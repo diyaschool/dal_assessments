@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}} | DAL Assessments</title>
+  </head>
+  <body style='background-size: cover; background-image: url("/background.png");  background-repeat: no-repeat; background-position: center; background-attachment: fixed;'>
+    <h1 style='color: white; position: fixed; left: 2%; bottom: 4%'>Hello {{name}}</h1>
+    <h4 style='color: white; position: fixed; left: 2%; bottom: 1.5%'>Logged in as {{username}}</h3>
+    <center>
+    <br><br><br><br><br><div style='background-color: white; height: 800px; width: 900px; border-radius: 20px; opacity: 0.9'>
+      <br><br>
+      <form action="/t/{{code}}/edit" method="post" id='main_form'>
+        <textarea name="test_data" rows="20" cols="80" style='border: 3px black solid; border-radius: 10px; resize: none;' form='main_form'>{{test_data}}</textarea><br>
+        <input type="submit" value='Validate and Save'>
+      </form><br><br>
+      <input type="button" onclick="window.open('https://docs.google.com/spreadsheets/d/{{sheet_id}}')" value='Open Google Sheet'><input type="text" readonly value='https://docs.google.com/spreadsheets/d/{{sheet_id}}' style='border: 2px black solid; border-radius 10px; width: 400px'><input type="button" onclick="window.location.href = '?sync'" value='Sync with Google Sheets'>
+  </div><br><br>
+  <div style='width: 100%; position: fixed; background-color: black; padding: 10px; top: 0px; left:0px; opacity: 1'>
+    <a style='color: white; font-size: 40px; left: 47%; text-decoration: none' href='/'>DAL Assessments</a>
+  </div>
+</center>
+{%if alert%}
+<script> alert("{{alert}}")</script>
+{%endif%}
+  </body>
+</html>

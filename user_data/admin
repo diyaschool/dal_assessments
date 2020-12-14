@@ -1,0 +1,1 @@
+{'name': 'Admin', 'password': 'adminpass', 'tags': ['admin'], 'test_data': {'demo': '0'}}
