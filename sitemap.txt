@@ -1,0 +1,11 @@
+Any URL request on this server without logging in will be returned with a redirect response to /login.
+
+/                     - [HTML] home.html
+/logout               - [REDIRECT] /login
+/clear_test_cookies   - [HTML] cookie_cleared.html
+/t/<code>/            - [HTML][DYNAMIC] before test start, t0.html, after starting t.html. when completed, t_completed.html, if already done before, t_repeat.html
+/t/<code>/verify      - [REDIRECT] /t/<code>
+/login                - [HTML] login.html
+/new_test             - [HTML] new_test.html
+/sheets_api_authorize - [HTML] DO NOT TOUCH, RISKY
+/t/<code>/edit        - [HTML] t_edit.html
