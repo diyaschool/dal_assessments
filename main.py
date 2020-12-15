@@ -648,10 +648,6 @@ def background():
 def logo():
     return app.send_static_file('logo.png')
 
-@app.route('/login.css')
-def login_css():
-    return app.send_static_file('login.css')
-
 #################### Error Handlers ####################
 
 @app.errorhandler(404)
