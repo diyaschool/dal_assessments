@@ -1,7 +1,7 @@
 html {
-	background: url(background.png);
 	background-size: cover;
 	background-text: white;
+	background: center;
 }
 /*body {
     color: #000;
@@ -12,7 +12,7 @@ html {
 }*/
 
 .card {
-	background: url(background.png);
+	/* background: url(background.png); */
 }
 
 input,
@@ -25,7 +25,7 @@ textarea {
     border: none !important;
     border: 1px solid #F3E5F5 !important;
     font-size: 16px !important;
-    color: #000 !important;
+    color: black !important;
     font-weight: 400
 }
 
