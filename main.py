@@ -15,7 +15,7 @@ app.secret_key = '.d1.g52@F4d0f.s53FF350F.sd40##'
 DOMAIN = 'chaitanyapy.ml:2783'
 gauth = sheets_api.authorize()
 
-anonymous_urls = ['/favicon.ico', '/clear_test_cookies', '/logo.png', '/background.png']
+anonymous_urls = ['/favicon.ico', '/clear_test_cookies', '/logo.png', '/background.png', '/login.css']
 desktop_agents = ['Macintosh', 'Windows', 'Linux']
 
 client_req_times = {}
@@ -647,6 +647,10 @@ def background():
 @app.route('/logo.png')
 def logo():
     return app.send_static_file('logo.png')
+
+@app.route('/login.css')
+def login_css():
+    return app.send_static_file('login.css')
 
 #################### Error Handlers ####################
 
