@@ -1,0 +1,26 @@
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <title>LOGIN | DAL Assessments</title>
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style='background-size: cover; background-image: url("/background.png");  background-repeat: no-repeat; background-position: center; background-attachment: fixed;'>
+  <center>
+    <div>
+    <br><text style="font-family:Arial, Helvetica, sans-serif; font-size: 40px; font-weight: bold; color: white">Diya Academy of Learning</text><br>
+    <br><img src='/logo.png' style="height: 150px;" id='logo' /><br><br>
+    <div style="position:relative; border: 5px solid blue; border-radius: 20px; height: 200px; width: 300px; background-color: cyan; opacity: 0.8;">
+      <form method='POST' action='/login' style="position:relative; top: 50px">
+        <label style="font-family: courier; position:relative; left: 0px; top: -20px; font-size: 20px; font-weight: bold" for='username'>Username</label><br>
+        <input style="font-family: courier; position:relative; left: 0px; top: -20px; width: 150px;height: 20px;border-radius: 5px; font-weight: bold" type='text' name='username' id='username' required value='{{username}}' autofocus><br><br>
+        <label style="font-family: courier; position:relative; left: 0px; top: -20px; font-size: 20px; font-weight: bold" for='password'>Password</label><br>
+        <input type='password' name='password' id='password' required style="position:relative; left: 0px; top: -20px; width: 150px; border-radius: 5px; height: 20px;"><br><br></br>
+        <input type='submit' value='Login' style='width:200px; height:30px;font-size: 20px;border-radius: 10px; position: relative; top: -40px'>
+      </form>
+    </div>
+  </div>
+  </center>
+  {%if error == True%}
+    <script>alert("Invalid credentials");</script>
+  {%endif%}
+</body>

@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <title>{{data['test_name']}} | DAL Assessments</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js" ></script>
     <script>
     function exit_test(){
       var r = confirm("Exiting this test will remove all session data related to this test.");
@@ -11,6 +12,46 @@
     </script>
   </head>
   <body style='background-size: cover; background-image: url("/background.png");  background-repeat: no-repeat; background-position: center; background-attachment: fixed;'>
+    <style>
+    body {
+      overflow: hidden;
+    }
+    #preloader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #fff;
+      z-index: 99;
+    }
+    #status {
+      width: 200px;
+      height: 200px;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      background-image: url(/loading.gif);
+      background-repeat: no-repeat;
+      background-position: center;
+      margin: -100px 0 0 -100px;
+    }
+    </style>
+    <script>
+    $(window).on('load', function() { // makes sure the whole site is loaded
+      $('#status').fadeOut(); // will first fade out the loading animation
+      {%if image_url%}
+        $('#preloader').delay(100).fadeOut('slow'); // will fade out the white DIV that covers the website.
+        $('body').delay(1000).css({'overflow':'visible'});
+      {%else%}
+        $('#preloader').delay(100).fadeOut('slow'); // will fade out the white DIV that covers the website.
+        $('body').delay(725).css({'overflow':'visible'});
+      {%endif%}
+    })
+    </script>
+    <div id="preloader">
+      <div id="status">&nbsp;</div>
+    </div>
     <center>
     <br><br><br><br><br><div style='background-color: white; height: {%if image_url%}{{total_height-80}}{%else%}{{total_height-300}}{%endif%}px; width: 320px; border-radius: 20px; opacity: 0.7'>
       <form method='POST' action='/t/{{code}}/verify'>
