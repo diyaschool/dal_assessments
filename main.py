@@ -16,7 +16,7 @@ DOMAIN = 'chaitanyapy.ml:2783'
 gauth = sheets_api.authorize()
 
 anonymous_urls = ['/favicon.ico', '/clear_test_cookies', '/logo.png', '/background.png', '/login.css']
-desktop_agents = ['Macintosh', 'Windows', 'Linux']
+mobile_agents = ['Android', 'iPhone', 'iPod touch']
 
 client_req_times = {}
 
@@ -269,6 +269,7 @@ def get_question(completed_questions, questions):
 
 @app.before_request
 def before_request():
+    print(flask.request.headers['User-Agent'])
     try:
         prev_time = client_req_times[flask.request.remote_addr]
     except KeyError:
@@ -302,10 +303,10 @@ def after_request(response):
 
 @app.route('/')
 def home():
-    desktop = False
-    for agent in desktop_agents:
+    desktop = True
+    for agent in mobile_agents:
         if agent in flask.request.headers['User-Agent']:
-            desktop = True
+            desktop = False
     user_data = get_user_data(flask.session['username'])
     if desktop:
         return flask.render_template('home.html', username=flask.session['username'], name=user_data['name'])
@@ -342,10 +343,10 @@ def t_verify(code):
 
 @app.route('/t/<code>/')
 def t_view(code):
-    desktop = False
-    for agent in desktop_agents:
+    desktop = True
+    for agent in mobile_agents:
         if agent in flask.request.headers['User-Agent']:
-            desktop = True
+            desktop = False
     user_data = get_user_data(flask.session['username'])
     try:
         user_data['test_data'][code]
@@ -512,8 +513,15 @@ def t_view(code):
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    desktop = True
+    for agent in mobile_agents:
+        if agent in flask.request.headers['User-Agent']:
+            desktop = False
     if flask.request.method == 'GET':
-        return flask.render_template('login.html', error=False, username='')
+        if desktop:
+            return flask.render_template('login.html', error=False, username='')
+        else:
+            return flask.render_template('mobile/login.html', error=False, username='')
     else:
         form_data = flask.request.form
         try:
@@ -521,7 +529,10 @@ def login():
                 fdata = f.read()
             data = eval(fdata)
             if data['password'] != form_data['password']:
-                return flask.render_template('login.html', error=True, username=form_data['username'])
+                if desktop:
+                    return flask.render_template('login.html', error=True, username=form_data['username'])
+                else:
+                    return flask.render_template('mobile/login.html', error=True, username=form_data['username'])
             else:
                 flask.session['username'] = form_data['username']
                 try:
@@ -531,7 +542,10 @@ def login():
                 except KeyError:
                     return flask.redirect('/')
         except FileNotFoundError:
-            return flask.render_template('login.html', error=True, username=form_data['username'])
+            if desktop:
+                return flask.render_template('login.html', error=True, username=form_data['username'])
+            else:
+                return flask.render_template('mobile/login.html', error=True, username=form_data['username'])
 
 @app.route('/new_test', methods=['GET', 'POST'])
 def new_test():
@@ -647,6 +661,10 @@ def background():
 @app.route('/logo.png')
 def logo():
     return app.send_static_file('logo.png')
+
+@app.route('/loading.gif')
+def loading():
+    return app.send_static_file('loading.gif')
 
 #################### Error Handlers ####################
 
