@@ -53,24 +53,24 @@
       <div id="status">&nbsp;</div>
     </div>
     <center>
-    <br><br><br><br><br><div style='background-color: white; height: {%if image_url%}{{total_height-80}}{%else%}{{total_height-300}}{%endif%}px; width: 320px; border-radius: 20px; opacity: 0.7'>
+    <br><br><br><br><br><div style='background-color: white; height: {%if image_url%}{{total_height-150}}{%else%}{{total_height-300}}{%endif%}px; width: 320px; border-radius: 20px; opacity: 1'>
       <form method='POST' action='/t/{{code}}/verify'>
-      <input type='submit' value='Next' style='position: relative; top: 5px; width: 100px; height: 40px; font-size: 23px; left: 100px; border-radius: 10px'>
+      <input type='submit' value='Next' style='position: relative; top: 5px; width: 100px; height: 40px; font-size: 23px; left: 120px; border-radius: 10px'>
+      <input type='button' onclick='exit_test();' value='Exit' style='position: relative; left: -170px; top: 0px; width: 50px; height: 25px; font-size: 15px; border-radius: 10px'>
       <div style='text-align: left; position: relative; left: 30px; top: 10px'>
-      <text style='font-size: 30px'>{{q_number}}: {%for chunk in question_data['question']%}{{chunk}}<br>{%endfor%}</text><br>
+      <text style='font-size: 22px'>{{q_number}}: {%for chunk in question_data['question']%}{{chunk}}<br>{%endfor%}</text><br>
           {%for i in ans_range%}
             <div style='padding-bottom: 7px'>
               <input type="radio" id="a{{i}}" name="answer" value="{{i}}" required><label for="a{{i}}" style='font-size: 20px'>{{question_data['answers'][i]}}</label><br>
             </div>
           {%endfor%}
         {%if image_url%}
-          <br><img src='{{image_url}}' height='300px'>
+          <br><img src='{{image_url}}' width='275px'>
         {%endif%}
         </form>
       </div>
   </div>
     <div style='width: 100%; position: fixed; background-color: black; padding: 10px; top: 0px; left:0px; opacity: 0.7'>
-      <input type='button' onclick='exit_test();' value='Exit' style='position: absolute; left: 13vw; top: 110px; width: 50px; height: 25px; font-size: 15px; border-radius: 10px'>
       <a style='color: white; font-size: 30px; left: 47%; text-decoration: none' href='#'>DAL Assessments</a>
     </div>
   </center>
