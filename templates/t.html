@@ -44,6 +44,46 @@
   cursor: pointer;
 }
 </style>
+<style>
+body {
+  overflow: hidden;
+}
+#preloader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #fff;
+  z-index: 99;
+}
+#status {
+  width: 200px;
+  height: 200px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  background-image: url(/loading.gif);
+  background-repeat: no-repeat;
+  background-position: center;
+  margin: -100px 0 0 -100px;
+}
+</style>
+<script>
+$(window).on('load', function() { // makes sure the whole site is loaded
+  $('#status').fadeOut(); // will first fade out the loading animation
+  {%if image_url%}
+    $('#preloader').delay(100).fadeOut('slow'); // will fade out the white DIV that covers the website.
+    $('body').delay(1000).css({'overflow':'visible'});
+  {%else%}
+    $('#preloader').delay(100).fadeOut('slow'); // will fade out the white DIV that covers the website.
+    $('body').delay(725).css({'overflow':'visible'});
+  {%endif%}
+})
+</script>
+<div id="preloader">
+  <div id="status">&nbsp;</div>
+</div>
     <script>
       $(window).on("load",function(){
         $(".loader.wrapper").fadeOut("slow")
@@ -75,11 +115,7 @@
       <text style='color: white; position: absolute; right: 50px; top: 35px'>Logged in as {{username}}</text>
     </div>
   </center>
-  <!-- Loading square for squar.red network -->
-<span class="loader"><span class="loader-inner"></span></span>
 <div id="myModal" class="modal">
-
-  <!-- Modal content -->
   <div class="modal-content" style='width: 300px; height: 80px'>
     <span class="close" style="position:relative; top: -10px">&times;</span>
     <center>
@@ -87,7 +123,6 @@
       <input onclick='exit_test();' type='button' value="Exit test" style='position: relative; top: 15px'>
     </center>
   </div>
-
 </div>
 <script>
 var modal = document.getElementById("myModal");

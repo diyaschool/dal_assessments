@@ -4,9 +4,10 @@
     <meta charset="utf-8">
     <title>{{data['test_name']}} | DAL Assessments</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js" ></script>
   </head>
-  <h4 style='color: white; position: fixed; left: 2%; bottom: 1.5%'>Logged in as {{username}}</h3>
   <body style='background-size: cover; background-image: url("/background.png");  background-repeat: no-repeat; background-position: center; background-attachment: fixed;'>
+    <h4 style='color: white; position: fixed; left: 2%; bottom: 1.5%'>Logged in as {{username}}</h3>
     <center><br><br><br>
       <h1 style='color: white; position: fixed; left: 2%; bottom: 4%'>Hello {{name}}</h1>
         <br><br><div style='background-color: white; border-radius: 20px; opacity: 0.7; height: 400px; width: 700px'>
@@ -15,27 +16,42 @@
             <text style='font-size: 25px; color: #303030; position: relative; top: 110px'>Number of questions: {{q_n}}</text><br>
             <a href="/t/{{code}}?start" style="text-decoration: none; font-size: 55px; position: relative; top: 130px; color: midnightblue"><button class="button">Start</button</a>
       </div>
+      <style>
+      body {
+        overflow: hidden;
+      }
+      #preloader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #fff;
+        z-index: 99;
+      }
+      #status {
+        width: 200px;
+        height: 200px;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        background-image: url(/loading.gif);
+        background-repeat: no-repeat;
+        background-position: center;
+        margin: -100px 0 0 -100px;
+      }
+      </style>
+      <script>
+      $(window).on('load', function() { // makes sure the whole site is loaded
+        $('#status').fadeOut(); // will first fade out the loading animation
+        $('#preloader').delay(350).fadeOut('slow'); // will fade out the white DIV that covers the website.
+        $('body').delay(350).css({'overflow':'visible'});
+      })
+      </script>
+      <div id="preloader">
+        <div id="status">&nbsp;</div>
+      </div>
 <style>
-.loader-wrapper {
-width: 100%;
-height: 100%;
-position: absolute;
-top: 0;
-left: 0;
-background-color: #242f3f;
-display:flex;
-justify-content: center;
-align-items: center;
-}
-.loader {
-  display: inline-block;
-  width: 30px;
-  height: 30px;
-  position: relative;
-  flex: center;
-  border: 4px solid #Fff;
-  animation: loader 2s infinite ease;
-}
 .button {
   padding: 15px 25px;
   font-size: 24px;
