@@ -439,16 +439,22 @@ def t_view(code):
             except KeyError:
                 image_url = None
             height_extend = 0
-            if len(question['question']) >= 40:
-                temp_question = textwrap.wrap(question['question'], 50)
-                for chunk in temp_question:
-                    if desktop:
+            if desktop:
+                if len(question['question']) >= 40:
+                    temp_question = textwrap.wrap(question['question'], 50)
+                    for chunk in temp_question:
                         height_extend += 10
-                    else:
-                        height_extend += 20
-                question['question'] = temp_question
+                    question['question'] = temp_question
+                else:
+                    question['question'] = [question['question']]
             else:
-                question['question'] = [question['question']]
+                if len(question['question']) >= 30:
+                    temp_question = textwrap.wrap(question['question'], 20)
+                    for chunk in temp_question:
+                        height_extend += 20
+                    question['question'] = temp_question
+                else:
+                    question['question'] = [question['question']]
             o_answers = []
             counter = 0
             for answer in question['answers']:
@@ -494,9 +500,9 @@ def t_view(code):
                     question['question'] = [question['question']]
             else:
                 if len(question['question']) >= 30:
-                    temp_question = textwrap.wrap(question['question'], 40)
+                    temp_question = textwrap.wrap(question['question'], 20)
                     for chunk in temp_question:
-                        height_extend += 40
+                        height_extend += 20
                     question['question'] = temp_question
                 else:
                     question['question'] = [question['question']]
