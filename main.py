@@ -15,7 +15,7 @@ app.secret_key = '.d1.g52@F4d0f.s53FF350F.sd40##'
 DOMAIN = 'chaitanyapy.ml:2783'
 gauth = sheets_api.authorize()
 
-anonymous_urls = ['/favicon.ico', '/clear_test_cookies', '/logo.png', '/background.png', '/login.css']
+anonymous_urls = ['/favicon.ico', '/clear_test_cookies', '/logo.png', '/background.png', '/login.css', '/loading.gif']
 mobile_agents = ['Android', 'iPhone', 'iPod touch']
 
 client_req_times = {}
@@ -24,7 +24,7 @@ client_req_times = {}
 
 def get_user_data(id):
     try:
-        with open('user_data/'+id) as f:
+        with open('user_metadata/'+id) as f:
             fdata = f.read()
         data = eval(fdata)
         return data
@@ -269,7 +269,6 @@ def get_question(completed_questions, questions):
 
 @app.before_request
 def before_request():
-    print(flask.request.headers['User-Agent'])
     try:
         prev_time = client_req_times[flask.request.remote_addr]
     except KeyError:
@@ -281,7 +280,7 @@ def before_request():
     if flask.request.path != '/login' and flask.request.path not in anonymous_urls:
         try:
             username = flask.session['username']
-            f = open('user_data/'+username)
+            f = open('user_metadata/'+username)
             f.close()
         except KeyError:
             flask.session['login_ref'] = flask.request.path
@@ -410,7 +409,7 @@ def t_view(code):
         if 'teacher' in user_data['tags'] or 'admin'  in user_data['tags']:
             pass
         else:
-            with open('user_data/'+flask.session['username'], 'w') as f:
+            with open('user_metadata/'+flask.session['username'], 'w') as f:
                 f.write(str(user_data))
         return flask.render_template('t_completed.html', name=question_data['test_name'], score=score)
     if flask.session['t']['q'] == '0':
@@ -531,7 +530,7 @@ def login():
     else:
         form_data = flask.request.form
         try:
-            with open('user_data/'+form_data['username']) as f:
+            with open('user_metadata/'+form_data['username']) as f:
                 fdata = f.read()
             data = eval(fdata)
             if data['password'] != form_data['password']:
