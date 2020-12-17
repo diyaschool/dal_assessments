@@ -3,8 +3,24 @@
   <head>
     <meta charset="utf-8">
     <title>{{name}} | DAL Assessments</title>
+    <link href='https://fonts.googleapis.com/css?family=Langar' rel='stylesheet'>
   </head>
-  <body>
-    <!-- your score is {{score}} -->
+  <body style='background-size: cover; background-image: url("background.png");  background-repeat: no-repeat; background-position: center; background-attachment: fixed;'>
+    <center><br><br><br>
+        <br><br><div class="font" style='background-color: white; border-radius: 20px; opacity: 1; height: 400px; width: 700px'>
+            <br><br><text style='font-size: 40px; color: #303030; position: relative; top: 70px'>Your Score</text><br>
+            <br><br><br><text style='font-size: 40px; color: #303030; position: relative; top: 70px'>{{score}}</text><br>
+          </div>
+      </div>
+    <div style='width: 100%; position: fixed; background-color: black; padding: 10px; top: 0px; left:0px; opacity: 1'>
+      <a style='color: white; font-size: 40px; left: 47%; text-decoration: none' href='/' autofocus>DAL Assessments</a>
+      <text style='color: white; position: absolute; right: 50px; top: 10px; font-size: 20px'>Hello {{name}}</text>
+      <text style='color: white; position: absolute; right: 50px; top: 35px'>Logged in as {{username}}</text>
+    </div>
+    <style>
+.font {
+  font-family: 'Langar';
+}
+    </style>
   </body>
 </html>
