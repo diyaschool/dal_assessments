@@ -22,6 +22,46 @@ client_req_times = {}
 
 #################### Utility Functions ####################
 
+def delete_score(username, test_id):
+    try:
+        os.remove('user_data/'+username+'/'+test_id+'.json')
+    except FileNotFoundError:
+        return False
+
+def update_score(username, test_id, ans_res, difficulty, question_id, answer_index, score, ans_score):
+    try:
+        with open('user_data/'+username+'/'+test_id+'.json') as f:
+            fdata = f.read()
+        try:
+            data = eval(fdata)
+        except:
+            data = {}
+    except FileNotFoundError:
+        data = {}
+    test_data = load_questions(test_id)
+    if test_data == False:
+        return False
+    if difficulty == 0:
+        difficulty = 'easy'
+    elif difficulty == 1:
+        difficulty = 'medium'
+    elif difficulty == 2:
+        difficulty = 'hard'
+    if type(answer_index) == type(''):
+        answer_index = -1
+        ans_given_text = 'Skipped'
+    else:
+        ans_given_text = test_data['questions'][difficulty][question_id]['answers'][answer_index]
+    try:
+        data['question_stream'].append({"difficulty": difficulty, "question_id": question_id, "question": test_data['questions'][difficulty][question_id]['question'], "given_answer": ans_given_text, "given_answer_index": answer_index, 'ans_res': ans_res, 'ans_score': ans_score})
+    except:
+        data['question_stream'] = []
+        data['question_stream'].append({"difficulty": difficulty, "question_id": question_id, "question": test_data['questions'][difficulty][question_id]['question'], "given_answer": ans_given_text, "given_answer_index": answer_index, 'ans_res': ans_res, 'ans_score': ans_score})
+    data['score'] = score
+    with open('user_data/'+username+'/'+test_id+'.json', 'w') as f:
+        f.write(str(data))
+    return True
+
 def get_user_data(id):
     try:
         with open('user_metadata/'+id) as f:
@@ -188,7 +228,7 @@ def load_questions(test_id):
         with open('test_data/'+test_id+'.json') as f:
             fdata = f.read()
     except FileNotFoundError:
-        return 'FILE_NOT_FOUND'
+        return False
     data = eval(fdata)
     counter = 0
     for q in data["questions"]['easy']:
@@ -332,11 +372,13 @@ def clear_test_cookies():
 @app.route('/t/<code>/verify', methods=['POST'])
 def t_verify(code):
     data = flask.request.form
+    ans_score = 10
     if str(data['answer']) == str(flask.session['t']['c_a_i']):
         flask.session['t']['prev_q_res'] = True
-        flask.session['t']['score'] = str(eval(flask.session['t']['score'])+10)
+        flask.session['t']['score'] = str(eval(flask.session['t']['score'])+ans_score)
     else:
         flask.session['t']['prev_q_res'] = False
+    update_score(flask.session['username'], code, flask.session['t']['prev_q_res'], flask.session['t']['difficulty'], flask.session['t']['q_id'], eval(data['answer']), flask.session['t']['score'], ans_score)
     flask.session.modified = True
     return flask.redirect('/t/'+code)
 
@@ -396,6 +438,7 @@ def t_view(code):
     elif flask.request.args.get('exit') == '':
         flask.session.pop('t')
         flask.session.modified = True
+        delete_score(flask.session['username'], code)
         return flask.redirect('/t/'+code)
     if len(flask.session['t']['c_q'][0]) == len(question_data['questions']['easy']) and len(flask.session['t']['c_q'][1]) == len(question_data['questions']['medium']) and len(flask.session['t']['c_q'][2]) == len(question_data['questions']['hard']):
         score = flask.session['t']['score']
@@ -426,6 +469,7 @@ def t_view(code):
         print(flask.session['t']['score'])
         if flask.session['t']['q'] == '1':
             question = get_question(flask.session['t']['c_q'][1], question_data['questions']['medium'])
+            flask.session['t']['q_id'] = question['id']
             if question == 'QUESTIONS_COMPLETED':
                 return flask.render_template('500.html'), 500
             flask.session['t']['c_q'][1].append(question['id'])
@@ -469,6 +513,7 @@ def t_view(code):
                  prev_q_res = flask.session['t']['prev_q_res']
             except:
                 prev_q_res = False
+                update_score(flask.session['username'], code, 'skipped', flask.session['t']['difficulty'], flask.session['t']['q_id'], 'skipped', flask.session['t']['score'], 0)
             c_difficulty = get_difficulty(flask.session['t']['difficulty'], flask.session['t']['c_q'], question_data['questions'], prev_q_res)
             print(c_difficulty)
             if c_difficulty == 0:
@@ -477,6 +522,7 @@ def t_view(code):
                 question = get_question(flask.session['t']['c_q'][1], question_data['questions']['medium'])
             elif c_difficulty == 2:
                 question = get_question(flask.session['t']['c_q'][2], question_data['questions']['hard'])
+            flask.session['t']['q_id'] = question['id']
             if question == 'QUESTIONS_COMPLETED':
                 return flask.render_template('500.html'), 500
             flask.session['t']['c_q'][c_difficulty].append(question['id'])
