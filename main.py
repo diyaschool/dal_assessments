@@ -292,6 +292,15 @@ def get_difficulty(difficulty, completed_questions, questions, prev_q_res):
                 difficulty = 2
             else:
                 return 'TEST_COMPLETE'
+        elif difficulty == 0:
+            if len(completed_questions[0]) != len(questions['easy']):
+                difficulty = 0
+            elif len(completed_questions[1]) != len(questions['medium']):
+                difficulty = 1
+            elif len(completed_questions[2]) != len(questions['hard']):
+                difficulty = 2
+            else:
+                return 'TEST_COMPLETE'
     return difficulty
 
 def get_question(completed_questions, questions):
@@ -378,12 +387,15 @@ def t_verify(code):
         flask.session['t']['score'] = str(eval(flask.session['t']['score'])+ans_score)
     else:
         flask.session['t']['prev_q_res'] = False
+    flask.session['t']['verified'] = True
     update_score(flask.session['username'], code, flask.session['t']['prev_q_res'], flask.session['t']['difficulty'], flask.session['t']['q_id'], eval(data['answer']), flask.session['t']['score'], ans_score)
+    flask.session['t']['q'] = str(eval(flask.session['t']['q'])+1)
     flask.session.modified = True
     return flask.redirect('/t/'+code)
 
 @app.route('/t/<code>/')
 def t_view(code):
+    print(flask.session)
     desktop = True
     for agent in mobile_agents:
         if agent in flask.request.headers['User-Agent']:
@@ -440,6 +452,9 @@ def t_view(code):
         flask.session.modified = True
         delete_score(flask.session['username'], code)
         return flask.redirect('/t/'+code)
+    elif flask.request.args.get('skip') == '' and code == 'demo':
+        flask.session['t']['c_q'] = [[0,1,2],[0,1,2],[0,1,2]]
+        flask.session.modified = True
     if len(flask.session['t']['c_q'][0]) == len(question_data['questions']['easy']) and len(flask.session['t']['c_q'][1]) == len(question_data['questions']['medium']) and len(flask.session['t']['c_q'][2]) == len(question_data['questions']['hard']):
         score = flask.session['t']['score']
         flask.session.pop('t')
@@ -454,29 +469,32 @@ def t_view(code):
         else:
             with open('user_metadata/'+flask.session['username'], 'w') as f:
                 f.write(str(user_data))
-        return flask.render_template('t_completed.html', name=question_data['test_name'], score=score)
+        return flask.render_template('t_completed.html', test_name=question_data['test_name'], score=score, name=user_data['name'], username=flask.session['username'])
     if flask.session['t']['q'] == '0':
         q_n = 0
         for difficulty in question_data['questions']:
             for q in question_data['questions'][difficulty]:
                 q_n += 1
+        flask.session['t']['verified'] = True
+        flask.session.modified = True
         if desktop:
             return flask.render_template('t0.html', code=code, data=question_data, username=flask.session['username'], name=user_data['name'], q_n=q_n, subject=question_data['subject'])
         else:
             return flask.render_template('mobile/t0.html', code=code, data=question_data, username=flask.session['username'], name=user_data['name'], q_n=q_n, subject=question_data['subject'])
     else:
-        print(flask.session['t']['c_q'])
-        print(flask.session['t']['score'])
         if flask.session['t']['q'] == '1':
-            question = get_question(flask.session['t']['c_q'][1], question_data['questions']['medium'])
-            flask.session['t']['q_id'] = question['id']
-            if question == 'QUESTIONS_COMPLETED':
-                return flask.render_template('500.html'), 500
-            flask.session['t']['c_q'][1].append(question['id'])
+            if flask.session['t'].get('verified') == True:
+                question = get_question(flask.session['t']['c_q'][1], question_data['questions']['medium'])
+                flask.session['t']['q_id'] = question['id']
+                if question == 'QUESTIONS_COMPLETED':
+                    return flask.render_template('500.html'), 500
+                flask.session['t']['c_q'][1].append(question['id'])
+                flask.session['t']['c_a_i'] = question['correct_answer_index']
+                flask.session['t'].pop('verified')
+                flask.session.modified = True
+            else:
+                question = question_data['questions']['medium'][flask.session['t']['q_id']]
             q_number = flask.session['t']['q']
-            flask.session['t']['q'] = str(eval(flask.session['t']['q'])+1)
-            flask.session['t']['c_a_i'] = question['correct_answer_index']
-            flask.session.modified = True
             try:
                 image_url = question['image']
             except KeyError:
@@ -504,32 +522,65 @@ def t_view(code):
                 o_answers.append({'answer': answer, "id": str(counter)})
                 counter += 1
             random.shuffle(o_answers)
+            print(flask.session)
             if desktop:
                 return flask.render_template('t.html', code=code, question_data=question, ans_range=range(len(question['answers'])), data=question_data, q_number=q_number, image_url=image_url, username=flask.session['username'], name=user_data['name'], total_height=650+height_extend, answers=o_answers)
             else:
                 return flask.render_template('mobile/t.html', code=code, question_data=question, ans_range=range(len(question['answers'])), data=question_data, q_number=q_number, image_url=image_url, username=flask.session['username'], name=user_data['name'], total_height=650+height_extend, answers=o_answers)
         else:
             try:
-                 prev_q_res = flask.session['t']['prev_q_res']
-            except:
+                if flask.session['t'].get('verified') == True:
+                    prev_q_res = flask.session['t']['prev_q_res']
+                    flask.session['t'].pop('prev_q_res')
+                    print(flask.session['t']['difficulty'])
+                    c_difficulty = get_difficulty(flask.session['t']['difficulty'], flask.session['t']['c_q'], question_data['questions'], prev_q_res)
+                    flask.session['t']['difficulty'] = c_difficulty
+                    if c_difficulty == 0:
+                        print('getting an ez q')
+                        question = get_question(flask.session['t']['c_q'][0], question_data['questions']['easy'])
+                    elif c_difficulty == 1:
+                        print('getting an mid q')
+                        question = get_question(flask.session['t']['c_q'][1], question_data['questions']['medium'])
+                    elif c_difficulty == 2:
+                        print('getting an hard q')
+                        question = get_question(flask.session['t']['c_q'][2], question_data['questions']['hard'])
+                    flask.session['t']['q_id'] = question['id']
+                    if question == 'QUESTIONS_COMPLETED':
+                        return flask.render_template('500.html'), 500
+                    flask.session['t']['c_q'][c_difficulty].append(question['id'])
+                    q_number = flask.session['t']['q']
+                    flask.session['t'].pop('verified')
+                    flask.session['t']['c_a_i'] = question['correct_answer_index']
+                    flask.session.modified = True
+                else:
+                    prev_q_res = False
+                    print('reloaded')
+                    print(flask.session)
+                    c_difficulty = flask.session['t']['difficulty']
+                    q_id = flask.session['t']['q_id']
+                    if c_difficulty == 0:
+                        question = question_data['questions']['easy'][q_id]
+                    elif c_difficulty == 1:
+                        question = question_data['questions']['medium'][q_id]
+                    elif c_difficulty == 2:
+                        question = question_data['questions']['hard'][q_id]
+                    q_number = flask.session['t']['q']
+            except KeyError:
                 prev_q_res = False
-                update_score(flask.session['username'], code, 'skipped', flask.session['t']['difficulty'], flask.session['t']['q_id'], 'skipped', flask.session['t']['score'], 0)
-            c_difficulty = get_difficulty(flask.session['t']['difficulty'], flask.session['t']['c_q'], question_data['questions'], prev_q_res)
-            print(c_difficulty)
-            if c_difficulty == 0:
-                question = get_question(flask.session['t']['c_q'][0], question_data['questions']['easy'])
-            elif c_difficulty == 1:
-                question = get_question(flask.session['t']['c_q'][1], question_data['questions']['medium'])
-            elif c_difficulty == 2:
-                question = get_question(flask.session['t']['c_q'][2], question_data['questions']['hard'])
-            flask.session['t']['q_id'] = question['id']
-            if question == 'QUESTIONS_COMPLETED':
-                return flask.render_template('500.html'), 500
-            flask.session['t']['c_q'][c_difficulty].append(question['id'])
-            q_number = flask.session['t']['q']
-            flask.session['t']['q'] = str(eval(flask.session['t']['q'])+1)
-            flask.session['t']['c_a_i'] = question['correct_answer_index']
-            flask.session.modified = True
+                c_difficulty = flask.session['t']['difficulty']
+                q_id = flask.session['t']['q_id']
+                if c_difficulty == 0:
+                    print('got ez')
+                    question = question_data['questions']['easy'][q_id]
+                elif c_difficulty == 1:
+                    print('got mid')
+                    question = question_data['questions']['medium'][q_id]
+                elif c_difficulty == 2:
+                    print('got hard')
+                    question = question_data['questions']['hard'][q_id]
+                print(question)
+                q_number = flask.session['t']['q']
+                #update_score(flask.session['username'], code, 'skipped', flask.session['t']['difficulty'], flask.session['t']['q_id'], 'skipped', flask.session['t']['score'], 0)
             try:
                 image_url = question['image']
             except KeyError:
@@ -731,4 +782,5 @@ def e_500(e):
 #################### Main ####################
 
 if __name__=='__main__':
+    app.debug = True
     app.run(debug=True, port=2783, host='0.0.0.0', threaded=True)
