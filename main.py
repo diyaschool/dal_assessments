@@ -395,7 +395,6 @@ def t_verify(code):
 
 @app.route('/t/<code>/')
 def t_view(code):
-    print(flask.session)
     desktop = True
     for agent in mobile_agents:
         if agent in flask.request.headers['User-Agent']:
@@ -522,7 +521,6 @@ def t_view(code):
                 o_answers.append({'answer': answer, "id": str(counter)})
                 counter += 1
             random.shuffle(o_answers)
-            print(flask.session)
             if desktop:
                 return flask.render_template('t.html', code=code, question_data=question, ans_range=range(len(question['answers'])), data=question_data, q_number=q_number, image_url=image_url, username=flask.session['username'], name=user_data['name'], total_height=650+height_extend, answers=o_answers)
             else:
@@ -532,17 +530,13 @@ def t_view(code):
                 if flask.session['t'].get('verified') == True:
                     prev_q_res = flask.session['t']['prev_q_res']
                     flask.session['t'].pop('prev_q_res')
-                    print(flask.session['t']['difficulty'])
                     c_difficulty = get_difficulty(flask.session['t']['difficulty'], flask.session['t']['c_q'], question_data['questions'], prev_q_res)
                     flask.session['t']['difficulty'] = c_difficulty
                     if c_difficulty == 0:
-                        print('getting an ez q')
                         question = get_question(flask.session['t']['c_q'][0], question_data['questions']['easy'])
                     elif c_difficulty == 1:
-                        print('getting an mid q')
                         question = get_question(flask.session['t']['c_q'][1], question_data['questions']['medium'])
                     elif c_difficulty == 2:
-                        print('getting an hard q')
                         question = get_question(flask.session['t']['c_q'][2], question_data['questions']['hard'])
                     flask.session['t']['q_id'] = question['id']
                     if question == 'QUESTIONS_COMPLETED':
@@ -554,8 +548,6 @@ def t_view(code):
                     flask.session.modified = True
                 else:
                     prev_q_res = False
-                    print('reloaded')
-                    print(flask.session)
                     c_difficulty = flask.session['t']['difficulty']
                     q_id = flask.session['t']['q_id']
                     if c_difficulty == 0:
@@ -570,15 +562,11 @@ def t_view(code):
                 c_difficulty = flask.session['t']['difficulty']
                 q_id = flask.session['t']['q_id']
                 if c_difficulty == 0:
-                    print('got ez')
                     question = question_data['questions']['easy'][q_id]
                 elif c_difficulty == 1:
-                    print('got mid')
                     question = question_data['questions']['medium'][q_id]
                 elif c_difficulty == 2:
-                    print('got hard')
                     question = question_data['questions']['hard'][q_id]
-                print(question)
                 q_number = flask.session['t']['q']
                 #update_score(flask.session['username'], code, 'skipped', flask.session['t']['difficulty'], flask.session['t']['q_id'], 'skipped', flask.session['t']['score'], 0)
             try:
