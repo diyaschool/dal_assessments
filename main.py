@@ -341,7 +341,7 @@ def before_request():
 @app.after_request
 def after_request(response):
     response.headers["Server"] = "DAL-Server/0.2"
-    response.headers["Developers"] = "Chaitanya, Harsha, Piyush"
+    response.headers["Developers"] = "Chaitanya, Harsha, Kushal, Piyush"
     response.headers["Origin-School"] = "Diya Academy of Learning"
     response.headers["X-Frame-Options"] = "SAMEORIGIN"
     response.headers["X-Content-Type-Options"] = "nosniff"
