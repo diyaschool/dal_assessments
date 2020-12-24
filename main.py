@@ -28,7 +28,7 @@ def delete_score(username, test_id):
     except FileNotFoundError:
         return False
 
-def update_score(username, test_id, ans_res, difficulty, question_id, answer_index, score, ans_score):
+def update_score(username, test_id, ans_res, difficulty, question_id, answer_index, score, ans_score, time_taken):
     try:
         with open('user_data/'+username+'/'+test_id+'.json') as f:
             fdata = f.read()
@@ -53,10 +53,10 @@ def update_score(username, test_id, ans_res, difficulty, question_id, answer_ind
     else:
         ans_given_text = test_data['questions'][difficulty][question_id]['answers'][answer_index]
     try:
-        data['question_stream'].append({"difficulty": difficulty, "question_id": question_id, "question": test_data['questions'][difficulty][question_id]['question'], "given_answer": ans_given_text, "given_answer_index": answer_index, 'ans_res': ans_res, 'ans_score': ans_score})
+        data['question_stream'].append({"difficulty": difficulty, "question_id": question_id, "question": test_data['questions'][difficulty][question_id]['question'], "given_answer": ans_given_text, "given_answer_index": answer_index, 'ans_res': ans_res, 'ans_score': ans_score, "time_taken": time_taken})
     except:
         data['question_stream'] = []
-        data['question_stream'].append({"difficulty": difficulty, "question_id": question_id, "question": test_data['questions'][difficulty][question_id]['question'], "given_answer": ans_given_text, "given_answer_index": answer_index, 'ans_res': ans_res, 'ans_score': ans_score})
+        data['question_stream'].append({"difficulty": difficulty, "question_id": question_id, "question": test_data['questions'][difficulty][question_id]['question'], "given_answer": ans_given_text, "given_answer_index": answer_index, 'ans_res': ans_res, 'ans_score': ans_score, "time_taken": time_taken})
     data['score'] = score
     with open('user_data/'+username+'/'+test_id+'.json', 'w') as f:
         f.write(str(data))
@@ -388,7 +388,8 @@ def t_verify(code):
     else:
         flask.session['t']['prev_q_res'] = False
     flask.session['t']['verified'] = True
-    update_score(flask.session['username'], code, flask.session['t']['prev_q_res'], flask.session['t']['difficulty'], flask.session['t']['q_id'], eval(data['answer']), flask.session['t']['score'], ans_score)
+    time_taken = time.time()-flask.session['t']['time']
+    update_score(flask.session['username'], code, flask.session['t']['prev_q_res'], flask.session['t']['difficulty'], flask.session['t']['q_id'], eval(data['answer']), flask.session['t']['score'], ans_score, time_taken)
     flask.session['t']['q'] = str(eval(flask.session['t']['q'])+1)
     flask.session.modified = True
     return flask.redirect('/t/'+code)
@@ -408,13 +409,13 @@ def t_view(code):
         pass
     question_data = load_questions(code)
     authorized = False
+    if question_data == False:
+        return flask.render_template('404.html'), 404
     for tag in user_data['tags']:
         if tag in question_data or tag == 'admin' or tag == 'teacher':
             authorized = True
     if authorized == False:
         return flask.render_template('401.html'), 401
-    if question_data == 'FILE_NOT_FOUND':
-        return flask.render_template('404.html'), 404
     try:
         flask.session['t']
         flask.session['t']['q']
@@ -483,6 +484,7 @@ def t_view(code):
     else:
         if flask.session['t']['q'] == '1':
             if flask.session['t'].get('verified') == True:
+                flask.session['t']['time'] = time.time()
                 question = get_question(flask.session['t']['c_q'][1], question_data['questions']['medium'])
                 flask.session['t']['q_id'] = question['id']
                 if question == 'QUESTIONS_COMPLETED':
@@ -530,6 +532,7 @@ def t_view(code):
                 if flask.session['t'].get('verified') == True:
                     prev_q_res = flask.session['t']['prev_q_res']
                     flask.session['t'].pop('prev_q_res')
+                    flask.session['t']['time'] = time.time()
                     c_difficulty = get_difficulty(flask.session['t']['difficulty'], flask.session['t']['c_q'], question_data['questions'], prev_q_res)
                     flask.session['t']['difficulty'] = c_difficulty
                     if c_difficulty == 0:
@@ -639,6 +642,11 @@ def login():
 
 @app.route('/new_test', methods=['GET', 'POST'])
 def new_test():
+    user_data = get_user_data(flask.session['username'])
+    if 'admin' in user_data['tags']:
+        pass
+    else:
+        return flask.render_template('401.html'), 401
     if flask.request.method == 'GET':
         return flask.render_template('new_test.html')
     else:
@@ -770,5 +778,4 @@ def e_500(e):
 #################### Main ####################
 
 if __name__=='__main__':
-    app.debug = True
     app.run(debug=True, port=2783, host='0.0.0.0', threaded=True)
