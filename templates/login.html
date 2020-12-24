@@ -141,8 +141,8 @@
   .fadeInDown {
     -webkit-animation-name: fadeInDown;
     animation-name: fadeInDown;
-    -webkit-animation-duration: 1s;
-    animation-duration: 1s;
+    -webkit-animation-duration: 0.5s;
+    animation-duration: 0.5s;
     -webkit-animation-fill-mode: both;
     animation-fill-mode: both;
   }
@@ -279,6 +279,8 @@ function myFunction() {
   }
 }
 </script>
-
-
+{%if error%}
+<script type="text/javascript">alert("Invalid credentials")</script>
+{%endif%}
 </body>
+</html>
