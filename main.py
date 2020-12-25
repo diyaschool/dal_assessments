@@ -12,7 +12,7 @@ app = flask.Flask(__name__, static_url_path='')
 
 app.secret_key = '.d1.g52@F4d0f.s53FF350F.sd40##'
 
-DOMAIN = 'chaitanyapy.ml:2783'
+DOMAIN = 'localhost'
 gauth = sheets_api.authorize()
 
 anonymous_urls = ['/favicon.ico', '/clear_test_cookies', '/logo.png', '/background.png', '/login.css', '/loading.gif']
@@ -93,6 +93,9 @@ def convert(sheet):
         output['test_name'] = sheet[0][0]
         output['subject'] = sheet[0][1]
         output['tags'] = sheet[1]
+        for i, tag in enumerate(output['tags']):
+            if tag == '':
+                output['tags'].pop(i)
         output['questions'] = {"easy": [], "medium": [], "hard": []}
         for i in range(len(sheet[2])):
             if sheet[2][i] == '':
@@ -122,6 +125,22 @@ def convert(sheet):
                     output['questions']['hard'].append({"question": sheet[10][i], "answers": sheet[11][i].split('\n'), "correct_answer_index": c_a_i, "image": sheet[13][i]})
             except:
                 output['questions']['hard'].append({"question": sheet[10][i], "answers": sheet[11][i].split('\n'), "correct_answer_index": c_a_i})
+        try:
+            if sheet[0][2] == '':
+                q_n = 0
+                for difficulty in output['questions']:
+                    for q in output['questions'][difficulty]:
+                        q_n += 1
+                output['question_count'] = q_n
+            else:
+                output['question_count'] = eval(sheet[0][2])
+        except Exception as e:
+            print('kay')
+            q_n = 0
+            for difficulty in output['questions']:
+                for q in output['questions'][difficulty]:
+                    q_n += 1
+            output['question_count'] = q_n
         return output
     except:
         return 'ERROR'
@@ -455,6 +474,8 @@ def t_view(code):
     elif flask.request.args.get('skip') == '' and code == 'demo':
         flask.session['t']['c_q'] = [[0,1,2],[0,1,2],[0,1,2]]
         flask.session.modified = True
+    print(question_data['question_count'])
+    print(flask.session['t']['q'])
     if len(flask.session['t']['c_q'][0]) == len(question_data['questions']['easy']) and len(flask.session['t']['c_q'][1]) == len(question_data['questions']['medium']) and len(flask.session['t']['c_q'][2]) == len(question_data['questions']['hard']):
         score = flask.session['t']['score']
         flask.session.pop('t')
@@ -470,11 +491,24 @@ def t_view(code):
             with open('user_metadata/'+flask.session['username'], 'w') as f:
                 f.write(str(user_data))
         return flask.render_template('t_completed.html', test_name=question_data['test_name'], score=score, name=user_data['name'], username=flask.session['username'])
+    else:
+        if question_data['question_count'] == eval(flask.session['t']['q'])-1:
+            score = flask.session['t']['score']
+            flask.session.pop('t')
+            flask.session.modified = True
+            try:
+                user_data['test_data'][code] = score
+            except KeyError:
+                user_data['test_data'] = {}
+                user_data['test_data'][code] = score
+            if 'teacher' in user_data['tags'] or 'admin'  in user_data['tags']:
+                pass
+            else:
+                with open('user_metadata/'+flask.session['username'], 'w') as f:
+                    f.write(str(user_data))
+            return flask.render_template('t_completed.html', test_name=question_data['test_name'], score=score, name=user_data['name'], username=flask.session['username'])
     if flask.session['t']['q'] == '0':
-        q_n = 0
-        for difficulty in question_data['questions']:
-            for q in question_data['questions'][difficulty]:
-                q_n += 1
+        q_n = question_data['question_count']
         flask.session['t']['verified'] = True
         flask.session.modified = True
         if desktop:
@@ -571,7 +605,6 @@ def t_view(code):
                 elif c_difficulty == 2:
                     question = question_data['questions']['hard'][q_id]
                 q_number = flask.session['t']['q']
-                #update_score(flask.session['username'], code, 'skipped', flask.session['t']['difficulty'], flask.session['t']['q_id'], 'skipped', flask.session['t']['score'], 0)
             try:
                 image_url = question['image']
             except KeyError:
@@ -778,4 +811,4 @@ def e_500(e):
 #################### Main ####################
 
 if __name__=='__main__':
-    app.run(debug=True, port=2783, host='0.0.0.0', threaded=True)
+    app.run(debug=True, port=80, host='0.0.0.0', threaded=True)
