@@ -261,6 +261,14 @@ def load_questions(test_id):
     for q in data["questions"]['hard']:
         q['id'] = counter
         counter += 1
+    try:
+        data['question_count']
+    except KeyError:
+        q_n = 0
+        for difficulty in data['questions']:
+            for q in data['questions'][difficulty]:
+                q_n += 1
+        data['question_count'] = q_n
     return data
 
 def get_difficulty(difficulty, completed_questions, questions, prev_q_res):
