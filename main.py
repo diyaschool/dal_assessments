@@ -135,7 +135,6 @@ def convert(sheet):
             else:
                 output['question_count'] = eval(sheet[0][2])
         except Exception as e:
-            print('kay')
             q_n = 0
             for difficulty in output['questions']:
                 for q in output['questions'][difficulty]:
@@ -408,7 +407,12 @@ def clear_test_cookies():
 @app.route('/t/<code>/verify', methods=['POST'])
 def t_verify(code):
     data = flask.request.form
-    ans_score = 10
+    if flask.session['t']['difficulty'] == 0:
+        ans_score = 1
+    elif flask.session['t']['difficulty'] == 1:
+        ans_score = 3
+    elif flask.session['t']['difficulty'] == 2:
+        ans_score = 5
     if str(data['answer']) == str(flask.session['t']['c_a_i']):
         flask.session['t']['prev_q_res'] = True
         flask.session['t']['score'] = str(eval(flask.session['t']['score'])+ans_score)
@@ -482,8 +486,6 @@ def t_view(code):
     elif flask.request.args.get('skip') == '' and code == 'demo':
         flask.session['t']['c_q'] = [[0,1,2],[0,1,2],[0,1,2]]
         flask.session.modified = True
-    print(question_data['question_count'])
-    print(flask.session['t']['q'])
     if len(flask.session['t']['c_q'][0]) == len(question_data['questions']['easy']) and len(flask.session['t']['c_q'][1]) == len(question_data['questions']['medium']) and len(flask.session['t']['c_q'][2]) == len(question_data['questions']['hard']):
         score = flask.session['t']['score']
         flask.session.pop('t')
