@@ -808,6 +808,10 @@ def logo():
 def loading():
     return app.send_static_file('loading.gif')
 
+@app.route("/jquery.min.js")
+def jquery():
+    return app.send_static_file('jquery.min.js')
+
 #################### Error Handlers ####################
 
 @app.errorhandler(404)
