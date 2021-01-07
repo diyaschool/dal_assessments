@@ -10,7 +10,7 @@
     ],
     "medium": [
       {"question": "medium q1?", "answers": ["wrong", "wrong", "wrong", "correct", "wrong"], "correct_answer_index": 3},
-      {"question": "This picture looks...", "answers": ["bad", "awesome", "terrible", "not nice"], "correct_answer_index": 1, "image": "https://cdn.mos.cms.futurecdn.net/ntFmJUZ8tw3ULD3tkBaAtf.jpg"},
+      {"question": "This picture looks...", "answers": ["bad", "awesome", "terrible", "not nice"], "correct_answer_index": 1, "image": "/logo"},
       {"question": "This is the logo of which school?", "answers": ["Diya Academy of Learning", "Delhi Public School", "Imaginary School of Coding", "I dont know any schools"], "correct_answer_index": 0, "image": "/logo.png"}
     ],
     "hard": [
