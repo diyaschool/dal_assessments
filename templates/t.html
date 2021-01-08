@@ -104,7 +104,11 @@ $(window).on('load', function() { // makes sure the whole site is loaded
         {%if image_url%}
           <br><img src='{{image_url}}' height='350px'>
         {%endif%}
-        <span><input class="button sapn" type='submit' value='Next' style='position: absolute; top: -20px; width: 100px;  left: 850px;' onclick="setClean();"></span>
+        <div class="button"
+        <input class="button" type='submit' value="next" style='position: absolute; top: -20px; width: 100px;  left: 800px;' onclick="setClean();">
+        <span>Next </span>
+      </div>
+        </div>
         <style>
         .button {
       border-radius: 4px;
