@@ -96,15 +96,18 @@ $(window).on('load', function() { // makes sure the whole site is loaded
       <form method='POST' action='/t/{{code}}/verify'>
       <div style='text-align: left; position: relative; left: 70px; top: 40px'>
       <text style='font-size: 30px'>{{q_number}}: {%for chunk in question_data['question']%}{{chunk}}<br>{%endfor%}</text><br>
+      {%set counter = 0%}
           {%for option in answers%}
+          {%if counter == 0%}{%set option1_label = "a"+option['id']%}{%endif%}
             <div style='padding-bottom: 7px'>
               <input type="radio" id="a{{option['id']}}" name="answer" value="{{option['id']}}" required><label for="a{{option['id']}}" style='font-size: 20px'>{{option['answer']}}</label><br>
             </div>
+            {%set counter = counter+1%}
           {%endfor%}
         {%if image_url%}
           <br><img src='{{image_url}}' height='350px'>
         {%endif%}
-          <button class="button" type='submit' style='position: absolute; top: -20px; width: 120px;  left: 800px; height: 70px' onclick="setClean();">
+          <button class="button" type='submit' style='position: absolute; top: -20px; width: 120px;  left: 800px; height: 70px' onclick="setClean();" id='next_button'>
             <span>Next</span>
           </button>
         </div>
@@ -164,7 +167,7 @@ $(window).on('load', function() { // makes sure the whole site is loaded
     <span class="close" style="position:relative; top: -10px">&times;</span>
     <center>
       <text>Are you sure you want to leave the test?</text><br>
-      <input onclick='exit_test();' type='button' value="Exit test" style='position: relative; top: 15px'>
+      <input onclick='exit_test();' type='button' value="Exit test" style='position: relative; top: 15px' id='exit_button_modal'>
     </center>
   </div>
 </div>
@@ -172,14 +175,18 @@ $(window).on('load', function() { // makes sure the whole site is loaded
 var modal = document.getElementById("myModal");
 var btn = document.getElementById("myBtn");
 var span = document.getElementsByClassName("close")[0];
+document.getElementById("next_button").focus();
 btn.onclick = function() {
   modal.style.display = "block";
+  document.getElementById("exit_button_modal").focus();
 }
 span.onclick = function() {
+  document.getElementById("next_button").focus();
   modal.style.display = "none";
 }
 window.onclick = function(event) {
   if (event.target == modal) {
+    document.getElementById("next_button").focus();
     modal.style.display = "none";
   }
 }
