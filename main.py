@@ -13,7 +13,8 @@ app = flask.Flask(__name__, static_url_path='')
 
 app.secret_key = '.d1.g52@F4d0f.s53FF350F.sd40##'
 
-DOMAIN = 'localhost'
+DOMAINS = ['localhost', 'dal-assessments.herokuapp.com']
+DOMAIN =['dal-assessments.herokuapp.com']
 gauth = sheets_api.authorize()
 
 anonymous_urls = ['/favicon.ico', '/clear_test_cookies', '/logo.png', '/background.png', '/login.css', '/loading.gif']
@@ -351,7 +352,7 @@ def before_request():
         prev_time = None
     if prev_time:
         c_time = time.time()
-    if flask.request.headers['Host'] != DOMAIN:
+    if flask.request.headers['Host'] not in DOMAINS:
         return flask.redirect('http://'+DOMAIN+flask.request.path, 301)
     if flask.request.path != '/login' and flask.request.path not in anonymous_urls:
         try:
