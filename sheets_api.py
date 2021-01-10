@@ -1,4 +1,3 @@
-from __future__ import print_function
 import pickle
 import os.path
 from google.oauth2 import id_token
