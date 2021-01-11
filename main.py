@@ -7,11 +7,11 @@ import os
 import sys
 import string
 import random
-app = flask.Flask(__name__, static_url_path='/')
 
 #################### Initialize ####################
 
-app.secret_key = '.d1.g52@F4d0f.s53FF350F.sd40##'
+app = flask.Flask(__name__, static_url_path='/')
+app.secret_key = ''.join(random.choices(string.ascii_uppercase + string.digits, k=50))
 
 DOMAINS = ['localhost']
 DOMAIN = 'localhost'
