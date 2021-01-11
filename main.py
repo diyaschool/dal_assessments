@@ -7,14 +7,15 @@ import os
 import sys
 import string
 import random
-app = flask.Flask(__name__, static_url_path='')
 
 #################### Initialize ####################
 
-app.secret_key = '.d1.g52@F4d0f.s53FF350F.sd40##'
+app = flask.Flask(__name__, static_url_path='/')
+app.secret_key = ''.join(random.choices(string.ascii_uppercase + string.digits, k=50))
 
 DOMAINS = ['localhost']
 DOMAIN = 'localhost'
+
 gauth = sheets_api.authorize()
 
 anonymous_urls = ['/favicon.ico', '/clear_test_cookies', '/logo.png', '/background.png', '/login.css', '/loading.gif']
@@ -790,28 +791,6 @@ def sheets_api_authorize_delete():
             return 'file_not_found'
     else:
         return flask.render_template('404.html'), 404
-
-#################### Static Endpoints ####################
-
-@app.route('/favicon.ico')
-def favicon():
-    return app.send_static_file('favicon.ico')
-
-@app.route('/background.png')
-def background():
-    return app.send_static_file('background.png')
-
-@app.route('/logo.png')
-def logo():
-    return app.send_static_file('logo.png')
-
-@app.route('/loading.gif')
-def loading():
-    return app.send_static_file('loading.gif')
-
-@app.route("/jquery.min.js")
-def jquery():
-    return app.send_static_file('jquery.min.js')
 
 #################### Error Handlers ####################
 
