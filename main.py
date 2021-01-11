@@ -7,7 +7,7 @@ import os
 import sys
 import string
 import random
-app = flask.Flask(__name__, static_url_path='')
+app = flask.Flask(__name__, static_url_path='/')
 
 #################### Initialize ####################
 
@@ -790,28 +790,6 @@ def sheets_api_authorize_delete():
             return 'file_not_found'
     else:
         return flask.render_template('404.html'), 404
-
-#################### Static Endpoints ####################
-
-@app.route('/favicon.ico')
-def favicon():
-    return app.send_static_file('favicon.ico')
-
-@app.route('/background.png')
-def background():
-    return app.send_static_file('background.png')
-
-@app.route('/logo.png')
-def logo():
-    return app.send_static_file('logo.png')
-
-@app.route('/loading.gif')
-def loading():
-    return app.send_static_file('loading.gif')
-
-@app.route("/jquery.min.js")
-def jquery():
-    return app.send_static_file('jquery.min.js')
 
 #################### Error Handlers ####################
 
