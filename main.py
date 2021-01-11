@@ -807,8 +807,11 @@ def e_500(e):
 
 @app.route('/update_server', methods=['post'])
 def update_server():
-    os.system('git pull')
-    return 'mmmm idk'
+    data = flask.request.json
+    if data['action'] == 'closed' and data['pull_request'] == True:
+        os.system('git pull')
+        return 'pulled'
+    return 'not pulled'
 
 #################### Main ####################
 
