@@ -15,6 +15,7 @@ app.secret_key = ''.join(random.choices(string.ascii_uppercase + string.digits, 
 
 DOMAINS = ['localhost', 'diyaassessments.pythonanywhere.com']
 DOMAIN = 'diyaassessments.pythonanywhere.com'
+
 gauth = sheets_api.authorize()
 
 anonymous_urls = ['/favicon.ico', '/clear_test_cookies', '/logo.png', '/background.png', '/login.css', '/loading.gif', '/update_server']
@@ -803,10 +804,6 @@ def e_500(e):
     return flask.render_template('500.html'), 500
 
 #################### Other Endpoints ####################
-
-@app.route('/wut')
-def lol():
-    return 'lol'
 
 @app.route('/update_server', methods=['post'])
 def update_server():
