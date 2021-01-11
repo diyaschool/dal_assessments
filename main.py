@@ -13,8 +13,8 @@ import random
 app = flask.Flask(__name__, static_url_path='/')
 app.secret_key = ''.join(random.choices(string.ascii_uppercase + string.digits, k=50))
 
-DOMAINS = ['localhost']
-DOMAIN = 'localhost'
+DOMAINS = ['localhost', 'diyaassessments.pythonanywhere.com']
+DOMAIN = 'diyaassessments.pythonanywhere.com'
 
 gauth = sheets_api.authorize()
 
