@@ -15,6 +15,7 @@ app.secret_key = ''.join(random.choices(string.ascii_uppercase + string.digits, 
 
 DOMAINS = ['localhost']
 DOMAIN = 'localhost'
+
 gauth = sheets_api.authorize()
 
 anonymous_urls = ['/favicon.ico', '/clear_test_cookies', '/logo.png', '/background.png', '/login.css', '/loading.gif', '/update_server']
