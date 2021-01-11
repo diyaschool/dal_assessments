@@ -807,7 +807,8 @@ def e_500(e):
 
 @app.route('/update_server', methods=['post'])
 def update_server():
-    return str(flask.request.json)
+    os.system('git pull')
+    return 'mmmm idk'
 
 #################### Main ####################
 
