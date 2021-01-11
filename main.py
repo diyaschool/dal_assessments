@@ -6,7 +6,6 @@ import time
 import os
 import sys
 import random
-import git
 import string
 app = flask.Flask(__name__, static_url_path='')
 
@@ -14,8 +13,8 @@ app = flask.Flask(__name__, static_url_path='')
 
 app.secret_key = '.d1.g52@F4d0f.s53FF350F.sd40##'
 
-DOMAINS = ['localhost', 'diyaassessments.pythonanywhere.com']
-DOMAIN = 'diyaassessments.pythonanywhere.com'
+DOMAINS = ['localhost']
+DOMAIN = 'localhost'
 gauth = sheets_api.authorize()
 
 anonymous_urls = ['/favicon.ico', '/clear_test_cookies', '/logo.png', '/background.png', '/login.css', '/loading.gif']
