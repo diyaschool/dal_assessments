@@ -13,11 +13,12 @@ import random
 app = flask.Flask(__name__, static_url_path='/')
 app.secret_key = ''.join(random.choices(string.ascii_uppercase + string.digits, k=50))
 
-DOMAINS = ['localhost']
-DOMAIN = 'localhost'
+DOMAINS = ['localhost', 'diyaassessments.pythonanywhere.com']
+DOMAIN = 'diyaassessments.pythonanywhere.com'
+
 gauth = sheets_api.authorize()
 
-anonymous_urls = ['/favicon.ico', '/clear_test_cookies', '/logo.png', '/background.png', '/login.css', '/loading.gif']
+anonymous_urls = ['/favicon.ico', '/clear_test_cookies', '/logo.png', '/background.png', '/login.css', '/loading.gif', '/update_server']
 mobile_agents = ['Android', 'iPhone', 'iPod touch']
 
 client_req_times = {}
@@ -801,6 +802,12 @@ def e_404(e):
 def e_500(e):
     flask.session['error_referrer'] = flask.request.path
     return flask.render_template('500.html'), 500
+
+#################### Other Endpoints ####################
+
+@app.route('/update_server', methods=['post'])
+def update_server():
+    return str(flask.request.json)
 
 #################### Main ####################
 
