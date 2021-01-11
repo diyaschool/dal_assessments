@@ -804,7 +804,7 @@ def e_500(e):
 
 #################### Other Endpoints ####################
 
-@app.route('lol')
+@app.route('/lol')
 def lol():
     return 'lol'
 
