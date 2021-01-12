@@ -804,6 +804,10 @@ def e_500(e):
 
 #################### Other Endpoints ####################
 
+app.route('/lol')
+def lol():
+    return 'lol'
+
 @app.route('/update_server', methods=['post'])
 def update_server():
     data = flask.request.json
