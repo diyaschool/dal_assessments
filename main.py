@@ -32,7 +32,7 @@ def delete_score(username, test_id):
 
 def update_score(username, test_id, ans_res, difficulty, question_id, answer_index, score, ans_score, time_taken):
     try:
-        with open('user_data/'+username+'/'+test_id+'.json') as f:
+        with open('../data/user_data/'+username+'/'+test_id+'.json') as f:
             fdata = f.read()
         try:
             data = eval(fdata)
@@ -60,13 +60,13 @@ def update_score(username, test_id, ans_res, difficulty, question_id, answer_ind
         data['question_stream'] = []
         data['question_stream'].append({"difficulty": difficulty, "question_id": question_id, "question": test_data['questions'][difficulty][question_id]['question'], "given_answer": ans_given_text, "given_answer_index": answer_index, 'ans_res': ans_res, 'ans_score': ans_score, "time_taken": time_taken})
     data['score'] = score
-    with open('user_data/'+username+'/'+test_id+'.json', 'w') as f:
+    with open('../data/user_data/'+username+'/'+test_id+'.json', 'w') as f:
         f.write(str(data))
     return True
 
 def get_user_data(id):
     try:
-        with open('user_metadata/'+id) as f:
+        with open('../data/user_metadata/'+id) as f:
             fdata = f.read()
         data = eval(fdata)
         return data
@@ -159,9 +159,9 @@ def create_new_test_sheet(owner):
             break
     test_id = r_id
     sheet_id = sheets_api.create_sheet(test_id, gauth.load_credentials())
-    with open('test_data/'+test_id+'.json', 'w') as f:
+    with open('../data/test_data/'+test_id+'.json', 'w') as f:
         f.write('')
-    with open('test_metadata/'+test_id+'.json', 'w') as f:
+    with open('../data/test_metadata/'+test_id+'.json', 'w') as f:
         f.write(str({"owner": owner, "time": c_time, "date": c_date, "sheet_id": sheet_id}))
     return (test_id, sheet_id)
 
@@ -245,7 +245,7 @@ def id_generator(size=10, chars=string.ascii_uppercase + string.digits):
 
 def load_questions(test_id):
     try:
-        with open('test_data/'+test_id+'.json') as f:
+        with open('../data/test_data/'+test_id+'.json') as f:
             fdata = f.read()
     except FileNotFoundError:
         return False
@@ -357,7 +357,7 @@ def before_request():
     if flask.request.path != '/login' and flask.request.path not in anonymous_urls:
         try:
             username = flask.session['username']
-            f = open('user_metadata/'+username)
+            f = open('../data/user_metadata/'+username)
             f.close()
         except KeyError:
             flask.session['login_ref'] = flask.request.path
@@ -500,7 +500,7 @@ def t_view(code):
         if 'teacher' in user_data['tags'] or 'admin'  in user_data['tags']:
             pass
         else:
-            with open('user_metadata/'+flask.session['username'], 'w') as f:
+            with open('../data/user_metadata/'+flask.session['username'], 'w') as f:
                 f.write(str(user_data))
         return flask.render_template('t_completed.html', test_name=question_data['test_name'], score=score, name=user_data['name'], username=flask.session['username'])
     else:
@@ -516,7 +516,7 @@ def t_view(code):
             if 'teacher' in user_data['tags'] or 'admin'  in user_data['tags']:
                 pass
             else:
-                with open('user_metadata/'+flask.session['username'], 'w') as f:
+                with open('../data/user_metadata/'+flask.session['username'], 'w') as f:
                     f.write(str(user_data))
             return flask.render_template('t_completed.html', test_name=question_data['test_name'], score=score, name=user_data['name'], username=flask.session['username'])
     if flask.session['t']['q'] == '0':
@@ -663,7 +663,7 @@ def login():
     else:
         form_data = flask.request.form
         try:
-            with open('user_metadata/'+form_data['username']) as f:
+            with open('../data/user_metadata/'+form_data['username']) as f:
                 fdata = f.read()
             data = eval(fdata)
             if data['password'] != form_data['password']:
@@ -729,7 +729,7 @@ def sheets_api_authorize():
 def test_edit(code):
     user_data = get_user_data(flask.session['username'])
     try:
-        with open('test_metadata/'+code+'.json') as f:
+        with open('../data/test_metadata/'+code+'.json') as f:
             data = eval(f.read())
     except:
         return flask.render_template('404.html'), 404
@@ -746,7 +746,7 @@ def test_edit(code):
             pass
         else:
             return flask.redirect('/t/'+code)
-    with open('test_data/'+code+'.json') as f:
+    with open('../data/test_data/'+code+'.json') as f:
         test_data = f.read()
     sheet_id = data.get('sheet_id')
     try:
@@ -762,7 +762,7 @@ def test_edit(code):
                 return flask.render_template('t_edit.html', test_data=test_data, sheet_id=sheet_id, title=title, username=flask.session['username'], name=user_data['name'], code=code, alert="Error during parsing spreadsheet")
             test_validation = validate_test_data(str(n_test_data))
             if test_validation == True:
-                with open('test_data/'+code+'.json', 'w') as f:
+                with open('../data/test_data/'+code+'.json', 'w') as f:
                     f.write(str(n_test_data))
                 return flask.redirect('/t/'+code+'/edit')
             else:
@@ -773,7 +773,7 @@ def test_edit(code):
         data = flask.request.form
         v_output = validate_test_data(data['test_data'])
         if v_output == True:
-            with open('test_data/'+code+'.json', 'w') as f:
+            with open('../data/test_data/'+code+'.json', 'w') as f:
                 f.write(data['test_data'])
             return flask.render_template('t_edit.html', test_data=data['test_data'], sheet_id=sheet_id, title=title, username=flask.session['username'], name=user_data['name'], code=code, alert='Test updated')
         else:
@@ -809,7 +809,8 @@ def update_server():
     data = flask.request.json
     if data['action'] == 'closed' and data['pull_request']['merged'] == True:
         os.system('git pull')
-        return 'pulled'
+        os.system('touch /var/www/diyaassessments_pythonanywhere_com_wsgi.py')
+        return 'pulled and reloaded'
     return 'not pulled'
 
 #################### Main ####################
