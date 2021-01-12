@@ -26,7 +26,7 @@ client_req_times = {}
 
 def delete_score(username, test_id):
     try:
-        os.remove('user_data/'+username+'/'+test_id+'.json')
+        os.remove('../data/user_data/'+username+'/'+test_id+'.json')
     except FileNotFoundError:
         return False
 
