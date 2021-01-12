@@ -26,7 +26,7 @@ client_req_times = {}
 
 def delete_score(username, test_id):
     try:
-        os.remove('user_data/'+username+'/'+test_id+'.json')
+        os.remove('../data/user_data/'+username+'/'+test_id+'.json')
     except FileNotFoundError:
         return False
 
@@ -803,6 +803,10 @@ def e_500(e):
     return flask.render_template('500.html'), 500
 
 #################### Other Endpoints ####################
+
+app.route('/lol')
+def lol():
+    return 'lol'
 
 @app.route('/update_server', methods=['post'])
 def update_server():
