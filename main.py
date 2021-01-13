@@ -7,11 +7,12 @@ import os
 import sys
 import string
 import random
+import uuid
 
 #################### Initialize ####################
 
 app = flask.Flask(__name__, static_url_path='/')
-app.secret_key = ''.join(random.choices(string.ascii_uppercase + string.digits, k=50))
+app.secret_key = uuid.uuid4().hex
 
 DOMAINS = ['localhost', 'diyaassessments.pythonanywhere.com']
 DOMAIN = 'diyaassessments.pythonanywhere.com'
@@ -24,6 +25,56 @@ client_req_times = {}
 
 #################### Utility Functions ####################
 
+def get_user_response(username, test_id):
+    try:
+        with open('../data/response_data/'+test_id+'.json') as f:
+            data = eval(f.read())
+    except:
+        return False
+    for i, response in enumerate(data['responses']):
+        if response['username'] == username:
+            return str(i)
+    return False
+
+def save_test_response(username, test_id):
+    with open('../data/user_data/'+username+'/'+test_id+'.json') as f:
+        tdata = eval(f.read())
+    tdata['completed'] = True
+    with open('../data/user_data/'+username+'/'+test_id+'.json', 'w') as f:
+        f.write(str(tdata))
+    total_time = 0
+    times = []
+    for i in tdata['question_stream']:
+        total_time += i['time_taken']
+        times.append(i['time_taken'])
+    data = {}
+    data['total_time'] = int(total_time)
+    data['score'] = tdata['score']
+    data['username'] = username
+    user_data = get_user_data(username)
+    data['name'] = user_data['name']
+    data['average_time'] = round(sum(times)/len(times), 2)
+    response_id = get_user_response(username, test_id)
+    if response_id != False:
+        with open('../data/response_data/'+test_id+'.json') as f:
+            cdata = eval(f.read())
+        cdata['responses'][int(response_id)] = data
+        with open('../data/response_data/'+test_id+'.json', 'w') as f:
+            f.write(str(cdata))
+    else:
+        try:
+            with open('../data/response_data/'+test_id+'.json') as f:
+                cdata = eval(f.read())
+            cdata['responses'].append(data)
+            with open('../data/response_data/'+test_id+'.json', 'w') as f:
+                f.write(str(cdata))
+        except FileNotFoundError:
+            cdata = {}
+            cdata['responses'] = []
+            cdata['responses'].append(data)
+            with open('../data/response_data/'+test_id+'.json', 'w') as f:
+                f.write(str(cdata))
+
 def delete_score(username, test_id):
     try:
         os.remove('../data/user_data/'+username+'/'+test_id+'.json')
@@ -34,10 +85,12 @@ def update_score(username, test_id, ans_res, difficulty, question_id, answer_ind
     try:
         with open('../data/user_data/'+username+'/'+test_id+'.json') as f:
             fdata = f.read()
+        data = eval(fdata)
         try:
-            data = eval(fdata)
-        except:
-            data = {}
+            if data['completed'] == True:
+                data = {}
+        except KeyError:
+            pass
     except FileNotFoundError:
         data = {}
     test_data = load_questions(test_id)
@@ -368,7 +421,7 @@ def before_request():
 
 @app.after_request
 def after_request(response):
-    response.headers["Server"] = "DAL-Server/0.2"
+    response.headers["Server"] = "DAL-Server/0.9"
     response.headers["Developers"] = "Chaitanya, Harsha, Kushal, Piyush"
     response.headers["Origin-School"] = "Diya Academy of Learning"
     response.headers["X-Frame-Options"] = "SAMEORIGIN"
@@ -434,12 +487,6 @@ def t_view(code):
         if agent in flask.request.headers['User-Agent']:
             desktop = False
     user_data = get_user_data(flask.session['username'])
-    try:
-        user_data['test_data'][code]
-        if code != 'demo':
-            return flask.render_template('test_repeat.html'), 406
-    except KeyError:
-        pass
     question_data = load_questions(code)
     authorized = False
     if question_data == False:
@@ -492,16 +539,7 @@ def t_view(code):
         score = flask.session['t']['score']
         flask.session.pop('t')
         flask.session.modified = True
-        try:
-            user_data['test_data'][code] = score
-        except KeyError:
-            user_data['test_data'] = {}
-            user_data['test_data'][code] = score
-        if 'teacher' in user_data['tags'] or 'admin'  in user_data['tags']:
-            pass
-        else:
-            with open('../data/user_metadata/'+flask.session['username'], 'w') as f:
-                f.write(str(user_data))
+        save_test_response(flask.session['username'], code)
         return flask.render_template('t_completed.html', test_name=question_data['test_name'], score=score, name=user_data['name'], username=flask.session['username'])
     else:
         if question_data['question_count'] == eval(flask.session['t']['q'])-1:
@@ -778,6 +816,37 @@ def test_edit(code):
             return flask.render_template('t_edit.html', test_data=data['test_data'], sheet_id=sheet_id, title=title, username=flask.session['username'], name=user_data['name'], code=code, alert='Test updated')
         else:
             return flask.render_template('t_edit.html', test_data=data['test_data'], sheet_id=sheet_id, title=title, username=flask.session['username'], name=user_data['name'], code=code, alert='Error: '+v_output)
+
+@app.route('/t/<code>/analytics/')
+def test_analytics(code):
+    user_data = get_user_data(flask.session['username'])
+    try:
+        with open('../data/test_metadata/'+code+'.json') as f:
+            data = eval(f.read())
+    except:
+        return flask.render_template('404.html'), 404
+    if data.get('owner'):
+        if data['owner'] != flask.session['username'] or 'admin' in user_data['tags']:
+            pass
+        else:
+            if 'teacher' in user_data['tags']:
+                return flask.render_template('401.html'), 401
+            else:
+                return flask.redirect('/t/'+code)
+    else:
+        if 'teacher' in user_data['tags'] or 'admin' in user_data['tags']:
+            pass
+        else:
+            return flask.redirect('/t/'+code)
+    with open('../data/test_data/'+code+'.json') as f:
+        test_data = f.read()
+    try:
+        title = eval(test_data)['test_name']
+    except KeyError:
+        title = 'TEST FAILING'
+    with open('../data/response_data/'+code+'.json') as f:
+        response_data = eval(f.read())
+    return flask.render_template('test_analytics.html', test_name=title, username=flask.session['username'], name=user_data['name'], responses=response_data['responses'], response_count=len(response_data['responses']))
 
 @app.route('/sheets_api_authorize/delete')
 def sheets_api_authorize_delete():
