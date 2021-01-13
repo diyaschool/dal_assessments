@@ -9,7 +9,7 @@ from google_auth_oauthlib.flow import Flow
 
 class authorize:
     def get_url(self):
-        self.flow = Flow.from_client_secrets_file('credentials.json', scopes=['https://www.googleapis.com/auth/drive'], redirect_uri='urn:ietf:wg:oauth:2.0:oob')
+        self.flow = Flow.from_client_secrets_file('../data/credentials.json', scopes=['https://www.googleapis.com/auth/drive'], redirect_uri='urn:ietf:wg:oauth:2.0:oob')
         self.auth_url, _ = self.flow.authorization_url(prompt='consent')
         return self.auth_url
     def verify_code(self, code):
@@ -19,11 +19,11 @@ class authorize:
             return creds
         except:
             return False
-    def save_credentials(self, creds, file='credentials.pickle'):
+    def save_credentials(self, creds, file='../data/credentials.pickle'):
         with open(file, 'wb') as token:
             pickle.dump(creds, token)
         return True
-    def load_credentials(self, file='credentials.pickle'):
+    def load_credentials(self, file='../data/credentials.pickle'):
         try:
             with open(file, 'rb') as token:
                 creds = pickle.load(token)

@@ -203,7 +203,7 @@ def create_new_test_sheet(owner):
     dt = datetime.datetime.now()
     c_time = str(dt.hour)+':'+str(dt.minute)+':'+str(dt.second)
     c_date = str(dt.year)+'-'+str(dt.month)+'-'+str(dt.day)
-    test_list = [f for f in os.listdir('test_data') if os.path.isfile(os.path.join('test_data', f))]
+    test_list = [f for f in os.listdir('../data/test_data') if os.path.isfile(os.path.join('../data/test_data', f))]
     while 1:
         r_id = id_generator()
         if r_id in test_list:
