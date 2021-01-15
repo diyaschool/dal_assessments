@@ -17,6 +17,7 @@ app.secret_key = uuid.uuid4().hex
 
 DOMAINS = ['localhost', 'diyaassessments.pythonanywhere.com']
 DOMAIN = 'diyaassessments.pythonanywhere.com'
+
 gauth = sheets_api.authorize()
 
 anonymous_urls = ['/favicon.ico', '/clear_test_cookies', '/logo.png', '/background.png', '/loading.gif', '/update_server']
