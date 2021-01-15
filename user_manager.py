@@ -11,7 +11,7 @@ def create(username, password, name, tags):
     return True
 
 def delete(username):
-    shutil.rmtree('../data/user_metadata/'+username)
+    shutil.rmtree('../data/user_data/'+username)
     os.remove('../data/user_metadata/'+username)
 
 def get(username):
@@ -24,7 +24,7 @@ def modify(username, password, name, tags):
 
 if __name__ == '__main__':
     while 1:
-        mode = input('Mode [create/delete/get/modify]: ')
+        mode = input('Mode? [create/delete/get/modify]: ')
         if mode == 'create':
             username = input('Username: ')
             password = input('Password: ')
