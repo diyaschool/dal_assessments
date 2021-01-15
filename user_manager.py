@@ -12,10 +12,10 @@ def create(username, password, name, tags):
 
 def delete(username):
     shutil.rmtree('../data/user_data/'+username)
-    os.remove('../data/user_metadata/'+username+'.json')
+    os.remove('../data/user_metadata/'+username)
 
 def get(username):
-    with open('../data/user_metadata/'+username+'.json') as f:
+    with open('../data/user_metadata/'+username) as f:
         return eval(f.read())
 
 def modify(username, password, name, tags):
