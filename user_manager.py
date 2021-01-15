@@ -11,7 +11,7 @@ def create(username, password, name, tags):
     return True
 
 def delete(username):
-    shutil.rmtree('../data/user_metadata/'+username)
+    shutil.rmtree('../data/user_data/'+username)
     os.remove('../data/user_metadata/'+username)
 
 def get(username):

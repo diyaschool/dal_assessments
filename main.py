@@ -863,6 +863,11 @@ def sheets_api_authorize_delete():
     else:
         return flask.render_template('404.html'), 404
 
+@app.route('/change_password', methods=['get', 'post'])
+def change_password():
+    if flask.request.method == 'get':
+        return flask.render_template('change_password.html')
+
 #################### Error Handlers ####################
 
 @app.errorhandler(404)
