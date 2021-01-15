@@ -24,7 +24,7 @@ def modify(username, password, name, tags):
 
 if __name__ == '__main__':
     while 1:
-        mode = input('Mode [create/delete/get/modify]: ')
+        mode = input('Mode? [create/delete/get/modify]: ')
         if mode == 'create':
             username = input('Username: ')
             password = input('Password: ')
