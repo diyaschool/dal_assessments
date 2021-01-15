@@ -1,11 +1,12 @@
 import os
+import hashlib
 import shutil
 
 def create(username, password, name, tags):
     if os.path.isfile('../data/user_metadata/'+username):
         return False
     with open('../data/user_metadata/'+username, 'w') as f:
-        f.write(str({"name": name, "password": password, "tags": tags}))
+        f.write(str({"name": name, "password": hashlib.sha224(password.encode()).hexdigest(), "tags": tags}))
     os.mkdir('../data/user_data/'+username)
     return True
 
@@ -19,7 +20,7 @@ def get(username):
 
 def modify(username, password, name, tags):
     with open('../data/user_metadata/'+username, 'w') as f:
-        f.write(str({"name": name, "password": password, "tags": tags}))
+        f.write(str({"name": name, "password": hashlib.sha224(password.encode()).hexdigest(), "tags": tags}))
 
 if __name__ == '__main__':
     while 1:
