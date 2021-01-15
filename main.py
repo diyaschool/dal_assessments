@@ -1,4 +1,5 @@
 import textwrap
+import hashlib
 import datetime
 import sheets_api
 import flask
@@ -18,7 +19,7 @@ DOMAINS = ['localhost', 'diyaassessments.pythonanywhere.com']
 DOMAIN = 'diyaassessments.pythonanywhere.com'
 gauth = sheets_api.authorize()
 
-anonymous_urls = ['/favicon.ico', '/clear_test_cookies', '/logo.png', '/background.png', '/login.css', '/loading.gif', '/update_server']
+anonymous_urls = ['/favicon.ico', '/clear_test_cookies', '/logo.png', '/background.png', '/loading.gif', '/update_server']
 mobile_agents = ['Android', 'iPhone', 'iPod touch']
 
 client_req_times = {}
@@ -704,7 +705,8 @@ def login():
             with open('../data/user_metadata/'+form_data['username']) as f:
                 fdata = f.read()
             data = eval(fdata)
-            if data['password'] != form_data['password']:
+            password = hashlib.sha224(form_data['password'].encode()).hexdigest()
+            if data['password'] != password:
                 if desktop:
                     return flask.render_template('login.html', error=True, username=form_data['username'])
                 else:
@@ -853,7 +855,7 @@ def sheets_api_authorize_delete():
     user_data = get_user_data(flask.session['username'])
     if flask.session['username'] == 'admin':
         try:
-            os.remove('credentials.pickle')
+            os.remove('../data/credentials.pickle')
             return flask.redirect('/sheets_api_authorize')
         except:
             return 'file_not_found'
