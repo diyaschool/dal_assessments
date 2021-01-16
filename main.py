@@ -420,7 +420,7 @@ def before_request():
             return flask.redirect('/login')
         except FileNotFoundError:
             flask.session['login_ref'] = flask.request.path
-            return flask.redirect('/logout')
+            return flask.redirect('/login')
         user_data = get_user_data(flask.session['username'])
         if user_data.get('has_changed_password') != None and flask.request.path != '/change_password':
             return flask.redirect('/change_password')
@@ -718,6 +718,9 @@ def login():
                     return flask.render_template('mobile/login.html', error=True, username=form_data['username'])
             else:
                 flask.session['username'] = form_data['username']
+                user_data = get_user_data(flask.session['username'])
+                if user_data.get('has_changed_password') != None and flask.request.path != '/change_password':
+                    return flask.redirect('/change_password')
                 try:
                     login_ref = flask.session['login_ref']
                     flask.session.pop('login_ref')
@@ -876,8 +879,16 @@ def change_password():
         data = flask.request.form
         if hashlib.sha224(data['current_password'].encode()).hexdigest() == user_data['password']:
             if data['new_password'] == data['conf_password']:
-                user_manager.change_password(flask.session['username'], data['new_password'])
-                return flask.render_template('change_password.html', username=flask.session['username'], name=user_data['name'], error='Password successfuly changed')
+                if data['current_password'] != data['new_password']:
+                    user_manager.change_password(flask.session['username'], data['new_password'])
+                    try:
+                        login_ref = flask.session['login_ref']
+                        flask.session.pop('login_ref')
+                        return flask.redirect(login_ref)
+                    except KeyError:
+                        return flask.redirect('/')
+                else:
+                    return flask.render_template('change_password.html', username=flask.session['username'], name=user_data['name'], error='Your new password must be different from the current one')
             else:
                 return flask.render_template('change_password.html', username=flask.session['username'], name=user_data['name'], error='Both passwords must match')
         else:
