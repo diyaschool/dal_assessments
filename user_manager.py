@@ -6,7 +6,7 @@ def create(username, password, name, tags):
     if os.path.isfile('../data/user_metadata/'+username):
         return False
     with open('../data/user_metadata/'+username, 'w') as f:
-        f.write(str({"name": name, "password": hashlib.sha224(password.encode()).hexdigest(), "tags": tags}))
+        f.write(str({"name": name, "password": hashlib.sha224(password.encode()).hexdigest(), "tags": tags, "has_changed_password": False}))
     os.mkdir('../data/user_data/'+username)
     return True
 

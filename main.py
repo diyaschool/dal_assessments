@@ -420,7 +420,10 @@ def before_request():
             return flask.redirect('/login')
         except FileNotFoundError:
             flask.session['login_ref'] = flask.request.path
-            return flask.redirect('/login')
+            return flask.redirect('/logout')
+        user_data = get_user_data(flask.session['username'])
+        if user_data.get('has_changed_password') != None and flask.request.path != '/change_password':
+            return flask.redirect('/change_password')
 
 @app.after_request
 def after_request(response):
