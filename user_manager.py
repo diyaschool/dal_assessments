@@ -22,6 +22,13 @@ def modify(username, password, name, tags):
     with open('../data/user_metadata/'+username, 'w') as f:
         f.write(str({"name": name, "password": hashlib.sha224(password.encode()).hexdigest(), "tags": tags}))
 
+def change_password(username, password):
+    data = get(username)
+    print(data)
+    print(password)
+    with open('../data/user_metadata/'+username, 'w') as f:
+        f.write(str({"name": data['name'], "password": hashlib.sha224(password.encode()).hexdigest(), "tags": data['tags']}))
+
 if __name__ == '__main__':
     while 1:
         mode = input('Mode? [create/delete/get/modify]: ')

@@ -1,4 +1,5 @@
 import textwrap
+import user_manager
 import hashlib
 import datetime
 import sheets_api
@@ -865,8 +866,20 @@ def sheets_api_authorize_delete():
 
 @app.route('/change_password', methods=['GET', 'POST'])
 def change_password():
+    user_data = get_user_data(flask.session['username'])
     if flask.request.method == 'GET':
-        return flask.render_template('change_password.html')
+        return flask.render_template('change_password.html', username=flask.session['username'], name=user_data['name'], error=None)
+    elif flask.request.method == 'POST':
+        data = flask.request.form
+        if hashlib.sha224(data['current_password'].encode()).hexdigest() == user_data['password']:
+            if data['new_password'] == data['conf_password']:
+                user_manager.change_password(flask.session['username'], data['new_password'])
+                return flask.render_template('change_password.html', username=flask.session['username'], name=user_data['name'], error='Password successfuly changed')
+            else:
+                return flask.render_template('change_password.html', username=flask.session['username'], name=user_data['name'], error='Both passwords must match')
+        else:
+            return flask.render_template('change_password.html', username=flask.session['username'], name=user_data['name'], error='Password incorrect')
+
 
 #################### Error Handlers ####################
 
