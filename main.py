@@ -861,8 +861,11 @@ def test_analytics(code):
         title = eval(test_data)['test_name']
     except KeyError:
         title = 'TEST FAILING'
-    with open('../data/response_data/'+code+'.json') as f:
-        response_data = eval(f.read())
+    try:
+        with open('../data/response_data/'+code+'.json') as f:
+            response_data = eval(f.read())
+    except FileNotFoundError:
+        response_data = {'responses': []}
     return flask.render_template('test_analytics.html', test_name=title, username=flask.session['username'], name=user_data['name'], responses=response_data['responses'], response_count=len(response_data['responses']))
 
 @app.route('/sheets_api_authorize/delete')
@@ -918,7 +921,7 @@ def e_500(e):
 @app.route('/update_server', methods=['post'])
 def update_server():
     data = flask.request.json
-    if check_hook_integrity(flask.request.headers['X-Real-IP']):
+    if check_hook_integrity(flask.request.headers.get('X-Real-IP')):
         pass
     else:
         return 'integrity failed'
