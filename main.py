@@ -918,7 +918,7 @@ def e_500(e):
 @app.route('/update_server', methods=['post'])
 def update_server():
     data = flask.request.json
-    if check_hook_integrity(flask.request.headers['X-Real-IP']):
+    if check_hook_integrity(flask.request.headers.get('X-Real-IP')):
         pass
     else:
         return 'integrity failed'
