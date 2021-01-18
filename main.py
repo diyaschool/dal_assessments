@@ -10,6 +10,7 @@ import sys
 import string
 import random
 import uuid
+import ipaddress
 
 #################### Initialize ####################
 
@@ -27,6 +28,12 @@ mobile_agents = ['Android', 'iPhone', 'iPod touch']
 client_req_times = {}
 
 #################### Utility Functions ####################
+
+def check_hook_integrity(ip):
+    if ipaddress.ip_address(ip) in ipaddress.ip_network('192.30.252.0/22') or ipaddress.ip_address(ip) in ipaddress.ip_network('185.199.108.0/22') or ipaddress.ip_address(ip) in ipaddress.ip_network('140.82.112.0/20'):
+        return True
+    else:
+        return False
 
 def get_user_response(username, test_id):
     try:
@@ -911,6 +918,10 @@ def e_500(e):
 @app.route('/update_server', methods=['post'])
 def update_server():
     data = flask.request.json
+    if check_hook_integrity(flask.request.headers['X-Real-IP']):
+        pass
+    else:
+        return 'integrity failed'
     if data['action'] == 'closed' and data['pull_request']['merged'] == True:
         os.system('git pull')
         os.system('touch /var/www/diyaassessments_pythonanywhere_com_wsgi.py')
