@@ -10,6 +10,7 @@ import sys
 import string
 import random
 import uuid
+import ipaddress
 
 #################### Initialize ####################
 
@@ -27,6 +28,12 @@ mobile_agents = ['Android', 'iPhone', 'iPod touch']
 client_req_times = {}
 
 #################### Utility Functions ####################
+
+def check_hook_integrity(ip):
+    if ipaddress.ip_address(ip) in ipaddress.ip_network('192.30.252.0/22') or ipaddress.ip_address(ip) in ipaddress.ip_network('185.199.108.0/22') or ipaddress.ip_address(ip) in ipaddress.ip_network('140.82.112.0/20'):
+        return True
+    else:
+        return False
 
 def get_user_response(username, test_id):
     try:
@@ -854,8 +861,11 @@ def test_analytics(code):
         title = eval(test_data)['test_name']
     except KeyError:
         title = 'TEST FAILING'
-    with open('../data/response_data/'+code+'.json') as f:
-        response_data = eval(f.read())
+    try:
+        with open('../data/response_data/'+code+'.json') as f:
+            response_data = eval(f.read())
+    except FileNotFoundError:
+        response_data = {'responses': []}
     return flask.render_template('test_analytics.html', test_name=title, username=flask.session['username'], name=user_data['name'], responses=response_data['responses'], response_count=len(response_data['responses']))
 
 @app.route('/sheets_api_authorize/delete')
@@ -911,6 +921,10 @@ def e_500(e):
 @app.route('/update_server', methods=['post'])
 def update_server():
     data = flask.request.json
+    if check_hook_integrity(flask.request.headers.get('X-Real-IP')):
+        pass
+    else:
+        return 'integrity failed'
     if data['action'] == 'closed' and data['pull_request']['merged'] == True:
         os.system('git pull')
         os.system('touch /var/www/diyaassessments_pythonanywhere_com_wsgi.py')
