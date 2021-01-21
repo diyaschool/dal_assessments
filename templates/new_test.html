@@ -1,12 +1,82 @@
+
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8">
-    <title>New Test | DAL Assessments</title>
+    <title>HOME | DAL Assessments</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/jquery.min.js" ></script>
   </head>
-  <body>
-    <form id='main' method='POST' action='/new_test'>
-      <input type='submit' value='Create'>
-    </form>
+  <body style='background-size: cover; background-image: url("/background.png");  background-repeat: no-repeat; background-position: center; background-attachment: fixed;'>
+    <style>
+    body {
+      overflow: hidden;
+    }
+    #preloader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #fff;
+      z-index: 99;
+    }
+    #status {
+      width: 200px;
+      height: 200px;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      background-image: url(/loading.gif);
+      background-repeat: no-repeat;
+      background-position: center;
+      margin: -100px 0 0 -100px;
+    }
+    </style>
+    <script>
+    $(window).on('load', function() { // makes sure the whole site is loaded
+      $('#status').fadeOut(); // will first fade out the loading animation
+
+        $('#preloader').delay(100).fadeOut('slow'); // will fade out the white DIV that covers the website.
+        $('body').delay(725).css({'overflow':'visible'});
+
+    })
+    </script>
+    <div id="preloader">
+      <div id="status">&nbsp;</div>
+    </div>
+    <center><br><br><br>
+      <br><br><div style='background-color: white; height: 600px; width: 900px; border-radius: 20px; opacity: 1'>
+        <br><br><br><br><br><br><br><br><br><br><br><br><br>
+        <form class="create" id='main' method='POST' action='/new_test'>
+          <input class="create" type='submit' value='Create'>
+      </div><br>
+      <div style='width:100%; position: fixed; background-color: black; padding: 10px; top: 0px; left:0px; opacity: 1'>
+        <a style='color: white; font-size: 40px; left: 47%; text-decoration: none' href='/'>DAL Assessments</a>
+        <text style='color: white; position: absolute; right: 50px; top: 10px; font-size: 20px'>Hello admin</text>
+        <text style='color: white; position: absolute; right: 50px; top: 35px'>Logged in as admin</text>
+      </div>
+    </center>
+  <style>
+    input[type=submit] {
+border: 1px solid #f44c0e;
+padding: 15px 30px;
+font-size: 40px;
+text-align: center;
+cursor: pointer;
+outline: none;
+color: #fff;
+background-color: #4CAF50;
+border: none;
+border-radius: 15px;
+box-shadow: 0 9px #999;
+}
+input[type=submit]:hover {background-color: #3e8e41}
+input[type=submit]:active {
+background-color: #3e8e41;
+box-shadow: 0 5px #666;
+transform: translateY(4px);
+}
+  </style>
   </body>
 </html>
