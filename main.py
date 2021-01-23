@@ -6,7 +6,6 @@ import sheets_api
 import flask
 import time
 import os
-import sys
 import string
 import random
 import uuid
@@ -17,7 +16,7 @@ import ipaddress
 app = flask.Flask(__name__, static_url_path='/')
 app.secret_key = uuid.uuid4().hex
 
-DOMAINS = ['localhost', 'diyaassessments.pythonanywhere.com']
+DOMAINS = ['localhost', 'diyaassessments.pythonanywhere.com', 'w75rtoqm6xtorlqxk6xlzh244qbva3omj7y2pdyzlh3giuuii6uoovid.onion']
 DOMAIN = 'diyaassessments.pythonanywhere.com'
 
 gauth = sheets_api.authorize()
@@ -39,7 +38,7 @@ def get_user_response(username, test_id):
     try:
         with open('../data/response_data/'+test_id+'.json') as f:
             data = eval(f.read())
-    except:
+    except FileNotFoundError:
         return False
     for i, response in enumerate(data['responses']):
         if response['username'] == username:
@@ -112,7 +111,7 @@ def update_score(username, test_id, ans_res, difficulty, question_id, answer_ind
         difficulty = 'medium'
     elif difficulty == 2:
         difficulty = 'hard'
-    if type(answer_index) == type(''):
+    if isinstance(answer_index, str):
         answer_index = -1
         ans_given_text = 'Skipped'
     else:
@@ -127,9 +126,9 @@ def update_score(username, test_id, ans_res, difficulty, question_id, answer_ind
         f.write(str(data))
     return True
 
-def get_user_data(id):
+def get_user_data(user_id):
     try:
-        with open('../data/user_metadata/'+id) as f:
+        with open('../data/user_metadata/'+user_id) as f:
             fdata = f.read()
         data = eval(fdata)
         return data
@@ -194,12 +193,12 @@ def convert(sheet):
             if sheet[0][2] == '':
                 q_n = 0
                 for difficulty in output['questions']:
-                    for q in output['questions'][difficulty]:
+                    for _ in output['questions'][difficulty]:
                         q_n += 1
                 output['question_count'] = q_n
             else:
                 output['question_count'] = eval(sheet[0][2])
-        except Exception as e:
+        except:
             q_n = 0
             for difficulty in output['questions']:
                 for q in output['questions'][difficulty]:
@@ -413,8 +412,6 @@ def before_request():
         prev_time = client_req_times[flask.request.remote_addr]
     except KeyError:
         prev_time = None
-    if prev_time:
-        c_time = time.time()
     if flask.request.headers['Host'] not in DOMAINS:
         return flask.redirect('http://'+DOMAIN+flask.request.path, 301)
     if flask.request.path != '/login' and flask.request.path not in anonymous_urls:
@@ -510,7 +507,6 @@ def t_view(code):
     if authorized == False:
         return flask.render_template('401.html'), 401
     try:
-        flask.session['t']
         flask.session['t']['q']
         flask.session['t']['c_q']
         flask.session['t']['difficulty']
@@ -871,7 +867,7 @@ def test_analytics(code):
 @app.route('/sheets_api_authorize/delete')
 def sheets_api_authorize_delete():
     user_data = get_user_data(flask.session['username'])
-    if flask.session['username'] == 'admin':
+    if  'admin' in user_data['tags']:
         try:
             os.remove('../data/credentials.pickle')
             return flask.redirect('/sheets_api_authorize')
