@@ -1,4 +1,5 @@
 import textwrap
+import ast
 import user_manager
 import hashlib
 import datetime
@@ -37,7 +38,7 @@ def check_hook_integrity(ip):
 def get_user_response(username, test_id):
     try:
         with open('../data/response_data/'+test_id+'.json') as f:
-            data = eval(f.read())
+            data = ast.literal_ast.literal_eval(f.read())
     except FileNotFoundError:
         return False
     for i, response in enumerate(data['responses']):
@@ -47,7 +48,7 @@ def get_user_response(username, test_id):
 
 def save_test_response(username, test_id):
     with open('../data/user_data/'+username+'/'+test_id+'.json') as f:
-        tdata = eval(f.read())
+        tdata = ast.literal_eval(f.read())
     tdata['completed'] = True
     with open('../data/user_data/'+username+'/'+test_id+'.json', 'w') as f:
         f.write(str(tdata))
@@ -66,14 +67,14 @@ def save_test_response(username, test_id):
     response_id = get_user_response(username, test_id)
     if response_id != False:
         with open('../data/response_data/'+test_id+'.json') as f:
-            cdata = eval(f.read())
+            cdata = ast.literal_eval(f.read())
         cdata['responses'][int(response_id)] = data
         with open('../data/response_data/'+test_id+'.json', 'w') as f:
             f.write(str(cdata))
     else:
         try:
             with open('../data/response_data/'+test_id+'.json') as f:
-                cdata = eval(f.read())
+                cdata = ast.literal_eval(f.read())
             cdata['responses'].append(data)
             with open('../data/response_data/'+test_id+'.json', 'w') as f:
                 f.write(str(cdata))
@@ -94,7 +95,7 @@ def update_score(username, test_id, ans_res, difficulty, question_id, answer_ind
     try:
         with open('../data/user_data/'+username+'/'+test_id+'.json') as f:
             fdata = f.read()
-        data = eval(fdata)
+        data = ast.literal_eval(fdata)
         try:
             if data['completed'] == True:
                 data = {}
@@ -130,7 +131,7 @@ def get_user_data(user_id):
     try:
         with open('../data/user_metadata/'+user_id) as f:
             fdata = f.read()
-        data = eval(fdata)
+        data = ast.literal_eval(fdata)
         return data
     except FileNotFoundError:
         return False
@@ -164,7 +165,7 @@ def convert(sheet):
         for i in range(len(sheet[2])):
             if sheet[2][i] == '':
                 continue
-            c_a_i = eval(sheet[4][i])-1
+            c_a_i = ast.literal_eval(sheet[4][i])-1
             if sheet[5][i] == '':
                 output['questions']['easy'].append({"question": sheet[2][i], "answers": sheet[3][i].split('\n'), "correct_answer_index": c_a_i})
             else:
@@ -172,7 +173,7 @@ def convert(sheet):
         for i in range(len(sheet[6])):
             if sheet[6][i] == '':
                 continue
-            c_a_i = eval(sheet[8][i])-1
+            c_a_i = ast.literal_eval(sheet[8][i])-1
             if sheet[9][i] == '':
                 output['questions']['medium'].append({"question": sheet[6][i], "answers": sheet[7][i].split('\n'), "correct_answer_index": c_a_i})
             else:
@@ -180,7 +181,7 @@ def convert(sheet):
         for i in range(len(sheet[10])):
             if sheet[10][i] == '':
                 continue
-            c_a_i = eval(sheet[12][i])-1
+            c_a_i = ast.literal_eval(sheet[12][i])-1
             try:
                 sheet[13]
                 if sheet[13][i] == '':
@@ -197,7 +198,7 @@ def convert(sheet):
                         q_n += 1
                 output['question_count'] = q_n
             else:
-                output['question_count'] = eval(sheet[0][2])
+                output['question_count'] = ast.literal_eval(sheet[0][2])
         except:
             q_n = 0
             for difficulty in output['questions']:
@@ -229,7 +230,7 @@ def create_new_test_sheet(owner):
 
 def validate_test_data(data_string):
     try:
-        data = eval(data_string)
+        data = ast.literal_eval(data_string)
         if type(data['test_name']) != type(''):
             return 'TEST_NAME_INVALID'
         if type(data['subject']) != type(''):
@@ -311,7 +312,7 @@ def load_questions(test_id):
             fdata = f.read()
     except FileNotFoundError:
         return False
-    data = eval(fdata)
+    data = ast.literal_eval(fdata)
     counter = 0
     for q in data["questions"]['easy']:
         q['id'] = counter
@@ -480,13 +481,13 @@ def t_verify(code):
         ans_score = 5
     if str(data['answer']) == str(flask.session['t']['c_a_i']):
         flask.session['t']['prev_q_res'] = True
-        flask.session['t']['score'] = str(eval(flask.session['t']['score'])+ans_score)
+        flask.session['t']['score'] = str(ast.literal_eval(flask.session['t']['score'])+ans_score)
     else:
         flask.session['t']['prev_q_res'] = False
     flask.session['t']['verified'] = True
     time_taken = time.time()-flask.session['t']['time']
-    update_score(flask.session['username'], code, flask.session['t']['prev_q_res'], flask.session['t']['difficulty'], flask.session['t']['q_id'], eval(data['answer']), flask.session['t']['score'], ans_score, time_taken)
-    flask.session['t']['q'] = str(eval(flask.session['t']['q'])+1)
+    update_score(flask.session['username'], code, flask.session['t']['prev_q_res'], flask.session['t']['difficulty'], flask.session['t']['q_id'], ast.literal_eval(data['answer']), flask.session['t']['score'], ans_score, time_taken)
+    flask.session['t']['q'] = str(ast.literal_eval(flask.session['t']['q'])+1)
     flask.session.modified = True
     return flask.redirect('/t/'+code)
 
@@ -551,7 +552,7 @@ def t_view(code):
         save_test_response(flask.session['username'], code)
         return flask.render_template('t_completed.html', test_name=question_data['test_name'], score=score, name=user_data['name'], username=flask.session['username'])
     else:
-        if question_data['question_count'] == eval(flask.session['t']['q'])-1:
+        if question_data['question_count'] == ast.literal_eval(flask.session['t']['q'])-1:
             score = flask.session['t']['score']
             flask.session.pop('t')
             flask.session.modified = True
@@ -712,7 +713,7 @@ def login():
         try:
             with open('../data/user_metadata/'+form_data['username']) as f:
                 fdata = f.read()
-            data = eval(fdata)
+            data = ast.literal_eval(fdata)
             password = hashlib.sha224(form_data['password'].encode()).hexdigest()
             if data['password'] != password:
                 if desktop:
@@ -778,10 +779,12 @@ def sheets_api_authorize():
 
 @app.route('/t/<code>/edit/', methods=['GET', 'POST'])
 def test_edit(code):
+    if '\\' in code or '.' in code:
+        raise VulneratbilityAttempted
     user_data = get_user_data(flask.session['username'])
     try:
         with open('../data/test_metadata/'+code+'.json') as f:
-            data = eval(f.read())
+            data = ast.literal_eval(f.read())
     except:
         return flask.render_template('404.html'), 404
     if data.get('owner'):
@@ -801,7 +804,7 @@ def test_edit(code):
         test_data = f.read()
     sheet_id = data.get('sheet_id')
     try:
-        title = eval(test_data)['test_name']
+        title = ast.literal_eval(test_data)['test_name']
     except:
         title = 'EDIT TEST'
     if flask.request.method == 'GET':
@@ -835,7 +838,7 @@ def test_analytics(code):
     user_data = get_user_data(flask.session['username'])
     try:
         with open('../data/test_metadata/'+code+'.json') as f:
-            data = eval(f.read())
+            data = ast.literal_eval(f.read())
     except:
         return flask.render_template('404.html'), 404
     if data.get('owner'):
@@ -854,12 +857,12 @@ def test_analytics(code):
     with open('../data/test_data/'+code+'.json') as f:
         test_data = f.read()
     try:
-        title = eval(test_data)['test_name']
+        title = ast.literal_eval(test_data)['test_name']
     except KeyError:
         title = 'TEST FAILING'
     try:
         with open('../data/response_data/'+code+'.json') as f:
-            response_data = eval(f.read())
+            response_data = ast.literal_eval(f.read())
     except FileNotFoundError:
         response_data = {'responses': []}
     return flask.render_template('test_analytics.html', test_name=title, username=flask.session['username'], name=user_data['name'], responses=response_data['responses'], response_count=len(response_data['responses']))

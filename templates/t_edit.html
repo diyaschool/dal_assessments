@@ -11,7 +11,7 @@
     <br><br><br><br><br><div style='background-color: white; height: 800px; width: 900px; border-radius: 20px; opacity: 0.9'>
       <br><br>
       <form action="/t/{{code}}/edit/" method="post" id='main_form'>
-        <textarea name="test_data" rows="20" cols="80" style='border: 3px black solid; border-radius: 10px; resize: none;' form='main_form'>{{test_data}}</textarea><br>
+        <textarea name="test_data" rows="20" cols="80" style='border: 3px black solid; border-radius: 10px; resize: none;' form='main_form' required>{{test_data}}</textarea><br>
         <input type="submit" value='Validate and Save'>
       </form><br><br>
       <input type="button" onclick="window.open('https://docs.google.com/spreadsheets/d/{{sheet_id}}')" value='Open Google Sheet'><input type="text" readonly value='https://docs.google.com/spreadsheets/d/{{sheet_id}}' style='border: 2px black solid; border-radius 10px; width: 400px'><input type="button" onclick="window.location.href = '?sync'" value='Sync with Google Sheets'>
