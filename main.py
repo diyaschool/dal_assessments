@@ -119,7 +119,7 @@ def update_score(username, test_id, ans_res, difficulty, question_id, answer_ind
         ans_given_text = test_data['questions'][difficulty][question_id]['answers'][answer_index]
     try:
         data['question_stream'].append({"difficulty": difficulty, "question_id": question_id, "question": test_data['questions'][difficulty][question_id]['question'], "given_answer": ans_given_text, "given_answer_index": answer_index, 'ans_res': ans_res, 'ans_score': ans_score, "time_taken": time_taken})
-    except:
+    except KeyError:
         data['question_stream'] = []
         data['question_stream'].append({"difficulty": difficulty, "question_id": question_id, "question": test_data['questions'][difficulty][question_id]['question'], "given_answer": ans_given_text, "given_answer_index": answer_index, 'ans_res': ans_res, 'ans_score': ans_score, "time_taken": time_taken})
     data['score'] = score
@@ -183,12 +183,11 @@ def convert(sheet):
                 continue
             c_a_i = ast.literal_eval(sheet[12][i])-1
             try:
-                sheet[13]
                 if sheet[13][i] == '':
                     output['questions']['hard'].append({"question": sheet[10][i], "answers": sheet[11][i].split('\n'), "correct_answer_index": c_a_i})
                 else:
                     output['questions']['hard'].append({"question": sheet[10][i], "answers": sheet[11][i].split('\n'), "correct_answer_index": c_a_i, "image": sheet[13][i]})
-            except:
+            except IndexError:
                 output['questions']['hard'].append({"question": sheet[10][i], "answers": sheet[11][i].split('\n'), "correct_answer_index": c_a_i})
         try:
             if sheet[0][2] == '':
@@ -202,7 +201,7 @@ def convert(sheet):
         except:
             q_n = 0
             for difficulty in output['questions']:
-                for q in output['questions'][difficulty]:
+                for _ in output['questions'][difficulty]:
                     q_n += 1
             output['question_count'] = q_n
         return output
@@ -231,71 +230,71 @@ def create_new_test_sheet(owner):
 def validate_test_data(data_string):
     try:
         data = ast.literal_eval(data_string)
-        if type(data['test_name']) != type(''):
+        if not isinstance(data['test_name'], str):
             return 'TEST_NAME_INVALID'
-        if type(data['subject']) != type(''):
+        if not isinstance(data['subject'], str):
             return 'SUBJECT_INVALID'
-        if type(data['tags']) != type([]):
+        if not isinstance(data['tags'], list):
             return 'TAGS_INVALID'
-        if type(data['questions']) != type({}):
+        if not isinstance(data['questions'], dict):
             return 'QUESTIONS_INAVLID'
         for question in data['questions']['easy']:
-            if type(question['question']) != type(''):
+            if not isinstance(question['question'], str):
                 return 'EASY_QUESTION_TEXT_INVALID'
             try:
                 for answer in question['answers']:
-                    if type(answer) != type(''):
+                    if not isinstance(answer, str):
                         return 'EASY_QUESTION_ANSWER_INVALID'
             except:
                 return 'EASY_QUESTION_ANSWERS_INVALID'
-            if type(question['correct_answer_index']) != type(0):
+            if not isinstance(question['correct_answer_index'], int):
                 return 'EASY_CORRECT_ANSWER_INDEX_INVALID'
             try:
                 question['answers'][question['correct_answer_index']]
             except:
                 return 'EASY_CORRECT_ANSWER_INDEX_OUTBOUND'
             try:
-                if type(question['image']) != type(''):
+                if not isinstance(question['image'], str):
                     return 'EASY_IMAGE_URL_INVALID'
-            except:
+            except KeyError:
                 pass
         for question in data['questions']['medium']:
-            if type(question['question']) != type(''):
+            if not isinstance(question['question'], str):
                 return 'MEDIUM_QUESTION_TEXT_INVALID'
             try:
                 for answer in question['answers']:
-                    if type(answer) != type(''):
+                    if not isinstance(answer, str):
                         return 'MEDIUM_QUESTION_ANSWER_INVALID'
             except:
                 return 'MEDIUM_QUESTION_ANSWERS_INVALID'
-            if type(question['correct_answer_index']) != type(0):
+            if not isinstance(question['correct_answer_index'], int):
                 return 'MEDIUM_CORRECT_ANSWER_INDEX_INVALID'
             try:
                 question['answers'][question['correct_answer_index']]
             except:
                 return 'MEDIUM_CORRECT_ANSWER_INDEX_OUTBOUND'
             try:
-                if type(question['image']) != type(''):
+                if not isinstance(question['image'], str):
                     return 'MEDIUM_IMAGE_URL_INVALID'
             except:
                 pass
         for question in data['questions']['hard']:
-            if type(question['question']) != type(''):
+            if not isinstance(question['question'], str):
                 return 'HARD_QUESTION_TEXT_INVALID'
             try:
                 for answer in question['answers']:
-                    if type(answer) != type(''):
+                    if not isinstance(answer, str):
                         return 'HARD_QUESTION_ANSWER_INVALID'
             except:
                 return 'HARD_QUESTION_ANSWERS_INVALID'
-            if type(question['correct_answer_index']) != type(0):
+            if not isinstance(question['correct_answer_index'], int):
                 return 'HARD_CORRECT_ANSWER_INDEX_INVALID'
             try:
                 question['answers'][question['correct_answer_index']]
             except:
                 return 'HARD_CORRECT_ANSWER_INDEX_OUTBOUND'
             try:
-                if type(question['image']) != type(''):
+                if not isinstance(question['image'], str):
                     return 'HARD_IMAGE_URL_INVALID'
             except:
                 pass
@@ -508,10 +507,6 @@ def t_view(code):
     if authorized == False:
         return flask.render_template('401.html'), 401
     try:
-        flask.session['t']['q']
-        flask.session['t']['c_q']
-        flask.session['t']['difficulty']
-        flask.session['t']['score']
         if flask.session['t']['code'] != code:
             flask.session.pop('t')
             flask.session['t'] = {}
@@ -598,7 +593,7 @@ def t_view(code):
             if desktop:
                 if len(question['question']) >= 40:
                     temp_question = textwrap.wrap(question['question'], 50)
-                    for chunk in temp_question:
+                    for _ in temp_question:
                         height_extend += 10
                     question['question'] = temp_question
                 else:
@@ -748,7 +743,7 @@ def new_test():
         return flask.render_template('new_test.html')
     else:
         test_data = create_new_test_sheet(flask.session['username'])
-        test_id, sheet_id = test_data
+        test_id, _ = test_data
         return flask.redirect('/t/'+test_id+'/edit')
 
 @app.route('/sheets_api_authorize', methods=['GET', 'POST'])

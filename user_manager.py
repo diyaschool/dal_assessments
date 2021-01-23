@@ -1,6 +1,7 @@
 import os
 import hashlib
 import shutil
+import ast
 
 def create(username, password, name, tags):
     if os.path.isfile('../data/user_metadata/'+username):
@@ -16,7 +17,7 @@ def delete(username):
 
 def get(username):
     with open('../data/user_metadata/'+username) as f:
-        return eval(f.read())
+        return ast.literal_ast(f.read())
 
 def modify(username, password, name, tags):
     with open('../data/user_metadata/'+username, 'w') as f:
