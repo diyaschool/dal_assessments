@@ -276,7 +276,7 @@ def validate_test_data(data_string):
             try:
                 if not isinstance(question['image'], str):
                     return 'MEDIUM_IMAGE_URL_INVALID'
-            except:
+            except KeyError:
                 pass
         for question in data['questions']['hard']:
             if not isinstance(question['question'], str):
@@ -601,7 +601,7 @@ def t_view(code):
             else:
                 if len(question['question']) >= 30:
                     temp_question = textwrap.wrap(question['question'], 20)
-                    for chunk in temp_question:
+                    for _ in temp_question:
                         height_extend += 20
                     question['question'] = temp_question
                 else:
