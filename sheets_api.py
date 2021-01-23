@@ -1,10 +1,5 @@
 import pickle
-import os.path
-from google.oauth2 import id_token
 from googleapiclient.discovery import build
-from google_auth_oauthlib.flow import InstalledAppFlow
-from google.auth.transport.requests import Request
-from google.auth.transport import requests
 from google_auth_oauthlib.flow import Flow
 
 class authorize:
@@ -34,7 +29,7 @@ class authorize:
         try:
             service = build('sheets', 'v4', credentials=creds)
             sheet = service.spreadsheets()
-            result = sheet.values().get(spreadsheetId='1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms', range='A1:C').execute()
+            sheet.values().get(spreadsheetId='1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms', range='A1:C').execute()
             return True
         except:
             return False
