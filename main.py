@@ -276,7 +276,7 @@ def validate_test_data(data_string):
             try:
                 if not isinstance(question['image'], str):
                     return 'MEDIUM_IMAGE_URL_INVALID'
-            except:
+            except KeyError:
                 pass
         for question in data['questions']['hard']:
             if not isinstance(question['question'], str):
