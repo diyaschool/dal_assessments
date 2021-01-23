@@ -32,6 +32,31 @@
       margin: -100px 0 0 -100px;
     }
     </style>
+    <style>
+.tooltip {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted black;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+
+  /* Position the tooltip */
+  position: absolute;
+  z-index: 1;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+}
+</style>
     <script>
     $(window).on('load', function() { // makes sure the whole site is loaded
       $('#status').fadeOut(); // will first fade out the loading animation
@@ -48,9 +73,10 @@
       <div id="status">&nbsp;</div>
     </div>
     <center><br><br><br>
-      <br><br><div style='background-color: white; height: 600px; width: 900px; border-radius: 20px; opacity: 0.7'>
+      <br><br><div style='background-color: white; height: 600px; width: 900px; border-radius: 20px; opacity: 1' class='tooltip'>
       </div><br>
-      <div style='width:100%; position: fixed; background-color: black; padding: 10px; top: 0px; left:0px; opacity: 0.7'>
+        <span class="tooltiptext">Tooltip text</span>
+      <div style='width:100%; position: fixed; background-color: black; padding: 10px; top: 0px; left:0px; opacity: 1'>
         <a style='color: white; font-size: 40px; left: 47%; text-decoration: none' href='/'>DAL Assessments</a>
         <text style='color: white; position: absolute; right: 50px; top: 10px; font-size: 20px'>Hello {{name}}</text>
         <text style='color: white; position: absolute; right: 50px; top: 35px'>Logged in as {{username}}</text>
