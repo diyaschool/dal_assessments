@@ -601,7 +601,7 @@ def t_view(code):
             else:
                 if len(question['question']) >= 30:
                     temp_question = textwrap.wrap(question['question'], 20)
-                    for chunk in temp_question:
+                    for _ in temp_question:
                         height_extend += 20
                     question['question'] = temp_question
                 else:
