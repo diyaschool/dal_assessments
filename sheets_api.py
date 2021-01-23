@@ -34,10 +34,10 @@ class authorize:
         except:
             return False
 
-def get_values(sheet_id, credentials, range='A1:Z'):
+def get_values(sheet_id, credentials, sheet_range='A1:Z'):
     service = build('sheets', 'v4', credentials=credentials)
     sheet = service.spreadsheets()
-    result = sheet.values().get(spreadsheetId=sheet_id, range=range).execute()
+    result = sheet.values().get(spreadsheetId=sheet_id, range=sheet_range).execute()
     values = result.get('values', [])
     return values
 
