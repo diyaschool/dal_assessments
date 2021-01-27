@@ -17,7 +17,7 @@ def delete(username):
 
 def get(username):
     with open('../data/user_metadata/'+username) as f:
-        return ast.literal_ast(f.read())
+        return ast.literal_eval(f.read())
 
 def modify(username, password, name, tags):
     with open('../data/user_metadata/'+username, 'w') as f:
