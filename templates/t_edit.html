@@ -5,8 +5,6 @@
     <title>{{title}} | DAL Assessments</title>
   </head>
   <body style='background-size: cover; background-image: url("/background.png");  background-repeat: no-repeat; background-position: center; background-attachment: fixed;'>
-    <h1 style='color: white; position: fixed; left: 2%; bottom: 4%'>Hello {{name}}</h1>
-    <h4 style='color: white; position: fixed; left: 2%; bottom: 1.5%'>Logged in as {{username}}</h3>
     <center>
     <br><br><br><br><br><div style='background-color: white; height: 800px; width: 900px; border-radius: 20px; opacity: 0.9'>
       <br><br>
@@ -19,6 +17,8 @@
   </div><br><br>
   <div style='width: 100%; position: fixed; background-color: black; padding: 10px; top: 0px; left:0px; opacity: 1'>
     <a style='color: white; font-size: 40px; left: 47%; text-decoration: none' href='/'>DAL Assessments</a>
+    <text style='color: white; position: absolute; right: 50px; top: 10px; font-size: 20px'>Hello {{name}}</text>
+    <text style='color: white; position: absolute; right: 50px; top: 35px'>Logged in as {{username}}</text>
   </div>
 </center>
 {%if alert%}

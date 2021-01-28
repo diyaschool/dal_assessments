@@ -259,6 +259,9 @@
   min-width: 5px;
   text-align: center;
   border-radius: 8px;
+  height: 8px;
+  position: relative;
+  top: 3px
 }
 </style>
 <body style='background-size: cover; background-image: url("background.png");  background-repeat: no-repeat; background-position: center; background-attachment: fixed;'>
@@ -270,11 +273,11 @@
       <center>
         <form action='/login' method='post'>
             <div class="input-container">
-              <i class="fa fa-user icon fadeIn forth"></i>
+              <i class="fa fa-user icon fadeIn second"></i>
           <input type="text" id="login" class="fadeIn second" name="username" placeholder="Username" required autofocus>
         </div><br/><br/>
         <div class="input-container">
-          <i class="fa fa-key icon fadeIn forth"></i>
+          <i class="fa fa-key icon fadeIn third"></i>
           <input type="password" id="password" class="fadeIn third" name="password" placeholder="Password" required>
         </div><br/>
             <input type="checkbox" class="fadeIn fourth" onclick="myFunction()" id='showPassword'><label class="fadeIn fourth" for='showPassword' style='color: white'>Show Password</label><br/><br/>
