@@ -17,7 +17,7 @@ import ipaddress
 app = flask.Flask(__name__, static_url_path='/')
 app.secret_key = uuid.uuid4().hex
 
-DOMAINS = ['localhost', 'diyaassessments.pythonanywhere.com', 'w75rtoqm6xtorlqxk6xlzh244qbva3omj7y2pdyzlh3giuuii6uoovid.onion']
+DOMAINS = ['localhost', 'diyaassessments.pythonanywhere.com', 'w75rtoqm6xtorlqxk6xlzh244qbva3omj7y2pdyzlh3giuuii6uoovid.onion', 'chaitanyapy.ml']
 DOMAIN = 'diyaassessments.pythonanywhere.com'
 
 gauth = sheets_api.authorize()
@@ -408,6 +408,7 @@ def get_question(completed_questions, questions):
 
 @app.before_request
 def before_request():
+    print(flask.request.headers)
     try:
         prev_time = client_req_times[flask.request.remote_addr]
     except KeyError:
