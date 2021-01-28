@@ -38,7 +38,7 @@ def check_hook_integrity(ip):
 def get_user_response(username, test_id):
     try:
         with open('../data/response_data/'+test_id+'.json') as f:
-            data = ast.literal_ast.literal_eval(f.read())
+            data = ast.literal_eval(f.read())
     except FileNotFoundError:
         return False
     for i, response in enumerate(data['responses']):

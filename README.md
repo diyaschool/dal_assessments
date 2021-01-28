@@ -6,7 +6,7 @@
 [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
 [![GitHub issues](https://img.shields.io/github/issues/ChaitanyaPy/dal_assessments.svg)](https://github.com/ChaitanyaPy/dal_assessments/issues/)
 
-Made with :heart: by the students of [Diya Academy of Learning](https://www.diyaschool.com/).
+Built with :heart: by the students of [Diya Academy of Learning](https://www.diyaschool.com/).
 
 ![Diya Academy of Learning](https://diyaassessments.pythonanywhere.com/logo.png)
 
