@@ -1,4 +1,5 @@
 import textwrap
+import datetime
 import ast
 import user_manager
 import hashlib
@@ -47,10 +48,10 @@ def get_user_response(username, test_id):
     return False
 
 def save_test_response(username, test_id):
-    with open('../data/user_data/'+username+'/'+test_id+'.json') as f:
+    with open('../data/user_data/'+username+'/test_data/'+test_id+'.json') as f:
         tdata = ast.literal_eval(f.read())
     tdata['completed'] = True
-    with open('../data/user_data/'+username+'/'+test_id+'.json', 'w') as f:
+    with open('../data/user_data/'+username+'/test_data/'+test_id+'.json', 'w') as f:
         f.write(str(tdata))
     total_time = 0
     times = []
@@ -87,13 +88,13 @@ def save_test_response(username, test_id):
 
 def delete_score(username, test_id):
     try:
-        os.remove('../data/user_data/'+username+'/'+test_id+'.json')
+        os.remove('../data/user_data/'+username+'/test_data/'+test_id+'.json')
     except FileNotFoundError:
-        return False
+        pass
 
 def update_score(username, test_id, ans_res, difficulty, question_id, answer_index, score, ans_score, time_taken):
     try:
-        with open('../data/user_data/'+username+'/'+test_id+'.json') as f:
+        with open('../data/user_data/'+username+'/test_data/'+test_id+'.json') as f:
             fdata = f.read()
         data = ast.literal_eval(fdata)
         try:
@@ -117,13 +118,14 @@ def update_score(username, test_id, ans_res, difficulty, question_id, answer_ind
         ans_given_text = 'Skipped'
     else:
         ans_given_text = test_data['questions'][difficulty][question_id]['answers'][answer_index]
+    now = datetime.datetime.now()
     try:
-        data['question_stream'].append({"difficulty": difficulty, "question_id": question_id, "question": test_data['questions'][difficulty][question_id]['question'], "given_answer": ans_given_text, "given_answer_index": answer_index, 'ans_res': ans_res, 'ans_score': ans_score, "time_taken": time_taken})
+        data['question_stream'].append({"difficulty": difficulty, "question_id": question_id, "question": test_data['questions'][difficulty][question_id]['question'], "given_answer": ans_given_text, "given_answer_index": answer_index, 'ans_res': ans_res, 'ans_score': ans_score, "time_taken": time_taken, "time_stamp": str(now.hour)+":"+str(now.minute)+":"+str(now.second), "long_time_stamp": str(now.day)+"-"+str(now.month)+"-"+str(now.year)+" "+str(now.hour)+":"+str(now.minute)+":"+str(now.second)})
     except KeyError:
         data['question_stream'] = []
-        data['question_stream'].append({"difficulty": difficulty, "question_id": question_id, "question": test_data['questions'][difficulty][question_id]['question'], "given_answer": ans_given_text, "given_answer_index": answer_index, 'ans_res': ans_res, 'ans_score': ans_score, "time_taken": time_taken})
+        data['question_stream'].append({"difficulty": difficulty, "question_id": question_id, "question": test_data['questions'][difficulty][question_id]['question'], "given_answer": ans_given_text, "given_answer_index": answer_index, 'ans_res': ans_res, 'ans_score': ans_score, "time_taken": time_taken, "time_stamp": str(now.hour)+":"+str(now.minute)+":"+str(now.second), "long_time_stamp": str(now.day)+"-"+str(now.month)+"-"+str(now.year)+" "+str(now.hour)+":"+str(now.minute)+":"+str(now.second)})
     data['score'] = score
-    with open('../data/user_data/'+username+'/'+test_id+'.json', 'w') as f:
+    with open('../data/user_data/'+username+'/test_data/'+test_id+'.json', 'w') as f:
         f.write(str(data))
     return True
 
@@ -408,7 +410,6 @@ def get_question(completed_questions, questions):
 
 @app.before_request
 def before_request():
-    print(flask.request.headers)
     try:
         prev_time = client_req_times[flask.request.remote_addr]
     except KeyError:
@@ -473,17 +474,20 @@ def clear_test_cookies():
 @app.route('/t/<code>/verify', methods=['POST'])
 def t_verify(code):
     data = flask.request.form
-    if flask.session['t']['difficulty'] == 0:
-        ans_score = 1
-    elif flask.session['t']['difficulty'] == 1:
-        ans_score = 3
-    elif flask.session['t']['difficulty'] == 2:
-        ans_score = 5
     if str(data['answer']) == str(flask.session['t']['c_a_i']):
         flask.session['t']['prev_q_res'] = True
-        flask.session['t']['score'] = str(ast.literal_eval(flask.session['t']['score'])+ans_score)
     else:
         flask.session['t']['prev_q_res'] = False
+    if flask.session['t']['prev_q_res'] == True:
+        if flask.session['t']['difficulty'] == 0:
+            ans_score = 1
+        elif flask.session['t']['difficulty'] == 1:
+            ans_score = 3
+        elif flask.session['t']['difficulty'] == 2:
+            ans_score = 5
+        flask.session['t']['score'] = str(ast.literal_eval(flask.session['t']['score'])+ans_score)
+    else:
+        ans_score = 0
     flask.session['t']['verified'] = True
     time_taken = time.time()-flask.session['t']['time']
     update_score(flask.session['username'], code, flask.session['t']['prev_q_res'], flask.session['t']['difficulty'], flask.session['t']['q_id'], ast.literal_eval(data['answer']), flask.session['t']['score'], ans_score, time_taken)
@@ -898,7 +902,6 @@ def change_password():
                 return flask.render_template('change_password.html', username=flask.session['username'], name=user_data['name'], error='Both passwords must match')
         else:
             return flask.render_template('change_password.html', username=flask.session['username'], name=user_data['name'], error='Password incorrect')
-
 
 #################### Error Handlers ####################
 
