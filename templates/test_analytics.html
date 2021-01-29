@@ -100,7 +100,7 @@ function snackbar_show() {
                   {%for response in responses%}
                   <tr>
                     <td>{{counter}}</td>
-                    <td>{{response['username']}}</td>
+                    <td><a href="/t/{{code}}/analytics/{{response['username']}}">{{response['username']}}</a></td>
                     <td>{{response['name']}}</td>
                     <td>{{response['score']}}</td>
                     <td>{{response['average_time']}} secs</td>

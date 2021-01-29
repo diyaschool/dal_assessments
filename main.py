@@ -865,7 +865,41 @@ def test_analytics(code):
             response_data = ast.literal_eval(f.read())
     except FileNotFoundError:
         response_data = {'responses': []}
-    return flask.render_template('test_analytics.html', test_name=title, username=flask.session['username'], name=user_data['name'], responses=response_data['responses'], response_count=len(response_data['responses']))
+    return flask.render_template('test_analytics.html', test_name=title, username=flask.session['username'], name=user_data['name'], responses=response_data['responses'], response_count=len(response_data['responses']), code=code)
+
+@app.route('/t/<code>/analytics/<username>/')
+def test_analytics_user(code, username):
+    user_data = get_user_data(flask.session['username'])
+    try:
+        with open('../data/test_metadata/'+code+'.json') as f:
+            data = ast.literal_eval(f.read())
+    except:
+        return flask.render_template('404.html'), 404
+    if data.get('owner'):
+        if data['owner'] != flask.session['username'] or 'admin' in user_data['tags'] or username == flask.session['username']:
+            pass
+        else:
+            if 'teacher' in user_data['tags']:
+                return flask.render_template('401.html'), 401
+            else:
+                return flask.redirect('/t/'+code)
+    else:
+        if 'teacher' in user_data['tags'] or 'admin' in user_data['tags']:
+            pass
+        else:
+            return flask.redirect('/t/'+code)
+    with open('../data/test_data/'+code+'.json') as f:
+        test_data = f.read()
+    try:
+        title = ast.literal_eval(test_data)['test_name']
+    except KeyError:
+        title = 'TEST FAILING'
+    try:
+        with open('../data/response_data/'+code+'.json') as f:
+            response_data = ast.literal_eval(f.read())
+    except FileNotFoundError:
+        response_data = {'responses': []}
+    return flask.render_template('test_analytics.html', test_name=title, username=flask.session['username'], name=user_data['name'], responses=response_data['responses'], response_count=len(response_data['responses']), code=code)
 
 @app.route('/sheets_api_authorize/delete')
 def sheets_api_authorize_delete():
