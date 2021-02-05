@@ -16,6 +16,13 @@ import ipaddress
 #################### Initialize ####################
 
 app = flask.Flask(__name__, static_url_path='/')
+
+try:
+    with open('../data/server_key') as f:
+        data = eval(f.read())
+except:
+    pass
+
 app.secret_key = uuid.uuid4().hex
 
 DOMAINS = ['localhost', 'diyaassessments.pythonanywhere.com', 'w75rtoqm6xtorlqxk6xlzh244qbva3omj7y2pdyzlh3giuuii6uoovid.onion', 'chaitanyapy.ml']
@@ -69,6 +76,8 @@ def save_test_response(username, test_id):
     if response_id != False:
         with open('../data/response_data/'+test_id+'.json') as f:
             cdata = ast.literal_eval(f.read())
+        cresponse_count = len(cdata['responses'])
+        data['index'] = int(response_id)
         cdata['responses'][int(response_id)] = data
         with open('../data/response_data/'+test_id+'.json', 'w') as f:
             f.write(str(cdata))
@@ -76,12 +85,15 @@ def save_test_response(username, test_id):
         try:
             with open('../data/response_data/'+test_id+'.json') as f:
                 cdata = ast.literal_eval(f.read())
+            cresponse_count = len(cdata['responses'])
+            data['index'] = cresponse_count+1
             cdata['responses'].append(data)
             with open('../data/response_data/'+test_id+'.json', 'w') as f:
                 f.write(str(cdata))
         except FileNotFoundError:
             cdata = {}
             cdata['responses'] = []
+            data['index'] = 1
             cdata['responses'].append(data)
             with open('../data/response_data/'+test_id+'.json', 'w') as f:
                 f.write(str(cdata))
@@ -414,6 +426,7 @@ def before_request():
         prev_time = client_req_times[flask.request.remote_addr]
     except KeyError:
         prev_time = None
+    print(flask.request.headers)
     if flask.request.headers['Host'] not in DOMAINS:
         return flask.redirect('http://'+DOMAIN+flask.request.path, 301)
     if flask.request.path != '/login' and flask.request.path not in anonymous_urls:
@@ -507,7 +520,7 @@ def t_view(code):
     if question_data == False:
         return flask.render_template('404.html'), 404
     for tag in user_data['tags']:
-        if tag in question_data or tag == 'admin' or tag == 'teacher':
+        if tag in question_data or tag == 'admin' or tag == 'teacher' or code == 'demo':
             authorized = True
     if authorized == False:
         return flask.render_template('401.html'), 401
@@ -711,7 +724,7 @@ def login():
     else:
         form_data = flask.request.form
         try:
-            with open('../data/user_metadata/'+form_data['username']) as f:
+            with open('../data/user_metadata/'+form_data['username'].lower()) as f:
                 fdata = f.read()
             data = ast.literal_eval(fdata)
             password = hashlib.sha224(form_data['password'].encode()).hexdigest()
@@ -721,7 +734,7 @@ def login():
                 else:
                     return flask.render_template('mobile/login.html', error=True, username=form_data['username'])
             else:
-                flask.session['username'] = form_data['username']
+                flask.session['username'] = form_data['username'].lower()
                 user_data = get_user_data(flask.session['username'])
                 if user_data.get('has_changed_password') != None and flask.request.path != '/change_password':
                     return flask.redirect('/change_password')
@@ -899,7 +912,7 @@ def test_analytics_user(code, username):
             response_data = ast.literal_eval(f.read())
     except FileNotFoundError:
         response_data = {'responses': []}
-    return flask.render_template('test_analytics.html', test_name=title, username=flask.session['username'], name=user_data['name'], responses=response_data['responses'], response_count=len(response_data['responses']), code=code)
+    return flask.render_template('test_analytics_username.html', test_name=title, username=flask.session['username'], name=user_data['name'], responses=response_data['responses'], response_count=len(response_data['responses']), code=code)
 
 @app.route('/sheets_api_authorize/delete')
 def sheets_api_authorize_delete():

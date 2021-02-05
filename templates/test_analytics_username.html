@@ -96,16 +96,17 @@ function snackbar_show() {
                   </tr>
                 </thead>
                 <tbody>
+                  {%set counter = 1 %}
                   {%for response in responses%}
                   <tr>
-                    <td>{{response['index']}}</td>
+                    <td>{{counter}}</td>
                     <td><a href="/t/{{code}}/analytics/{{response['username']}}">{{response['username']}}</a></td>
                     <td>{{response['name']}}</td>
                     <td>{{response['score']}}</td>
                     <td>{{response['average_time']}} secs</td>
                     <td>{{response['total_time']}} secs</td>
                   </tr>
-                  {%endfor%}
+                  {%set counter = counter+ 1%}{%endfor%}
                 </tbody>
             </table>
             </div>
