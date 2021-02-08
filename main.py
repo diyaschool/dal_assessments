@@ -87,10 +87,11 @@ def save_test_response(username, test_id):
         with open('../data/response_data/'+test_id+'.json') as f:
             cdata = ast.literal_eval(f.read())
         cresponse_count = len(cdata['responses'])
-        data['index'] = int(response_id)
+        data['index'] = int(response_id)+1
         cdata['responses'][int(response_id)] = data
         with open('../data/response_data/'+test_id+'.json', 'w') as f:
             f.write(str(cdata))
+        print('ok')
     else:
         try:
             with open('../data/response_data/'+test_id+'.json') as f:
@@ -100,6 +101,7 @@ def save_test_response(username, test_id):
             cdata['responses'].append(data)
             with open('../data/response_data/'+test_id+'.json', 'w') as f:
                 f.write(str(cdata))
+            print('lol')
         except FileNotFoundError:
             cdata = {}
             cdata['responses'] = []
@@ -107,6 +109,7 @@ def save_test_response(username, test_id):
             cdata['responses'].append(data)
             with open('../data/response_data/'+test_id+'.json', 'w') as f:
                 f.write(str(cdata))
+            print('grt')
 
 def delete_score(username, test_id):
     try:
@@ -351,7 +354,6 @@ def load_questions(test_id):
         if q['question'].strip() == '':
             data['questions']['hard'].pop(counter)
         counter += 1
-
     for j, q in enumerate(data['questions']['easy']):
         for i, ans in enumerate(q['answers']):
             if ans.strip() == '':
@@ -364,7 +366,6 @@ def load_questions(test_id):
         for i, ans in enumerate(q['answers']):
             if ans.strip() == '':
                 data['questions']['hard'][j]['answers'].pop(i)
-
     counter = 0
     for q in data["questions"]['easy']:
         q['id'] = counter
@@ -385,7 +386,6 @@ def load_questions(test_id):
             for q in data['questions'][difficulty]:
                 q_n += 1
         data['question_count'] = q_n
-    print(data)
     return data
 
 def get_difficulty(difficulty, completed_questions, questions, prev_q_res):
@@ -602,6 +602,7 @@ def t_view(code):
         flask.session.pop('t')
         flask.session.modified = True
         save_test_response(flask.session['username'], code)
+        delete_score(flask.session['username'], code)
         return flask.render_template('t_completed.html', test_name=question_data['test_name'], score=score, name=user_data['name'], username=flask.session['username'])
     else:
         if question_data['question_count'] == ast.literal_eval(flask.session['t']['q'])-1:
@@ -618,6 +619,8 @@ def t_view(code):
             else:
                 with open('../data/user_metadata/'+flask.session['username'], 'w') as f:
                     f.write(str(user_data))
+            save_test_response(flask.session['username'], code)
+            delete_score(flask.session['username'], code)
             return flask.render_template('t_completed.html', test_name=question_data['test_name'], score=score, name=user_data['name'], username=flask.session['username'])
     if flask.session['t']['q'] == '0':
         q_n = question_data['question_count']
