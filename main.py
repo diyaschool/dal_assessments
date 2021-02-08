@@ -520,7 +520,7 @@ def t_view(code):
     if question_data == False:
         return flask.render_template('404.html'), 404
     for tag in user_data['tags']:
-        if tag in question_data or tag == 'admin' or tag == 'teacher' or code == 'demo':
+        if tag in question_data['tags'] or tag == 'admin' or tag == 'teacher' or code == 'demo':
             authorized = True
     if authorized == False:
         return flask.render_template('401.html'), 401
