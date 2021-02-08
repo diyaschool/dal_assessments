@@ -51,7 +51,7 @@ def create_sheet(title, credentials):
 def tamper_with_format(sheet_id, credentials):
     service = build('sheets', 'v4', credentials=credentials)
     sheet = service.spreadsheets()
-    tamper_data = ['Name, Subject', 'Student Tags', 'Easy Questions', 'Options', 'Correct Option', 'Image', 'Medium Questions', 'Options', 'Correct Option', 'Image', 'Hard Questions', 'Options', 'Correct Option', 'Image']
+    tamper_data = ['Name, Subject, Total questions', 'Student Tags', 'Easy Questions', 'Options', 'Correct Option', 'Image', 'Medium Questions', 'Options', 'Correct Option', 'Image', 'Hard Questions', 'Options', 'Correct Option', 'Image']
     req = sheet.values().update(spreadsheetId=sheet_id, range="A1:Z", valueInputOption="USER_ENTERED", body={"range": "A1:Z", "majorDimension": "ROWS", "values": [tamper_data]})
     req.execute()
 
