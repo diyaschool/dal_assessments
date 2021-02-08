@@ -328,6 +328,21 @@ def load_questions(test_id):
     data = ast.literal_eval(fdata)
     counter = 0
     for q in data["questions"]['easy']:
+        if q['question'].strip() == '':
+            data['questions']['easy'].pop(counter)
+        counter += 1
+    counter = 0
+    for q in data["questions"]['medium']:
+        if q['question'].strip() == '':
+            data['questions']['medium'].pop(counter)
+        counter += 1
+    counter = 0
+    for q in data["questions"]['hard']:
+        if q['question'].strip() == '':
+            data['questions']['hard'].pop(counter)
+        counter += 1
+    counter = 0
+    for q in data["questions"]['easy']:
         q['id'] = counter
         counter += 1
     counter = 0
