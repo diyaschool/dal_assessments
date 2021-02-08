@@ -351,6 +351,20 @@ def load_questions(test_id):
         if q['question'].strip() == '':
             data['questions']['hard'].pop(counter)
         counter += 1
+
+    for j, q in enumerate(data['questions']['easy']):
+        for i, ans in enumerate(q['answers']):
+            if ans.strip() == '':
+                data['questions']['easy'][j]['answers'].pop(i)
+    for j, q in enumerate(data['questions']['medium']):
+        for i, ans in enumerate(q['answers']):
+            if ans.strip() == '':
+                data['questions']['medium'][j]['answers'].pop(i)
+    for j, q in enumerate(data['questions']['hard']):
+        for i, ans in enumerate(q['answers']):
+            if ans.strip() == '':
+                data['questions']['hard'][j]['answers'].pop(i)
+
     counter = 0
     for q in data["questions"]['easy']:
         q['id'] = counter
@@ -371,6 +385,7 @@ def load_questions(test_id):
             for q in data['questions'][difficulty]:
                 q_n += 1
         data['question_count'] = q_n
+    print(data)
     return data
 
 def get_difficulty(difficulty, completed_questions, questions, prev_q_res):
