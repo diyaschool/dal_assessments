@@ -91,7 +91,6 @@ def save_test_response(username, test_id):
         cdata['responses'][int(response_id)] = data
         with open('../data/response_data/'+test_id+'.json', 'w') as f:
             f.write(str(cdata))
-        print('ok')
     else:
         try:
             with open('../data/response_data/'+test_id+'.json') as f:
@@ -101,7 +100,6 @@ def save_test_response(username, test_id):
             cdata['responses'].append(data)
             with open('../data/response_data/'+test_id+'.json', 'w') as f:
                 f.write(str(cdata))
-            print('lol')
         except FileNotFoundError:
             cdata = {}
             cdata['responses'] = []
@@ -109,7 +107,6 @@ def save_test_response(username, test_id):
             cdata['responses'].append(data)
             with open('../data/response_data/'+test_id+'.json', 'w') as f:
                 f.write(str(cdata))
-            print('grt')
 
 def delete_score(username, test_id):
     try:
