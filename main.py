@@ -23,7 +23,17 @@ try:
 except:
     pass
 
-app.secret_key = uuid.uuid4().hex
+# app.secret_key = uuid.uuid4().hex
+
+try:
+    with open('../data/cookie_key') as f:
+        fdata = f.read()
+    app.secret_key = fdata
+except:
+    key = uuid.uuid4().hex
+    app.secret_key = key
+    with open('../data/cookie_key', 'w') as f:
+        f.write(key)
 
 DOMAINS = ['localhost', 'diyaassessments.pythonanywhere.com', 'w75rtoqm6xtorlqxk6xlzh244qbva3omj7y2pdyzlh3giuuii6uoovid.onion', 'chaitanyapy.ml']
 DOMAIN = 'diyaassessments.pythonanywhere.com'
@@ -441,7 +451,6 @@ def before_request():
         prev_time = client_req_times[flask.request.remote_addr]
     except KeyError:
         prev_time = None
-    print(flask.request.headers)
     if flask.request.headers['Host'] not in DOMAINS:
         return flask.redirect('http://'+DOMAIN+flask.request.path, 301)
     if flask.request.path != '/login' and flask.request.path not in anonymous_urls:
