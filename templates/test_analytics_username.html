@@ -6,105 +6,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <script src="/jquery.min.js" ></script>
-    <script>
-    window.setTimeout(function () {
-      window.location.reload();
-    }, 5000);
-    </script>
-    <!-- <script>
-    window.setTimeout(function () {
-      snackbar_show();
-    }, 4500);
-    </script> -->
   </head>
-  <style>
-  #snackbar {
-  visibility: hidden; /* Hidden by default. Visible on click */
-  min-width: 250px; /* Set a default minimum width */
-  margin-left: -125px; /* Divide value of min-width by 2 */
-  background-color: #333; /* Black background color */
-  color: #fff; /* White text color */
-  text-align: center; /* Centered text */
-  border-radius: 2px; /* Rounded borders */
-  padding: 16px; /* Padding */
-  position: fixed; /* Sit on top of the screen */
-  z-index: 1; /* Add a z-index if needed */
-  left: 50%; /* Center the snackbar */
-  bottom: 30px; /* 30px from the bottom */
-}
-
-/* Show the snackbar when clicking on a button (class added with JavaScript) */
-#snackbar.show {
-  visibility: visible; /* Show the snackbar */
-  /* Add animation: Take 0.5 seconds to fade in and out the snackbar.
-  However, delay the fade out process for 2.5 seconds */
-  -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
-  animation: fadein 0.5s, fadeout 0.5s 2.5s;
-}
-
-/* Animations to fade the snackbar in and out */
-@-webkit-keyframes fadein {
-  from {bottom: 0; opacity: 0;}
-  to {bottom: 30px; opacity: 1;}
-}
-
-@keyframes fadein {
-  from {bottom: 0; opacity: 0;}
-  to {bottom: 30px; opacity: 1;}
-}
-
-@-webkit-keyframes fadeout {
-  from {bottom: 30px; opacity: 1;}
-  to {bottom: 0; opacity: 0;}
-}
-
-@keyframes fadeout {
-  from {bottom: 30px; opacity: 1;}
-  to {bottom: 0; opacity: 0;}
-}
-</style>
-<script>
-function snackbar_show() {
- // Get the snackbar DIV
- var x = document.getElementById("snackbar");
-
- // Add the "show" class to DIV
- x.className = "show";
-
- // After 3 seconds, remove the show class from DIV
- setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
-}
-</script>
-  <div id="snackbar"><text>Reloading data...</text></div>
   <body style='background-size: cover; background-image: url("/background.png");  background-repeat: no-repeat; background-position: center; background-attachment: fixed;overflow:visible'>
     <center><br><br><br>
         <br><br>
         <div style='background-color: white; border-radius: 20px; opacity: 1; height: auto; max-width: 1400px; min-height: 350px'>
           <br><br>
-            <text style='font-size: 45px; font-weight: bold'>Responses</text><br><br><br>
+            <text style='font-size: 45px; font-weight: bold'>Individual Analytics</text><br><text style='font-size: 35px; font-weight: bold'>{{auserdata['name']}}</text><br><br><br>
             {%if response_count == 0%}<br><br><text style='font-size: 50px; font-weight: bold; color: lightgray'>No responses yet...</text><br><br>{%else%}
             <div style='margin-left: 75px'>
               <table class='table'>
                 <thead>
                   <tr>
                     <th scope='col'>#</th>
-                    <th scope='col'>Username</th>
-                    <th scope='col'>Name</th>
+                    <th scope='col'>Question</th>
+                    <th scope='col'>Answer</th>
+                    <th scope='col'>Difficulty</th>
+                    <th scope='col'>Time Taken</th>
                     <th scope='col'>Score</th>
-                    <th scope='col'>Average Time</th>
-                    <th scope='col'>Total Time</th>
+                    <th scope='col'>Result</th>
+                    <th scope='col'>Time Stamp</th>
                   </tr>
                 </thead>
                 <tbody>
                   {%set counter = 1 %}
                   {%for response in responses%}
                   <tr>
-                    <td>{{counter}}</td>
-                    <td><a href="/t/{{code}}/analytics/{{response['username']}}">{{response['username']}}</a></td>
-                    <td>{{response['name']}}</td>
-                    <td>{{response['score']}}</td>
-                    <td>{{response['average_time']}} secs</td>
-                    <td>{{response['total_time']}} secs</td>
+                    <td>{{response['index']}}.</td>
+                    <td data-toggle="tooltip" title="{{response['full_question']}}" width='20px'>{{response['question']}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                    <td data-toggle="tooltip" title="{{response['full_given_answer']}}">{{response['given_answer']}}</td>
+                    <td>{{response['difficulty']}}</td>
+                    <td>{{response['time_taken']}} secs</td>
+                    <td>+{{response['ans_score']}}</td>
+                    <td>{{response['ans_res']}}</td>
+                    <td data-toggle="tooltip" title="{{response['long_time_stamp']}}">{{response['time_stamp']}}</td>
                   </tr>
                   {%set counter = counter+ 1%}{%endfor%}
                 </tbody>
@@ -112,34 +47,6 @@ function snackbar_show() {
             </div>
             {%endif%}<br><br>
         </div>
-      <script>
-      document.getElementById("start_button").focus();
-      </script>
-      <style>
-      body {
-        overflow: hidden;
-      }
-      #preloader {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: #fff;
-        z-index: 99;
-      }
-      #status {
-        width: 200px;
-        height: 200px;
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        background-image: url(/loading.gif);
-        background-repeat: no-repeat;
-        background-position: center;
-        margin: -100px 0 0 -100px;
-      }
-      </style>
       <div style='width: 100%; position: fixed; background-color: black; padding: 10px; top: 0px; left:0px; opacity: 1'>
         <a style='color: white; font-size: 40px; left: 47%; text-decoration: none' href='/' autofocus>DAL Assessments</a>
         <text style='color: white; position: absolute; right: 50px; top: 10px; font-size: 20px'>Hello {{name}}</text>

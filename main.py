@@ -82,6 +82,11 @@ def save_test_response(username, test_id):
     user_data = get_user_data(username)
     data['name'] = user_data['name']
     data['average_time'] = round(sum(times)/len(times), 2)
+    with open('../data/user_data/'+username+'/test_data/'+test_id+'.json') as f:
+        data['question_stream'] = ast.literal_eval(f.read())['question_stream']
+    now = datetime.datetime.now()
+    data["time_stamp"] = str(now.hour)+":"+str(now.minute)+":"+str(now.second)
+    data["long_time_stamp"] = str(now.day)+"-"+str(now.month)+"-"+str(now.year)+" "+str(now.hour)+":"+str(now.minute)+":"+str(now.second)
     response_id = get_user_response(username, test_id)
     if response_id != False:
         with open('../data/response_data/'+test_id+'.json') as f:
@@ -142,10 +147,10 @@ def update_score(username, test_id, ans_res, difficulty, question_id, answer_ind
         ans_given_text = test_data['questions'][difficulty][question_id]['answers'][answer_index]
     now = datetime.datetime.now()
     try:
-        data['question_stream'].append({"difficulty": difficulty, "question_id": question_id, "question": test_data['questions'][difficulty][question_id]['question'], "given_answer": ans_given_text, "given_answer_index": answer_index, 'ans_res': ans_res, 'ans_score': ans_score, "time_taken": time_taken, "time_stamp": str(now.hour)+":"+str(now.minute)+":"+str(now.second), "long_time_stamp": str(now.day)+"-"+str(now.month)+"-"+str(now.year)+" "+str(now.hour)+":"+str(now.minute)+":"+str(now.second)})
+        data['question_stream'].append({"difficulty": difficulty, "question_id": question_id, "question": test_data['questions'][difficulty][question_id]['question'], "given_answer": ans_given_text, "given_answer_index": answer_index, 'ans_res': ans_res, 'ans_score': ans_score, "time_taken": time_taken, "time_stamp": str(now.hour)+":"+str(now.minute)+":"+str(now.second), "long_time_stamp": str(now.day)+"-"+str(now.month)+"-"+str(now.year)+" "+str(now.hour)+":"+str(now.minute)+":"+str(now.second), "index": len(data['question_stream'])+1})
     except KeyError:
         data['question_stream'] = []
-        data['question_stream'].append({"difficulty": difficulty, "question_id": question_id, "question": test_data['questions'][difficulty][question_id]['question'], "given_answer": ans_given_text, "given_answer_index": answer_index, 'ans_res': ans_res, 'ans_score': ans_score, "time_taken": time_taken, "time_stamp": str(now.hour)+":"+str(now.minute)+":"+str(now.second), "long_time_stamp": str(now.day)+"-"+str(now.month)+"-"+str(now.year)+" "+str(now.hour)+":"+str(now.minute)+":"+str(now.second)})
+        data['question_stream'].append({"difficulty": difficulty, "question_id": question_id, "question": test_data['questions'][difficulty][question_id]['question'], "given_answer": ans_given_text, "given_answer_index": answer_index, 'ans_res': ans_res, 'ans_score': ans_score, "time_taken": time_taken, "time_stamp": str(now.hour)+":"+str(now.minute)+":"+str(now.second), "long_time_stamp": str(now.day)+"-"+str(now.month)+"-"+str(now.year)+" "+str(now.hour)+":"+str(now.minute)+":"+str(now.second), "index": 1})
     data['score'] = score
     with open('../data/user_data/'+username+'/test_data/'+test_id+'.json', 'w') as f:
         f.write(str(data))
@@ -894,7 +899,7 @@ def test_analytics(code):
     except:
         return flask.render_template('404.html'), 404
     if data.get('owner'):
-        if data['owner'] != flask.session['username'] or 'admin' in user_data['tags']:
+        if data['owner'] == flask.session['username'] or 'admin' in user_data['tags']:
             pass
         else:
             if 'teacher' in user_data['tags']:
@@ -921,6 +926,7 @@ def test_analytics(code):
 
 @app.route('/t/<code>/analytics/<username>/')
 def test_analytics_user(code, username):
+    auserdata = get_user_data(username)
     user_data = get_user_data(flask.session['username'])
     try:
         with open('../data/test_metadata/'+code+'.json') as f:
@@ -928,7 +934,8 @@ def test_analytics_user(code, username):
     except:
         return flask.render_template('404.html'), 404
     if data.get('owner'):
-        if data['owner'] != flask.session['username'] or 'admin' in user_data['tags'] or username == flask.session['username']:
+        if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or username == flask.session['username']:
+            print('ok')
             pass
         else:
             if 'teacher' in user_data['tags']:
@@ -936,6 +943,7 @@ def test_analytics_user(code, username):
             else:
                 return flask.redirect('/t/'+code)
     else:
+        print('lol')
         if 'teacher' in user_data['tags'] or 'admin' in user_data['tags']:
             pass
         else:
@@ -946,12 +954,22 @@ def test_analytics_user(code, username):
         title = ast.literal_eval(test_data)['test_name']
     except KeyError:
         title = 'TEST FAILING'
-    try:
-        with open('../data/response_data/'+code+'.json') as f:
-            response_data = ast.literal_eval(f.read())
-    except FileNotFoundError:
-        response_data = {'responses': []}
-    return flask.render_template('test_analytics_username.html', test_name=title, username=flask.session['username'], name=user_data['name'], responses=response_data['responses'], response_count=len(response_data['responses']), code=code)
+    with open('../data/response_data/'+code+'.json') as f:
+        response_data = ast.literal_eval(f.read())['responses'][int(get_user_response(username, code))]['question_stream']
+    for response in response_data:
+        response['time_taken'] = round(response['time_taken'], 2)
+        if response['ans_res']:
+            response['ans_res'] = 'Correct'
+        else:
+            response['ans_res'] = 'Wrong'
+        response['difficulty'] = response['difficulty'].capitalize()
+        response['full_question'] = response['question']
+        if len(response['question']) > 20:
+            response['question'] = response['question'][:20]+'...'
+        response['full_given_answer'] = response['given_answer']
+        if len(response['given_answer']) > 20:
+            response['given_answer'] = response['given_answer'][:20]+'...'
+    return flask.render_template('test_analytics_username.html', test_name=title, username=flask.session['username'], name=user_data['name'], responses=response_data, response_count=len(response_data), code=code, auserdata=auserdata)
 
 @app.route('/sheets_api_authorize/delete')
 def sheets_api_authorize_delete():
