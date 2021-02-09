@@ -6,44 +6,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <script src="/jquery.min.js" ></script>
-    <script>
-    window.setTimeout(function () {
-      window.location.reload();
-    }, 5000);
-    </script>
   </head>
   <body style='background-size: cover; background-image: url("/background.png");  background-repeat: no-repeat; background-position: center; background-attachment: fixed;overflow:visible'>
     <center><br><br><br>
         <br><br>
         <div style='background-color: white; border-radius: 20px; opacity: 1; height: auto; max-width: 1400px; min-height: 350px'>
           <br><br>
-            <text style='font-size: 45px; font-weight: bold'>Responses</text><br><br><br>
+            <text style='font-size: 45px; font-weight: bold'>Individual Analytics</text><br><text style='font-size: 35px; font-weight: bold'>{{auserdata['name']}}</text><br><br><br>
             {%if response_count == 0%}<br><br><text style='font-size: 50px; font-weight: bold; color: lightgray'>No responses yet...</text><br><br>{%else%}
             <div style='margin-left: 75px'>
               <table class='table'>
                 <thead>
                   <tr>
                     <th scope='col'>#</th>
-                    <th scope='col'>Username</th>
-                    <th scope='col'>Name</th>
+                    <th scope='col'>Question</th>
+                    <th scope='col'>Answer</th>
+                    <th scope='col'>Difficulty</th>
+                    <th scope='col'>Time Taken</th>
                     <th scope='col'>Score</th>
-                    <th scope='col'>Average Time</th>
-                    <th scope='col'>Total Time</th>
+                    <th scope='col'>Result</th>
                     <th scope='col'>Time Stamp</th>
                   </tr>
                 </thead>
                 <tbody>
+                  {%set counter = 1 %}
                   {%for response in responses%}
                   <tr>
                     <td>{{response['index']}}.</td>
-                    <td><a href="/t/{{code}}/analytics/{{response['username']}}">{{response['username']}}</a></td>
-                    <td>{{response['name']}}</td>
-                    <td>{{response['score']}}</td>
-                    <td>{{response['average_time']}} secs</td>
-                    <td>{{response['total_time']}} secs</td>
+                    <td data-toggle="tooltip" title="{{response['full_question']}}" width='20px'>{{response['question']}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                    <td data-toggle="tooltip" title="{{response['full_given_answer']}}">{{response['given_answer']}}</td>
+                    <td>{{response['difficulty']}}</td>
+                    <td>{{response['time_taken']}} secs</td>
+                    <td>+{{response['ans_score']}}</td>
+                    <td>{{response['ans_res']}}</td>
                     <td data-toggle="tooltip" title="{{response['long_time_stamp']}}">{{response['time_stamp']}}</td>
                   </tr>
-                  {%endfor%}
+                  {%set counter = counter+ 1%}{%endfor%}
                 </tbody>
             </table>
             </div>

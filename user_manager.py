@@ -9,6 +9,7 @@ def create(username, password, name, tags):
     with open('../data/user_metadata/'+username, 'w') as f:
         f.write(str({"name": name, "password": hashlib.sha224(password.encode()).hexdigest(), "tags": tags, "has_changed_password": False}))
     os.mkdir('../data/user_data/'+username)
+    os.mkdir('../data/user_data/'+username+'/test_data')
     return True
 
 def delete(username):

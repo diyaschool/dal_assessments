@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <title>LOGIN | DAL Assessments</title>
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
    <link rel="icon" href="logo.png" type="image/icon type">
 </head>
 <style>
@@ -244,8 +245,24 @@
   *:focus {
       outline: none;
   }
+  .input-container {
+  display: -ms-flexbox; /* IE10 */
+  display: flex;
+  width: 100%;
+  margin-bottom: 20px;
+}
 
-
+.icon {
+  padding: 23px;
+  background: dodgerblue;
+  color: white;
+  min-width: 5px;
+  text-align: center;
+  border-radius: 8px;
+  height: 8px;
+  position: relative;
+  top: 3px
+}
 </style>
 <body style='background-size: cover; background-image: url("background.png");  background-repeat: no-repeat; background-position: center; background-attachment: fixed;'>
   <center>
@@ -253,17 +270,18 @@
     <br><img src='logo.png' style="height: 230px;" id='logo' /><br><br><br><br>
   <div class="wrapper fadeInDown">
     <div id="fromContent">
-
-
-      <div class="fadeIn first">
-      </div>
       <center>
         <form action='/login' method='post'>
-          <input type="text" id="login" class="fadeIn second" name="username" placeholder="Username" required autofocus><br/><br/>
-          <input type="password" id="password" class="fadeIn third" name="password" placeholder="Password" required><br/>
+            <div class="input-container">
+              <i class="fa fa-user icon fadeIn second"></i>
+          <input type="text" id="login" class="fadeIn second" name="username" placeholder="Username" required autofocus>
+        </div><br/><br/>
+        <div class="input-container">
+          <i class="fa fa-key icon fadeIn third"></i>
+          <input type="password" id="password" class="fadeIn third" name="password" placeholder="Password" required>
+        </div><br/>
             <input type="checkbox" class="fadeIn fourth" onclick="myFunction()" id='showPassword'><label class="fadeIn fourth" for='showPassword' style='color: white'>Show Password</label><br/><br/>
           <input type="submit" class="fadeIn fourth" value="Log In">
-
         </form>
       </center>
     </div>
