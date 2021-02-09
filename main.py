@@ -19,7 +19,7 @@ app = flask.Flask(__name__, static_url_path='/')
 
 try:
     with open('../data/server_key') as f:
-        data = eval(f.read())
+        data = ast.literal_eval(f.read())
 except:
     pass
 
@@ -934,10 +934,7 @@ def test_analytics_user(code, username):
     except:
         return flask.render_template('404.html'), 404
     if data.get('owner'):
-        if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or username == flask.session['username']:
-            print('ok')
-            pass
-        else:
+        if data['owner'] != flask.session['username'] or 'admin' not in user_data['tags'] or username != flask.session['username']:
             if 'teacher' in user_data['tags']:
                 return flask.render_template('401.html'), 401
             else:
