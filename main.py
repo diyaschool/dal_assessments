@@ -23,8 +23,6 @@ try:
 except:
     pass
 
-# app.secret_key = uuid.uuid4().hex
-
 try:
     with open('../data/cookie_key') as f:
         fdata = f.read()
@@ -85,8 +83,18 @@ def save_test_response(username, test_id):
     with open('../data/user_data/'+username+'/test_data/'+test_id+'.json') as f:
         data['question_stream'] = ast.literal_eval(f.read())['question_stream']
     now = datetime.datetime.now()
-    data["time_stamp"] = str(now.hour)+":"+str(now.minute)+":"+str(now.second)
-    data["long_time_stamp"] = str(now.day)+"-"+str(now.month)+"-"+str(now.year)+" "+str(now.hour)+":"+str(now.minute)+":"+str(now.second)
+    now = datetime.datetime.now()
+    if now.hour >= 12:
+        c_m = 'PM'
+        hour = now.hour-12
+    else:
+        c_m = 'AM'
+    if len(str(now.minute)) == 1:
+        minute = '0'+str(now.minute)
+    else:
+        minute = now.minute
+    data["time_stamp"] = str(hour)+":"+str(minute)+":"+str(now.second)+' '+c_m
+    data["long_time_stamp"] = str(now.day)+"-"+str(now.month)+"-"+str(now.year)+" "+str(hour)+":"+str(minute)+":"+str(now.second)+' '+c_m
     response_id = get_user_response(username, test_id)
     if response_id != False:
         with open('../data/response_data/'+test_id+'.json') as f:
@@ -146,11 +154,20 @@ def update_score(username, test_id, ans_res, difficulty, question_id, answer_ind
     else:
         ans_given_text = test_data['questions'][difficulty][question_id]['answers'][answer_index]
     now = datetime.datetime.now()
+    if now.hour >= 12:
+        c_m = 'PM'
+        hour = now.hour-12
+    else:
+        c_m = 'AM'
+    if len(str(now.minute)) == 1:
+        minute = '0'+str(now.minute)
+    else:
+        minute = now.minute
     try:
-        data['question_stream'].append({"difficulty": difficulty, "question_id": question_id, "question": test_data['questions'][difficulty][question_id]['question'], "given_answer": ans_given_text, "given_answer_index": answer_index, 'ans_res': ans_res, 'ans_score': ans_score, "time_taken": time_taken, "time_stamp": str(now.hour)+":"+str(now.minute)+":"+str(now.second), "long_time_stamp": str(now.day)+"-"+str(now.month)+"-"+str(now.year)+" "+str(now.hour)+":"+str(now.minute)+":"+str(now.second), "index": len(data['question_stream'])+1})
+        data['question_stream'].append({"difficulty": difficulty, "question_id": question_id, "question": test_data['questions'][difficulty][question_id]['question'], "given_answer": ans_given_text, "given_answer_index": answer_index, 'ans_res': ans_res, 'ans_score': ans_score, "time_taken": time_taken, "time_stamp": str(hour)+":"+str(minute)+":"+str(now.second)+' '+c_m, "long_time_stamp": str(now.day)+"-"+str(now.month)+"-"+str(now.year)+" "+str(hour)+":"+str(minute)+":"+str(now.second)+' '+c_m, "index": len(data['question_stream'])+1})
     except KeyError:
         data['question_stream'] = []
-        data['question_stream'].append({"difficulty": difficulty, "question_id": question_id, "question": test_data['questions'][difficulty][question_id]['question'], "given_answer": ans_given_text, "given_answer_index": answer_index, 'ans_res': ans_res, 'ans_score': ans_score, "time_taken": time_taken, "time_stamp": str(now.hour)+":"+str(now.minute)+":"+str(now.second), "long_time_stamp": str(now.day)+"-"+str(now.month)+"-"+str(now.year)+" "+str(now.hour)+":"+str(now.minute)+":"+str(now.second), "index": 1})
+        data['question_stream'].append({"difficulty": difficulty, "question_id": question_id, "question": test_data['questions'][difficulty][question_id]['question'], "given_answer": ans_given_text, "given_answer_index": answer_index, 'ans_res': ans_res, 'ans_score': ans_score, "time_taken": time_taken, "time_stamp": str(hour)+":"+str(minute)+":"+str(now.second)+' '+c_m, "long_time_stamp": str(now.day)+"-"+str(now.month)+"-"+str(now.year)+" "+str(hour)+":"+str(minute)+":"+str(now.second)+' '+c_m, "index": 1})
     data['score'] = score
     with open('../data/user_data/'+username+'/test_data/'+test_id+'.json', 'w') as f:
         f.write(str(data))
@@ -934,16 +951,17 @@ def test_analytics_user(code, username):
     except:
         return flask.render_template('404.html'), 404
     if data.get('owner'):
-        if data['owner'] != flask.session['username'] or 'admin' not in user_data['tags'] or username != flask.session['username']:
-            if 'teacher' in user_data['tags']:
-                return flask.render_template('401.html'), 401
-            else:
-                return flask.redirect('/t/'+code)
+        if data['owner'] != flask.session['username']:
+            if username != flask.session['username']:
+                if 'teacher' in user_data['tags']:
+                    return flask.render_template('401.html'), 401
+                else:
+                    return flask.redirect('/t/'+code)
     else:
-        print('lol')
         if 'teacher' in user_data['tags'] or 'admin' in user_data['tags']:
             pass
         else:
+            print('hi')
             return flask.redirect('/t/'+code)
     with open('../data/test_data/'+code+'.json') as f:
         test_data = f.read()
