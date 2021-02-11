@@ -940,7 +940,6 @@ def test_analytics_user(code, username):
             else:
                 return flask.redirect('/t/'+code)
     else:
-        print('lol')
         if 'teacher' in user_data['tags'] or 'admin' in user_data['tags']:
             pass
         else:
