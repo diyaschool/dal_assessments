@@ -12,6 +12,7 @@ import string
 import random
 import uuid
 import ipaddress
+from dateutil import tz
 
 #################### Initialize ####################
 
@@ -42,6 +43,9 @@ anonymous_urls = ['/favicon.ico', '/clear_test_cookies', '/logo.png', '/backgrou
 mobile_agents = ['Android', 'iPhone', 'iPod touch']
 
 client_req_times = {}
+
+from_zone = tz.tzlocal()
+to_zone = tz.gettz('Asia/Kolkata')
 
 #################### Utility Functions ####################
 
@@ -83,7 +87,8 @@ def save_test_response(username, test_id):
     with open('../data/user_data/'+username+'/test_data/'+test_id+'.json') as f:
         data['question_stream'] = ast.literal_eval(f.read())['question_stream']
     now = datetime.datetime.now()
-    now = datetime.datetime.now()
+    now.replace(tzinfo=from_zone)
+    now = now.astimezone(to_zone)
     if now.hour >= 12:
         c_m = 'PM'
         hour = now.hour-12
@@ -155,6 +160,8 @@ def update_score(username, test_id, ans_res, difficulty, question_id, answer_ind
     else:
         ans_given_text = test_data['questions'][difficulty][question_id]['answers'][answer_index]
     now = datetime.datetime.now()
+    now.replace(tzinfo=from_zone)
+    now = now.astimezone(to_zone)
     if now.hour >= 12:
         c_m = 'PM'
         hour = now.hour-12
