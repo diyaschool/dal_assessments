@@ -587,7 +587,7 @@ def t_view(code):
     if question_data == False:
         return flask.render_template('404.html'), 404
     for tag in user_data['tags']:
-        if tag in question_data['tags'] or tag == 'admin' or tag == 'teacher' or code == 'demo':
+        if tag in question_data['tags'] or tag == 'admin' or tag == 'teacher' or tag == 'team' or code == 'demo':
             authorized = True
     if authorized == False:
         return flask.render_template('401.html'), 401
@@ -642,7 +642,7 @@ def t_view(code):
             except KeyError:
                 user_data['test_data'] = {}
                 user_data['test_data'][code] = score
-            if 'teacher' in user_data['tags'] or 'admin'  in user_data['tags']:
+            if 'teacher' in user_data['tags'] or 'admin' in user_data['tags'] or 'team' in user_data['tags']:
                 pass
             else:
                 with open('../data/user_metadata/'+flask.session['username'], 'w') as f:
@@ -823,7 +823,7 @@ def login():
 @app.route('/new_test', methods=['GET', 'POST'])
 def new_test():
     user_data = get_user_data(flask.session['username'])
-    if 'admin' in user_data['tags']:
+    if 'admin' in user_data['tags'] or 'team' in user_data['tags']:
         pass
     else:
         return flask.render_template('401.html'), 401
@@ -863,7 +863,7 @@ def sheets_api_authorize():
 @app.route('/t/<code>/edit/', methods=['GET', 'POST'])
 def test_edit(code):
     if '\\' in code or '.' in code:
-        raise VulneratbilityAttempted
+        return flask.render_template('500.html'), 500
     user_data = get_user_data(flask.session['username'])
     try:
         with open('../data/test_metadata/'+code+'.json') as f:
@@ -871,7 +871,7 @@ def test_edit(code):
     except:
         return flask.render_template('404.html'), 404
     if data.get('owner'):
-        if data['owner'] != flask.session['username'] or 'admin' in user_data['tags']:
+        if data['owner'] != flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags']:
             pass
         else:
             if 'teacher' in user_data['tags']:
@@ -879,7 +879,7 @@ def test_edit(code):
             else:
                 return flask.redirect('/t/'+code)
     else:
-        if 'teacher' in user_data['tags'] or 'admin' in user_data['tags']:
+        if 'teacher' in user_data['tags'] or 'admin' in user_data['tags'] or 'team' in user_data['tags']:
             pass
         else:
             return flask.redirect('/t/'+code)
@@ -896,25 +896,25 @@ def test_edit(code):
             n_test_data = sheets_api.get_values(sheet_id, gauth.load_credentials())
             n_test_data = convert(n_test_data)
             if n_test_data == "ERROR":
-                return flask.render_template('t_edit.html', test_data=test_data, sheet_id=sheet_id, title=title, username=flask.session['username'], name=user_data['name'], code=code, alert="Error during parsing spreadsheet")
+                return flask.render_template('t_edit.html', test_data=test_data, sheet_id=sheet_id, title=title, username=flask.session['username'], name=user_data['name'], code=code, alert="Error during parsing spreadsheet", base_uri=flask.request.url_root)
             test_validation = validate_test_data(str(n_test_data))
             if test_validation == True:
                 with open('../data/test_data/'+code+'.json', 'w') as f:
                     f.write(str(n_test_data))
                 return flask.redirect('/t/'+code+'/edit')
             else:
-                return flask.render_template('t_edit.html', test_data=test_data, sheet_id=sheet_id, title=title, username=flask.session['username'], name=user_data['name'], code=code, alert="Error: "+test_validation)
+                return flask.render_template('t_edit.html', test_data=test_data, sheet_id=sheet_id, title=title, username=flask.session['username'], name=user_data['name'], code=code, alert="Error: "+test_validation, base_uri=flask.request.url_root)
         else:
-            return flask.render_template('t_edit.html', test_data=test_data, sheet_id=sheet_id, title=title, username=flask.session['username'], name=user_data['name'], code=code, alert=None)
+            return flask.render_template('t_edit.html', test_data=test_data, sheet_id=sheet_id, title=title, username=flask.session['username'], name=user_data['name'], code=code, alert=None, base_uri=flask.request.url_root)
     else:
         data = flask.request.form
         v_output = validate_test_data(data['test_data'])
         if v_output == True:
             with open('../data/test_data/'+code+'.json', 'w') as f:
                 f.write(data['test_data'])
-            return flask.render_template('t_edit.html', test_data=data['test_data'], sheet_id=sheet_id, title=title, username=flask.session['username'], name=user_data['name'], code=code, alert='Test updated')
+            return flask.render_template('t_edit.html', test_data=data['test_data'], sheet_id=sheet_id, title=title, username=flask.session['username'], name=user_data['name'], code=code, alert='Test updated', base_uri=flask.request.url_root)
         else:
-            return flask.render_template('t_edit.html', test_data=data['test_data'], sheet_id=sheet_id, title=title, username=flask.session['username'], name=user_data['name'], code=code, alert='Error: '+v_output)
+            return flask.render_template('t_edit.html', test_data=data['test_data'], sheet_id=sheet_id, title=title, username=flask.session['username'], name=user_data['name'], code=code, alert='Error: '+v_output, base_uri=flask.request.url_root)
 
 @app.route('/t/<code>/analytics/')
 def test_analytics(code):
@@ -925,7 +925,7 @@ def test_analytics(code):
     except:
         return flask.render_template('404.html'), 404
     if data.get('owner'):
-        if data['owner'] == flask.session['username'] or 'admin' in user_data['tags']:
+        if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags']:
             pass
         else:
             if 'teacher' in user_data['tags']:
@@ -933,7 +933,7 @@ def test_analytics(code):
             else:
                 return flask.redirect('/t/'+code)
     else:
-        if 'teacher' in user_data['tags'] or 'admin' in user_data['tags']:
+        if 'teacher' in user_data['tags'] or 'admin' in user_data['tags'] or 'team' in user_data['tags']:
             pass
         else:
             return flask.redirect('/t/'+code)
@@ -967,7 +967,7 @@ def test_analytics_user(code, username):
                 else:
                     return flask.redirect('/t/'+code)
     else:
-        if 'teacher' in user_data['tags'] or 'admin' in user_data['tags']:
+        if 'teacher' in user_data['tags'] or 'admin' in user_data['tags'] or 'team' in user_data['tags']:
             pass
         else:
             print('hi')
