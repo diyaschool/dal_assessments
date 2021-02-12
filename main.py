@@ -631,7 +631,7 @@ def t_view(code):
         flask.session.modified = True
         save_test_response(flask.session['username'], code)
         delete_score(flask.session['username'], code)
-        return flask.render_template('t_completed.html', test_name=question_data['test_name'], score=score, name=user_data['name'], username=flask.session['username'])
+        return flask.render_template('t_completed.html', test_name=question_data['test_name'], score=score, name=user_data['name'], username=flask.session['username'], code=code)
     else:
         if question_data['question_count'] == ast.literal_eval(flask.session['t']['q'])-1:
             score = flask.session['t']['score']
@@ -649,7 +649,7 @@ def t_view(code):
                     f.write(str(user_data))
             save_test_response(flask.session['username'], code)
             delete_score(flask.session['username'], code)
-            return flask.render_template('t_completed.html', test_name=question_data['test_name'], score=score, name=user_data['name'], username=flask.session['username'])
+            return flask.render_template('t_completed.html', test_name=question_data['test_name'], score=score, name=user_data['name'], username=flask.session['username'], code=code)
     if flask.session['t']['q'] == '0':
         q_n = question_data['question_count']
         flask.session['t']['verified'] = True
@@ -979,7 +979,9 @@ def test_analytics_user(code, username):
     except KeyError:
         title = 'TEST FAILING'
     with open('../data/response_data/'+code+'.json') as f:
-        response_data = ast.literal_eval(f.read())['responses'][int(get_user_response(username, code))]['question_stream']
+        fdata = ast.literal_eval(f.read())['responses'][int(get_user_response(username, code))]
+        response_data = fdata['question_stream']
+        score = fdata['score']
     for response in response_data:
         response['time_taken'] = round(response['time_taken'], 2)
         if response['ans_res']:
@@ -993,7 +995,7 @@ def test_analytics_user(code, username):
         response['full_given_answer'] = response['given_answer']
         if len(response['given_answer']) > 20:
             response['given_answer'] = response['given_answer'][:20]+'...'
-    return flask.render_template('test_analytics_username.html', test_name=title, username=flask.session['username'], name=user_data['name'], responses=response_data, response_count=len(response_data), code=code, auserdata=auserdata)
+    return flask.render_template('test_analytics_username.html', test_name=title, username=flask.session['username'], name=user_data['name'], responses=response_data, response_count=len(response_data), code=code, auserdata=auserdata, score=score)
 
 @app.route('/sheets_api_authorize/delete')
 def sheets_api_authorize_delete():

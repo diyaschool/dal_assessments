@@ -6,10 +6,26 @@
     <link href='https://fonts.googleapis.com/css?family=Langar' rel='stylesheet'>
   </head>
   <body style='background-size: cover; background-image: url("/background.png");  background-repeat: no-repeat; background-position: center; background-attachment: fixed;'>
+    <style>
+      input[type=button] {
+  border: 1px solid #f44c0e;
+  font-size: 15px;
+  text-align: center;
+  height: 45px;
+  cursor: pointer;
+  outline: none;
+  color: #fff;
+  background-color: #4CAF50;
+  border: none;
+  border-radius: 5px;
+  box-shadow: 0 6px #999;
+  }
+    </style>
     <center><br><br><br>
         <br><br><div class="font" style='background-color: white; border-radius: 20px; opacity: 1; height: 400px; width: 700px'>
             <br><br><text style='font-size: 40px; color: #303030; position: relative; top: 70px'>Your Score</text><br>
-            <br><br><br><text style='font-size: 40px; color: #303030; position: relative; top: 70px'>{{score}}</text><br>
+            <br><br><text style='font-size: 40px; color: #303030; position: relative; top: 70px'>{{score}}</text><br><br><br><br><br>
+            <input type="button" onclick="window.location.href = '/t/{{code}}/analytics/{{username}}'" value='Open Your Analytics'>
           </div>
       </div>
     <div style='width: 100%; position: fixed; background-color: black; padding: 10px; top: 0px; left:0px; opacity: 1'>
