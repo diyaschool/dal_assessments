@@ -89,6 +89,7 @@ def save_test_response(username, test_id):
         hour = now.hour-12
     else:
         c_m = 'AM'
+        hour = now.hour
     if len(str(now.minute)) == 1:
         minute = '0'+str(now.minute)
     else:
@@ -159,6 +160,7 @@ def update_score(username, test_id, ans_res, difficulty, question_id, answer_ind
         hour = now.hour-12
     else:
         c_m = 'AM'
+        hour = now.hour
     if len(str(now.minute)) == 1:
         minute = '0'+str(now.minute)
     else:
