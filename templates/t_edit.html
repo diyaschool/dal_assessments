@@ -36,13 +36,13 @@ box-shadow: 0 6px #999;
     </style>
     <center>
     <br><br><br><br><br><div style='background-color: white; height: 700px; width: 900px; border-radius: 20px; opacity: 0.9'>
-      <br><br>
-      <text style='font-size: 40px; font-weight: bold'>Edit Test</text><br><br><br>
+      <br><br><br>
+      <text style='font-size: 40px; font-weight: bold'>Edit Test</text><br><br><br><br>
       <input type="button" onclick="window.open('/t/{{code}}/')" value='Open Test'>&nbsp;<input type="text" readonly value='{{base_uri}}t/{{code}}/' style='border: 2px black solid; border-radius 10px; width: 400px' id='view_url'>&nbsp;<input type="button" onclick="copy_to_clipboard()" value='Copy to Clipboard'><br><br>
       <input type="button" onclick="window.open('/t/{{code}}/analytics/')" value='Open Analytics'>&nbsp;<input type="text" readonly value='{{base_uri}}t/{{code}}/analytics/' style='border: 2px black solid; border-radius 10px; width: 400px'><br><br>
-      <input type="button" onclick="window.open('https://docs.google.com/spreadsheets/d/{{sheet_id}}/')" value='Open Google Sheet'>&nbsp;<input type="button" onclick="window.location.href = '?sync'" value='Sync with Google Sheets'>&nbsp;<input type="text" readonly value='https://docs.google.com/spreadsheets/d/{{sheet_id}}/' style='border: 2px black solid; border-radius 10px; width: 400px'><br><br><br>
+      <input type="button" onclick="window.open('https://docs.google.com/spreadsheets/d/{{sheet_id}}/')" value='Open Google Sheet'>&nbsp;<input type="button" onclick="window.location.href = '?sync'" value='Sync with Google Sheets'>&nbsp;<input type="text" readonly value='https://docs.google.com/spreadsheets/d/{{sheet_id}}/' style='border: 2px black solid; border-radius 10px; width: 400px'><br><br><br><br><br>
       <form action="/t/{{code}}/edit/" method="post" id='main_form'>
-        <textarea name="test_data" rows="20" cols="80" style='border: 3px black solid; border-radius: 10px; resize: none;' form='main_form' required>{{test_data}}</textarea><br><br>
+        <textarea name="test_data" rows="12" cols="80" style='border: 3px black solid; border-radius: 10px; resize: none;' form='main_form' required>{{test_data}}</textarea><br><br>
         <input type="submit" value='Validate and Save'>
       </form><br><br>
   </div><br><br>
