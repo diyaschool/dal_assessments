@@ -193,7 +193,7 @@ def get_user_data(user_id):
 
 def row_to_column(sheet):
     output = []
-    row_len = len(sheet[0])
+    row_len = 14
     for _ in range(row_len):
         output.append([])
     for i in range(row_len):
@@ -203,6 +203,7 @@ def row_to_column(sheet):
             except IndexError:
                 c_cell = ''
             output[i].append(c_cell)
+    print(output)
     return output
 
 def convert(sheet):
