@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+  </head>
+  <body>
+    <center>
+      {%for file in files%}
+        <input type="button" onclick="navigator.clipboard.writeText('{{base_uri}}t/{{code}}/static/{{file}}')" value='Copy image url'>&nbsp;&nbsp;<img style='height: 100px; position: relative; top: 40px' src="{{base_uri}}t/{{code}}/static/{{file}}/" alt="{{files[file]}}"><br>
+      {%endfor%}
+      <br><br><br><br>
+      <text style='font-size: 20px'>Upload Image</text><br><br>
+      <form action='/t/{{code}}/upload/' id="new_document_attachment" method="POST" enctype = "multipart/form-data">
+        <input type="file" id="document_attachment_doc" name='file' required /><br>&nbsp;
+        <div class="actions">
+          <input type="submit" name="commit" value="Upload Image" />
+        </div>
+      </form>
+    </center>
+    <script>
+      const form = document.getElementById("new_document_attachment");
+      const fileInput = document.getElementById("document_attachment_doc");
+      fileInput.addEventListener('change', () => {
+        form.submit();
+      });
+      window.addEventListener('paste', e => {
+        fileInput.files = e.clipboardData.files;
+      });
+    </script>
+  </body>
+</html>
