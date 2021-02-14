@@ -1,18 +1,21 @@
 Any URL request on this server without logging in will be returned with a redirect response to /login.
 
-/                               - [HTML] home.html
-/logout                         - [REDIRECT] /login
-/clear_test_cookies             - [HTML] cookie_cleared.html
-/t/<code>/verify                - [REDIRECT] /t/<code>
-/t/<code>/                      - [HTML][DYNAMIC]
-                                    before start: t0.html
-                                    after start: t.html
-                                    when complete: t_completed.html
-/login                          - [HTML] login.html
-/new_test                       - [HTML] new_test.html
-/sheets_api_authorize           - [HTML] DO NOT TOUCH, RISKY
-/t/<code>/edit                  - [HTML] t_edit.html
-/t/<code>/analytics/            - [HTML] test_analytics.html
-/t/<code>/analytics/<username>  - [HTML] test_analytics.html
-/sheets_api_authorize/delete    - [HTML] DO NOT TOUCH, RISKY
-/change_password                - [HTML] change_password.html
+/                                  - [HTML] home.html
+/logout/                           - [REDIRECT] /login
+/clear_test_cookies/               - [HTML] cookie_cleared.html
+/t/<code>/verify/                  - [REDIRECT] /t/<code>
+/t/<code>/                         - [HTML][DYNAMIC]
+                                       before start: t0.html
+                                       after start: t.html
+                                       when complete: t_completed.html
+/login                             - [HTML] login.html
+/new_test                          - [HTML] new_test.html
+/sheets_api_authorize              - [HTML] DO NOT TOUCH, RISKY
+/t/<code>/edit/                    - [HTML] t_edit.html
+/t/<code>/analytics/               - [HTML] test_analytics.html
+/t/<code>/analytics/<username>/    - [HTML] test_analytics.html
+/sheets_api_authorize/delete/      - [HTML] DO NOT TOUCH, RISKY
+/change_password/                  - [HTML] change_password.html
+/upload_file                       - [REDIRECT] /t/<code>/upload/
+/t/<code>/upload/                  - [HTML] upload.html
+/t/<code>/upload/delete/<file_id>/ - [REDIRECT] /t/<code>/upload/
