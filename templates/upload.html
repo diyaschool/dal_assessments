@@ -2,11 +2,19 @@
 <html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8">
+    <script>
+      function delete_file(file_name){
+        var r = confirm("Are you sure you want to delete this file?");
+        if (r == true) {
+          window.location.replace("{{base_uri}}t/{{code}}/upload/delete/"+file_name+'/')
+        }
+      }
+    </script>
   </head>
   <body>
     <center>
       {%for file in files%}
-        <input type="button" onclick="navigator.clipboard.writeText('{{base_uri}}t/{{code}}/static/{{file}}')" value='Copy image url'>&nbsp;&nbsp;<img style='height: 100px; position: relative; top: 40px' src="{{base_uri}}t/{{code}}/static/{{file}}/" alt="{{files[file]}}"><br>
+        <input type="button" onclick="navigator.clipboard.writeText('{{base_uri}}t/{{code}}/static/{{file}}')" value='Copy image url'>&nbsp;&nbsp;<img style='height: 100px; position: relative; top: 40px' src="{{base_uri}}t/{{code}}/static/{{file}}/" alt="{{files[file]}}">&nbsp;<button onclick="delete_file('{{file}}')"><img style='height: 15px' src='/delete.png'></button><br>
       {%endfor%}
       <br><br><br><br>
       <text style='font-size: 20px'>Upload Image</text><br><br>

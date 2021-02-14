@@ -1,4 +1,5 @@
 import textwrap
+import shutil
 import datetime
 import ast
 import user_manager
@@ -499,7 +500,7 @@ def before_request():
         prev_time = None
     if flask.request.headers['Host'] not in DOMAINS:
         return flask.redirect('http://'+DOMAIN+flask.request.path, 301)
-    if flask.request.path != '/login' and flask.request.path not in anonymous_urls:
+    if flask.request.path != '/login' and flask.request.path not in anonymous_urls and 'static' not in flask.request.path:
         try:
             username = flask.session['username']
             f = open('../data/user_metadata/'+username)
@@ -1062,6 +1063,11 @@ def upload_file(code):
         os.mkdir('../data/test_data/'+code+'/files/'+file_id)
         f.save('../data/test_data/'+code+'/files/'+file_id+'/'+f.filename)
         return flask.redirect(flask.request.path)
+
+@app.route('/t/<code>/upload/delete/<file_id>/')
+def upload_delete(code, file_id):
+    shutil.rmtree('../data/test_data/'+code+'/files/'+file_id+'/')
+    return flask.redirect('/t/'+code+'/upload/')
 
 @app.route('/t/<code>/static/<file_code>/')
 def t_static(code, file_code):
