@@ -1,4 +1,5 @@
 import textwrap
+import shutil
 import datetime
 import ast
 import user_manager
@@ -115,11 +116,21 @@ def save_test_response(username, test_id):
             with open('../data/response_data/'+test_id+'.json') as f:
                 cdata = ast.literal_eval(f.read())
             cresponse_count = len(cdata['responses'])
+            with open('../data/user_data/'+flask.session['username']+'/created_tests/'+test_id+'.json') as f:
+                cr_fdata = ast.literal_eval(f.read())
+            cr_fdata['responses_count'] = len(cdata['responses'])+1
+            with open('../data/user_data/'+username+'/created_tests/'+test_id+'.json', 'w') as f:
+                f.write(str(cr_fdata))
             data['index'] = cresponse_count+1
             cdata['responses'].append(data)
             with open('../data/response_data/'+test_id+'.json', 'w') as f:
                 f.write(str(cdata))
         except FileNotFoundError:
+            with open('../data/user_data/'+flask.session['username']+'/created_tests/'+test_id+'.json') as f:
+                cr_fdata = ast.literal_eval(f.read())
+            cr_fdata['responses_count'] = 1
+            with open('../data/user_data/'+username+'/created_tests/'+test_id+'.json', 'w') as f:
+                f.write(str(cr_fdata))
             cdata = {}
             cdata['responses'] = []
             data['index'] = 1
@@ -193,7 +204,7 @@ def get_user_data(user_id):
 
 def row_to_column(sheet):
     output = []
-    row_len = len(sheet[0])
+    row_len = 14
     for _ in range(row_len):
         output.append([])
     for i in range(row_len):
@@ -203,6 +214,7 @@ def row_to_column(sheet):
             except IndexError:
                 c_cell = ''
             output[i].append(c_cell)
+    print(output)
     return output
 
 def convert(sheet):
@@ -267,7 +279,7 @@ def create_new_test_sheet(owner):
     dt = datetime.datetime.now()
     c_time = str(dt.hour)+':'+str(dt.minute)+':'+str(dt.second)
     c_date = str(dt.year)+'-'+str(dt.month)+'-'+str(dt.day)
-    test_list = [f for f in os.listdir('../data/test_data') if os.path.isfile(os.path.join('../data/test_data', f))]
+    test_list = [f for f in os.listdir('../data/test_data') if os.path.isdir(os.path.join('../data/test_data', f))]
     while 1:
         r_id = id_generator()
         if r_id in test_list:
@@ -276,10 +288,14 @@ def create_new_test_sheet(owner):
             break
     test_id = r_id
     sheet_id = sheets_api.create_sheet(test_id, gauth.load_credentials())
-    with open('../data/test_data/'+test_id+'.json', 'w') as f:
+    os.mkdir('../data/test_data/'+test_id)
+    os.mkdir('../data/test_data/'+test_id+'/files')
+    with open('../data/test_data/'+test_id+'/config.json', 'w') as f:
         f.write('')
     with open('../data/test_metadata/'+test_id+'.json', 'w') as f:
-        f.write(str({"owner": owner, "time": c_time, "date": c_date, "sheet_id": sheet_id}))
+        f.write(str({"owner": owner, "time": c_time, "date": c_date, "sheet_id": sheet_id, "last_time": c_time, "last_date": c_date}))
+    with open('../data/user_data/'+owner+'/created_tests/'+test_id+'.json', 'w') as f:
+        f.write(str({"last_time": c_time, "last_date": c_date, "name": "Undefined", "subject": "Undefined", "responses_count": 0}))
     return (test_id, sheet_id)
 
 def validate_test_data(data_string):
@@ -362,7 +378,7 @@ def id_generator(size=10, chars=string.ascii_uppercase + string.digits):
 
 def load_questions(test_id):
     try:
-        with open('../data/test_data/'+test_id+'.json') as f:
+        with open('../data/test_data/'+test_id+'/config.json') as f:
             fdata = f.read()
     except FileNotFoundError:
         return False
@@ -496,7 +512,7 @@ def before_request():
         prev_time = None
     if flask.request.headers['Host'] not in DOMAINS:
         return flask.redirect('http://'+DOMAIN+flask.request.path, 301)
-    if flask.request.path != '/login' and flask.request.path not in anonymous_urls:
+    if flask.request.path != '/login' and flask.request.path not in anonymous_urls and 'static' not in flask.request.path:
         try:
             username = flask.session['username']
             f = open('../data/user_metadata/'+username)
@@ -883,7 +899,7 @@ def test_edit(code):
             pass
         else:
             return flask.redirect('/t/'+code)
-    with open('../data/test_data/'+code+'.json') as f:
+    with open('../data/test_data/'+code+'/config.json') as f:
         test_data = f.read()
     sheet_id = data.get('sheet_id')
     try:
@@ -899,8 +915,29 @@ def test_edit(code):
                 return flask.render_template('t_edit.html', test_data=test_data, sheet_id=sheet_id, title=title, username=flask.session['username'], name=user_data['name'], code=code, alert="Error during parsing spreadsheet", base_uri=flask.request.url_root)
             test_validation = validate_test_data(str(n_test_data))
             if test_validation == True:
-                with open('../data/test_data/'+code+'.json', 'w') as f:
+                with open('../data/test_data/'+code+'/config.json', 'w') as f:
                     f.write(str(n_test_data))
+                with open('../data/test_metadata/'+code+'.json') as f:
+                    metadata = ast.literal_eval(f.read())
+                with open('../data/test_metadata/'+code+'.json', 'w') as f:
+                    dt = datetime.datetime.now()
+                    c_time = str(dt.hour)+':'+str(dt.minute)+':'+str(dt.second)
+                    c_date = str(dt.year)+'-'+str(dt.month)+'-'+str(dt.day)
+                    metadata['last_time'] = c_time
+                    metadata['last_date'] = c_date
+                    f.write(str(metadata))
+                with open('../data/user_data/'+flask.session['username']+'/created_tests/'+code+'.json') as f:
+                    cr_fdata = ast.literal_eval(f.read())
+                try:
+                    with open('../data/response_data/'+code+'.json') as g:
+                        responses_count = len(ast.literal_eval(g.read())['responses'])
+                except FileNotFoundError:
+                    responses_count = 0
+                with open('../data/user_data/'+flask.session['username']+'/created_tests/'+code+'.json', 'w') as f:
+                    cr_fdata['name'] = n_test_data['test_name']
+                    cr_fdata['subject'] = n_test_data['subject']
+                    cr_fdata['responses_count'] = responses_count
+                    f.write(str(cr_fdata))
                 return flask.redirect('/t/'+code+'/edit')
             else:
                 return flask.render_template('t_edit.html', test_data=test_data, sheet_id=sheet_id, title=title, username=flask.session['username'], name=user_data['name'], code=code, alert="Error: "+test_validation, base_uri=flask.request.url_root)
@@ -910,7 +947,7 @@ def test_edit(code):
         data = flask.request.form
         v_output = validate_test_data(data['test_data'])
         if v_output == True:
-            with open('../data/test_data/'+code+'.json', 'w') as f:
+            with open('../data/test_data/'+code+'/config.json', 'w') as f:
                 f.write(data['test_data'])
             return flask.render_template('t_edit.html', test_data=data['test_data'], sheet_id=sheet_id, title=title, username=flask.session['username'], name=user_data['name'], code=code, alert='Test updated', base_uri=flask.request.url_root)
         else:
@@ -937,7 +974,7 @@ def test_analytics(code):
             pass
         else:
             return flask.redirect('/t/'+code)
-    with open('../data/test_data/'+code+'.json') as f:
+    with open('../data/test_data/'+code+'/config.json') as f:
         test_data = f.read()
     try:
         title = ast.literal_eval(test_data)['test_name']
@@ -972,7 +1009,7 @@ def test_analytics_user(code, username):
         else:
             print('hi')
             return flask.redirect('/t/'+code)
-    with open('../data/test_data/'+code+'.json') as f:
+    with open('../data/test_data/'+code+'/config.json') as f:
         test_data = f.read()
     try:
         title = ast.literal_eval(test_data)['test_name']
@@ -1032,6 +1069,42 @@ def change_password():
                 return flask.render_template('change_password.html', username=flask.session['username'], name=user_data['name'], error='Both passwords must match')
         else:
             return flask.render_template('change_password.html', username=flask.session['username'], name=user_data['name'], error='Password incorrect')
+
+@app.route('/upload_file')
+def u_r():
+    return flask.render_template('u_r.html')
+
+@app.route('/t/<code>/upload/', methods=['GET', 'POST'])
+def upload_file(code):
+    if flask.request.method == 'GET':
+        user_data = get_user_data(flask.session['username'])
+        files = [f for f in os.listdir('../data/test_data/'+code+'/files') if os.path.isdir(os.path.join('../data/test_data/'+code+'/files', f))]
+        all_files = {}
+        for file in files:
+            all_files[file] = [f for f in os.listdir('../data/test_data/'+code+'/files/'+file) if os.path.isfile(os.path.join('../data/test_data/'+code+'/files/'+file, f))][0]
+        return flask.render_template('upload.html', files=all_files, base_uri=flask.request.url_root, code=code)
+    elif flask.request.method == 'POST':
+        f = flask.request.files['file']
+        test_list = [f for f in os.listdir('../data/test_data/'+code+'/files/') if os.path.isdir(os.path.join('../data/test_data/'+code+'/files/', f))]
+        while 1:
+            r_id = id_generator()
+            if r_id in test_list:
+                pass
+            else:
+                break
+        file_id = r_id.lower()
+        os.mkdir('../data/test_data/'+code+'/files/'+file_id)
+        f.save('../data/test_data/'+code+'/files/'+file_id+'/'+f.filename)
+        return flask.redirect(flask.request.path)
+
+@app.route('/t/<code>/upload/delete/<file_id>/')
+def upload_delete(code, file_id):
+    shutil.rmtree('../data/test_data/'+code+'/files/'+file_id+'/')
+    return flask.redirect('/t/'+code+'/upload/')
+
+@app.route('/t/<code>/static/<file_code>/')
+def t_static(code, file_code):
+    return flask.send_file('../data/test_data/'+code+'/files/'+file_code+'/'+[f for f in os.listdir('../data/test_data/'+code+'/files/'+file_code) if os.path.isfile(os.path.join('../data/test_data/'+code+'/files/'+file_code, f))][0])
 
 #################### Error Handlers ####################
 
