@@ -935,7 +935,7 @@ def test_edit(code):
                     except FileNotFoundError:
                         responses_count = 0
                 except FileNotFoundError:
-                    with open('../data/user_data/'+owner+'/created_tests/'+test_id+'.json', 'w') as f:
+                    with open('../data/user_data/'+flask.session['username']+'/created_tests/'+test_id+'.json', 'w') as f:
                         f.write(str({"last_time": c_time, "last_date": c_date, "name": "Undefined", "subject": "Undefined", "responses_count": 0}))
                 with open('../data/user_data/'+flask.session['username']+'/created_tests/'+code+'.json', 'w') as f:
                     cr_fdata['name'] = n_test_data['test_name']
