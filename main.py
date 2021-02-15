@@ -100,6 +100,8 @@ def save_test_response(username, test_id):
         minute = '0'+str(now.minute)
     else:
         minute = now.minute
+    with open('../data/test_metadata/'+test_id+'.json') as f:
+        test_metadata = ast.literal_eval(f.read())
     data["time_stamp"] = str(hour)+":"+str(minute)+":"+str(now.second)+' '+c_m
     data["long_time_stamp"] = str(now.day)+"-"+str(now.month)+"-"+str(now.year)+" "+str(hour)+":"+str(minute)+":"+str(now.second)+' '+c_m
     response_id = get_user_response(username, test_id)
@@ -116,20 +118,20 @@ def save_test_response(username, test_id):
             with open('../data/response_data/'+test_id+'.json') as f:
                 cdata = ast.literal_eval(f.read())
             cresponse_count = len(cdata['responses'])
-            with open('../data/user_data/'+flask.session['username']+'/created_tests/'+test_id+'.json') as f:
+            with open('../data/user_data/'+test_metadata['owner']+'/created_tests/'+test_id+'.json') as f:
                 cr_fdata = ast.literal_eval(f.read())
             cr_fdata['responses_count'] = len(cdata['responses'])+1
-            with open('../data/user_data/'+username+'/created_tests/'+test_id+'.json', 'w') as f:
+            with open('../data/user_data/'+test_metadata['owner']+'/created_tests/'+test_id+'.json', 'w') as f:
                 f.write(str(cr_fdata))
             data['index'] = cresponse_count+1
             cdata['responses'].append(data)
             with open('../data/response_data/'+test_id+'.json', 'w') as f:
                 f.write(str(cdata))
         except FileNotFoundError:
-            with open('../data/user_data/'+flask.session['username']+'/created_tests/'+test_id+'.json') as f:
+            with open('../data/user_data/'+test_metadata['owner']+'/created_tests/'+test_id+'.json') as f:
                 cr_fdata = ast.literal_eval(f.read())
             cr_fdata['responses_count'] = 1
-            with open('../data/user_data/'+username+'/created_tests/'+test_id+'.json', 'w') as f:
+            with open('../data/user_data/'+test_metadata['owner']+'/created_tests/'+test_id+'.json', 'w') as f:
                 f.write(str(cr_fdata))
             cdata = {}
             cdata['responses'] = []
