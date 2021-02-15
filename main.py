@@ -887,13 +887,10 @@ def test_edit(code):
     except:
         return flask.render_template('404.html'), 404
     if data.get('owner'):
-        if data['owner'] != flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags']:
+        if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags']:
             pass
         else:
-            if 'teacher' in user_data['tags']:
-                return flask.render_template('401.html'), 401
-            else:
-                return flask.redirect('/t/'+code)
+            return flask.redirect('/t/'+code)
     else:
         if 'teacher' in user_data['tags'] or 'admin' in user_data['tags'] or 'team' in user_data['tags']:
             pass
