@@ -90,12 +90,15 @@ def save_test_response(username, test_id):
     now = datetime.datetime.now()
     now.replace(tzinfo=from_zone)
     now = now.astimezone(to_zone)
-    if now.hour >= 12:
+    if now.hour > 12:
         c_m = 'PM'
         hour = now.hour-12
     else:
         c_m = 'AM'
         hour = now.hour
+    if now.hour == 12:
+        c_m = 'PM'
+        hour = hour
     if len(str(now.minute)) == 1:
         minute = '0'+str(now.minute)
     else:
