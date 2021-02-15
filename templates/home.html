@@ -81,5 +81,115 @@
         <text style='color: white; position: absolute; right: 50px; top: 35px'>Logged in as {{username}}</text>
       </div>
     </center>
+    <footer class="footer">
+      <div class="container">
+        <div class="row">
+          <div class="footer-col">
+            <h4>DAL Assessments</h4>
+            <ul>
+              <li><a href="https://github.com/ChaitanyaPy/dal_assessments" target="_blank">About Us</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4>Quick Links</h4>
+            <ul>
+              <li><a href="/">Home</a></li>
+              <li><a href="/change_password">Change Password</a></li>
+              <li><a onclick='logout();' style='cursor: pointer;'>Logout</a></li>
+            </ul>
+          </div><div class="footer-col">
+            <h4>Contact Us</h4>
+            <div class="social-links">
+              <a title="Telegram" target="_blank" href="https://t.me/DAL_Assessments"><img alt="Telegram" width="30" height="30" src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Telegram_logo.svg/600px-Telegram_logo.svg.png"></a>
+              <a title="Facebook" target="_blank" href="https://www.facebook.com/diyaacademyoflearning/"><img alt="Facebook" width="30" height="30" src="https://facebookbrand.com/wp-content/uploads/2019/04/f_logo_RGB-Hex-Blue_512.png?w=512&h=512">
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+    <style>
+    .footer {
+      background-color: #24262b;
+      padding: 70px 0;
+      clear: both;
+      position: relative;
+      height: 300px;
+      margin-top: 180px;
+    }
+    *{
+      margin: 0;
+      padding: 0px;
+      box-sizing: border-box;
+    }
+    .container {
+      max-width: 1170px;
+      margin: auto;
+    }
+    ul {
+      list-style: none;
+    }
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+    }
+    .footer-col{
+      width: 25%;
+      padding: 0 62px;
+    }
+    .footer-col h4{
+      font-size: 18px;
+      color: #ffffff;
+      text-transform: capitalize;
+      margin-bottom: 35px;
+      font-weight: 500;
+      position: relative;
+    }
+    .footer-col h4::before{
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: -10px;
+      background-color: #ffa500;
+      height: 2px;
+      box-sizing: border-box;
+      width: 100px;
+    }
+    .footer-col ul li:bot(:last-child){
+      margin-bottom: 10px;
+    }
+    .footer-col ul li a{
+      font-size: 16px;
+      text-transform: capitalize;
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: 300;
+      color: #bbbbbb;
+      display: block;
+      transition: all 0.3s ease;
+    }
+    .footer-col ul li a:hover {
+      color: #ffffff;
+      padding-left: 10px;
+    }
+    .footer-col .social-links a {
+      display: inline-block;
+      height: 40px;
+      width: 40px;  text-align: center;
+      line-height: 40px;
+    }
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;&display=swap');
+    body {
+      line-height: 1.5;
+      font-family: 'Poppins', sans-serif;
+    }
+    </style>
+    <script>
+    function logout(){
+      var r = confirm("Are you sure you want to logout?");
+       if (r == true) {
+         window.location.href = '/logout' ;
+       }
+     }
+    </script>
   </body>
 </html>

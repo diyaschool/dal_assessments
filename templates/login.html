@@ -6,14 +6,6 @@
    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
    <link rel="icon" href="logo.png" type="image/icon type">
    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css">
-   <script>
-   function logout(){
-     var r = confirm("Are you sure you want to logout?");
-      if (r == true) {
-        window.location.href = '/logout' ;
-      }
-    }
-   </script>
 </head>
 <style>
   .wrapper {
@@ -267,6 +259,71 @@
   position: relative;
   top: 3px
 }
+</style>
+<body style='background-size: cover; background-image: url("background.png");  background-repeat: no-repeat; background-position: center; background-attachment: fixed;'>
+  <center>
+    <br><text style="font-family:Arial, Helvetica, sans-serif; font-size: 40px; font-weight: bold; color: white">DAL Assessments</text><br>
+    <br><img src='logo.png' style="height: 230px;" id='logo' /><br><br><br><br>
+  <div class="wrapper fadeInDown">
+    <div id="fromContent">
+      <center>
+        <form action='/login' method='post'>
+            <div class="input-container">
+              <i class="fa fa-user icon fadeIn second"></i>
+          <input type="text" id="login" class="fadeIn second" name="username" placeholder="Username" required autofocus>
+        </div><br/><br/>
+        <div class="input-container">
+          <i class="fa fa-key icon fadeIn third"></i>
+          <input type="password" id="password" class="fadeIn third" name="password" placeholder="Password" required>
+        </div><br/>
+            <input type="checkbox" class="fadeIn fourth" onclick="myFunction()" id='showPassword'><label class="fadeIn fourth" for='showPassword' style='color: white'>&nbsp;Show Password</label><br/><br/>
+          <input type="submit" class="fadeIn fourth" value="Log In">
+        </form>
+      </center>
+    </div>
+  </div>
+  </center>
+  <script>
+function myFunction() {
+  var x = document.getElementById("password");
+  if (x.type === "password") {
+    x.type = "text";
+  } else {
+    x.type = "password";
+  }
+}
+</script>
+{%if error%}
+<script type="text/javascript">alert("Invalid credentials")</script>
+{%endif%}
+
+<footer class="footer">
+  <div class="container">
+    <div class="row">
+      <div class="footer-col">
+        <h4>DAL Assessments</h4>
+        <ul>
+          <li><a href="https://github.com/ChaitanyaPy/dal_assessments" target="_blank">About Us</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="/change_password">Change Password</a></li>
+          <li><a onclick='logout();' style='cursor: pointer;'>Logout</a></li>
+        </ul>
+      </div><div class="footer-col">
+        <h4>Contact Us</h4>
+        <div class="social-links">
+          <a title="Telegram" target="_blank" href="https://t.me/DAL_Assessments"><img alt="Telegram" width="30" height="30" src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Telegram_logo.svg/600px-Telegram_logo.svg.png"></a>
+          <a title="Facebook" target="_blank" href="https://www.facebook.com/diyaacademyoflearning/"><img alt="Facebook" width="30" height="30" src="https://facebookbrand.com/wp-content/uploads/2019/04/f_logo_RGB-Hex-Blue_512.png?w=512&h=512">
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+<style>
 .footer {
   background-color: #24262b;
   padding: 70px 0;
@@ -342,68 +399,13 @@ body {
   font-family: 'Poppins', sans-serif;
 }
 </style>
-<body style='background-size: cover; background-image: url("background.png");  background-repeat: no-repeat; background-position: center; background-attachment: fixed;'>
-  <center>
-    <br><text style="font-family:Arial, Helvetica, sans-serif; font-size: 40px; font-weight: bold; color: white">DAL Assessments</text><br>
-    <br><img src='logo.png' style="height: 230px;" id='logo' /><br><br><br><br>
-  <div class="wrapper fadeInDown">
-    <div id="fromContent">
-      <center>
-        <form action='/login' method='post'>
-            <div class="input-container">
-              <i class="fa fa-user icon fadeIn second"></i>
-          <input type="text" id="login" class="fadeIn second" name="username" placeholder="Username" required autofocus>
-        </div><br/><br/>
-        <div class="input-container">
-          <i class="fa fa-key icon fadeIn third"></i>
-          <input type="password" id="password" class="fadeIn third" name="password" placeholder="Password" required>
-        </div><br/>
-            <input type="checkbox" class="fadeIn fourth" onclick="myFunction()" id='showPassword'><label class="fadeIn fourth" for='showPassword' style='color: white'>&nbsp;Show Password</label><br/><br/>
-          <input type="submit" class="fadeIn fourth" value="Log In">
-        </form>
-      </center>
-    </div>
-  </div>
-  </center>
-  <script>
-function myFunction() {
-  var x = document.getElementById("password");
-  if (x.type === "password") {
-    x.type = "text";
-  } else {
-    x.type = "password";
-  }
-}
+<script>
+function logout(){
+  var r = confirm("Are you sure you want to logout?");
+   if (r == true) {
+     window.location.href = '/logout' ;
+   }
+ }
 </script>
-{%if error%}
-<script type="text/javascript">alert("Invalid credentials")</script>
-{%endif%}
-
-<footer class="footer">
-  <div class="container">
-    <div class="row">
-      <div class="footer-col">
-        <h4>DAL Assessments</h4>
-        <ul>
-          <li><a href="https://github.com/ChaitanyaPy/dal_assessments" target="_blank">About Us</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h4>Quick Links</h4>
-        <ul>
-          <li><a href="/">Home</a></li>
-          <li><a href="/change_password">Change Password</a></li>
-          <li><a onclick='logout();' style='cursor: pointer;'>Logout</a></li>
-        </ul>
-      </div><div class="footer-col">
-        <h4>Contact Us</h4>
-        <div class="social-links">
-          <a title="Telegram" target="_blank" href="https://t.me/DAL_Assessments"><img alt="Telegram" width="30" height="30" src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Telegram_logo.svg/600px-Telegram_logo.svg.png"></a>
-          <a title="Facebook" target="_blank" href="https://www.facebook.com/diyaacademyoflearning/"><img alt="Facebook" width="30" height="30" src="https://facebookbrand.com/wp-content/uploads/2019/04/f_logo_RGB-Hex-Blue_512.png?w=512&h=512">
-        </div>
-      </div>
-    </div>
-  </div>
-</footer>
 </body>
 </html>
