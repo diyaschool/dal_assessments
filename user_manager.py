@@ -10,7 +10,11 @@ def create(username, password, name, tags):
         f.write(str({"name": name, "password": hashlib.sha224(password.encode()).hexdigest(), "tags": tags, "has_changed_password": False}))
     os.mkdir('../data/user_data/'+username)
     os.mkdir('../data/user_data/'+username+'/test_data')
+    os.mkdir('../data/user_data/'+username+'/created_tests')
     return True
+
+def fix(username):
+    os.mkdir('../data/user_data/'+username+'/created_tests')
 
 def delete(username):
     shutil.rmtree('../data/user_data/'+username)
@@ -51,5 +55,8 @@ if __name__ == '__main__':
                 delete(username)
             else:
                 print('Not recognized.\n')
+        elif mode == 'fix':
+            username = input('Username: ')
+            fix(username)
         else:
             print('Not recognized.\n')
