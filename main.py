@@ -934,14 +934,14 @@ def test_edit(code):
                             responses_count = len(ast.literal_eval(g.read())['responses'])
                     except FileNotFoundError:
                         responses_count = 0
+                    with open('../data/user_data/'+flask.session['username']+'/created_tests/'+code+'.json', 'w') as f:
+                        cr_fdata['name'] = n_test_data['test_name']
+                        cr_fdata['subject'] = n_test_data['subject']
+                        cr_fdata['responses_count'] = responses_count
+                        f.write(str(cr_fdata))
                 except FileNotFoundError:
                     with open('../data/user_data/'+flask.session['username']+'/created_tests/'+code+'.json', 'w') as f:
                         f.write(str({"last_time": c_time, "last_date": c_date, "name": "Undefined", "subject": "Undefined", "responses_count": 0}))
-                with open('../data/user_data/'+flask.session['username']+'/created_tests/'+code+'.json', 'w') as f:
-                    cr_fdata['name'] = n_test_data['test_name']
-                    cr_fdata['subject'] = n_test_data['subject']
-                    cr_fdata['responses_count'] = responses_count
-                    f.write(str(cr_fdata))
                 return flask.redirect('/t/'+code+'/edit')
             else:
                 return flask.render_template('t_edit.html', test_data=test_data, sheet_id=sheet_id, title=title, username=flask.session['username'], name=user_data['name'], code=code, alert="Error: "+test_validation, base_uri=flask.request.url_root)
