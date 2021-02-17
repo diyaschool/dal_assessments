@@ -814,6 +814,7 @@ def login():
         else:
             return flask.render_template('mobile/login.html', error=None, username='')
     elif flask.request.method == 'POST':
+        form_data = flask.request.form
         try:
             with open('../data/user_metadata/'+form_data['username'].lower()) as f:
                 fdata = f.read()
