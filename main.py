@@ -220,7 +220,6 @@ def row_to_column(sheet):
             except IndexError:
                 c_cell = ''
             output[i].append(c_cell)
-    print(output)
     return output
 
 def convert(sheet):
@@ -1014,7 +1013,6 @@ def test_analytics_user(code, username):
         if 'teacher' in user_data['tags'] or 'admin' in user_data['tags'] or 'team' in user_data['tags']:
             pass
         else:
-            print('hi')
             return flask.redirect('/t/'+code)
     with open('../data/test_data/'+code+'/config.json') as f:
         test_data = f.read()
