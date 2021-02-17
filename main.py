@@ -19,12 +19,6 @@ from dateutil import tz
 app = flask.Flask(__name__, static_url_path='/')
 
 try:
-    with open('../data/server_key') as f:
-        data = ast.literal_eval(f.read())
-except SyntaxError:
-    pass
-
-try:
     with open('../data/cookie_key') as f:
         fdata = f.read()
     app.secret_key = fdata
@@ -370,7 +364,7 @@ def validate_test_data(data_string):
             try:
                 if not isinstance(question['image'], str):
                     return 'HARD_IMAGE_URL_INVALID'
-            except:
+            except KeyError:
                 pass
         return True
     except:
@@ -783,7 +777,7 @@ def t_view(code):
             else:
                 if len(question['question']) >= 30:
                     temp_question = textwrap.wrap(question['question'], 20)
-                    for chunk in temp_question:
+                    for _ in temp_question:
                         height_extend += 20
                     question['question'] = temp_question
                 else:
@@ -1081,7 +1075,7 @@ def u_r():
 def upload_file(code):
     if flask.request.method == 'GET':
         user_data = get_user_data(flask.session['username'])
-        with open('../data/test_metadata/'+code+'.json'):
+        with open('../data/test_metadata/'+code+'.json') as f:
             test_metadata = ast.literal_eval(f.read())
         if flask.session['username'] != test_metadata['owner']:
             if 'admin' not in user_data['tags'] or 'team' not in user_data['tags'] or 'teacher' not in user_data['tags']:
