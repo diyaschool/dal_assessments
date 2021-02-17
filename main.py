@@ -20,7 +20,8 @@ from dateutil import tz
 
 app = flask.Flask(__name__, static_url_path='/')
 
-captcha_secret = '6LdidlsaAAAAAMkfKtyRNw7EHOKHghW5-quEwNsL'
+with open('../data/captcha_secret') as f:
+    captcha_secret = f.read()
 
 try:
     with open('../data/server_key') as f:
