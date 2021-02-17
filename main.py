@@ -19,12 +19,6 @@ from dateutil import tz
 app = flask.Flask(__name__, static_url_path='/')
 
 try:
-    with open('../data/server_key') as f:
-        data = ast.literal_eval(f.read())
-except SyntaxError:
-    pass
-
-try:
     with open('../data/cookie_key') as f:
         fdata = f.read()
     app.secret_key = fdata
@@ -370,7 +364,7 @@ def validate_test_data(data_string):
             try:
                 if not isinstance(question['image'], str):
                     return 'HARD_IMAGE_URL_INVALID'
-            except:
+            except KeyError:
                 pass
         return True
     except:
