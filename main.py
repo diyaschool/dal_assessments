@@ -35,7 +35,7 @@ except:
     with open('../data/cookie_key', 'w') as f:
         f.write(key)
 
-DOMAINS = ['localhost', 'diyaassessments.pythonanywhere.com', 'w75rtoqm6xtorlqxk6xlzh244qbva3omj7y2pdyzlh3giuuii6uoovid.onion', 'chaitanyapy.ml']
+DOMAINS = ['localhost', 'diyaassessments.pythonanywhere.com', 'chaitanyapy.ml']
 DOMAIN = 'diyaassessments.pythonanywhere.com'
 
 gauth = sheets_api.authorize()
