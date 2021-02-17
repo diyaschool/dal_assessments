@@ -1,11 +1,9 @@
 import textwrap
-import requests
 import shutil
 import datetime
 import ast
 import user_manager
 import hashlib
-import datetime
 import sheets_api
 import flask
 import time
@@ -23,7 +21,7 @@ app = flask.Flask(__name__, static_url_path='/')
 try:
     with open('../data/server_key') as f:
         data = ast.literal_eval(f.read())
-except:
+except SyntaxError:
     pass
 
 try:
@@ -777,7 +775,7 @@ def t_view(code):
             if desktop:
                 if len(question['question']) >= 40:
                     temp_question = textwrap.wrap(question['question'], 50)
-                    for chunk in temp_question:
+                    for _ in temp_question:
                         height_extend += 10
                     question['question'] = temp_question
                 else:
@@ -1083,6 +1081,11 @@ def u_r():
 def upload_file(code):
     if flask.request.method == 'GET':
         user_data = get_user_data(flask.session['username'])
+        with open('../data/test_metadata/'+code+'.json')
+            test_metadata = ast.literal_eval(f.read())
+        if flask.session['username'] != test_metadata['owner']:
+            if 'admin' not in user_data['tags'] or 'team' not in user_data['tags'] or 'teacher' not in user_data['tags']:
+                return flask.redirect('/t/'+code+'/')
         files = [f for f in os.listdir('../data/test_data/'+code+'/files') if os.path.isdir(os.path.join('../data/test_data/'+code+'/files', f))]
         all_files = {}
         for file in files:
