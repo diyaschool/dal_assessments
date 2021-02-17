@@ -1,11 +1,9 @@
 import textwrap
-import requests
 import shutil
 import datetime
 import ast
 import user_manager
 import hashlib
-import datetime
 import sheets_api
 import flask
 import time
@@ -23,7 +21,7 @@ app = flask.Flask(__name__, static_url_path='/')
 try:
     with open('../data/server_key') as f:
         data = ast.literal_eval(f.read())
-except:
+except SyntaxError:
     pass
 
 try:
@@ -777,7 +775,7 @@ def t_view(code):
             if desktop:
                 if len(question['question']) >= 40:
                     temp_question = textwrap.wrap(question['question'], 50)
-                    for chunk in temp_question:
+                    for _ in temp_question:
                         height_extend += 10
                     question['question'] = temp_question
                 else:
