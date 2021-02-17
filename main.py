@@ -20,9 +20,6 @@ from dateutil import tz
 
 app = flask.Flask(__name__, static_url_path='/')
 
-with open('../data/captcha_secret') as f:
-    captcha_secret = f.read()
-
 try:
     with open('../data/server_key') as f:
         data = ast.literal_eval(f.read())
@@ -817,12 +814,6 @@ def login():
         else:
             return flask.render_template('mobile/login.html', error=None, username='')
     elif flask.request.method == 'POST':
-        form_data = flask.request.form
-        captcha_response = form_data['g-recaptcha-response']
-        req = requests.post('https://www.google.com/recaptcha/api/siteverify', data={"secret": captcha_secret, "response": captcha_response})
-        captcha_res = req.json()
-        if captcha_res['success'] != True:
-            return flask.render_template('login.html', error='CAPTCHA unsuccessful', username=form_data['username'])
         try:
             with open('../data/user_metadata/'+form_data['username'].lower()) as f:
                 fdata = f.read()
