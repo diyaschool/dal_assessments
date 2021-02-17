@@ -1,4 +1,5 @@
 import textwrap
+import requests
 import shutil
 import datetime
 import ast
@@ -19,6 +20,8 @@ from dateutil import tz
 
 app = flask.Flask(__name__, static_url_path='/')
 
+captcha_secret = '6LdidlsaAAAAAMkfKtyRNw7EHOKHghW5-quEwNsL'
+
 try:
     with open('../data/server_key') as f:
         data = ast.literal_eval(f.read())
@@ -35,7 +38,7 @@ except:
     with open('../data/cookie_key', 'w') as f:
         f.write(key)
 
-DOMAINS = ['localhost', 'diyaassessments.pythonanywhere.com', 'w75rtoqm6xtorlqxk6xlzh244qbva3omj7y2pdyzlh3giuuii6uoovid.onion', 'chaitanyapy.ml']
+DOMAINS = ['localhost', 'diyaassessments.pythonanywhere.com', 'chaitanyapy.ml']
 DOMAIN = 'diyaassessments.pythonanywhere.com'
 
 gauth = sheets_api.authorize()
@@ -809,11 +812,16 @@ def login():
             desktop = False
     if flask.request.method == 'GET':
         if desktop:
-            return flask.render_template('login.html', error=False, username='')
+            return flask.render_template('login.html', error=None, username='')
         else:
-            return flask.render_template('mobile/login.html', error=False, username='')
-    else:
+            return flask.render_template('mobile/login.html', error=None, username='')
+    elif flask.request.method == 'POST':
         form_data = flask.request.form
+        captcha_response = form_data['g-recaptcha-response']
+        req = requests.post('https://www.google.com/recaptcha/api/siteverify', data={"secret": captcha_secret, "response": captcha_response})
+        captcha_res = req.json()
+        if captcha_res['success'] != True:
+            return flask.render_template('login.html', error='CAPTCHA unsuccessful', username=form_data['username'])
         try:
             with open('../data/user_metadata/'+form_data['username'].lower()) as f:
                 fdata = f.read()
@@ -821,9 +829,9 @@ def login():
             password = hashlib.sha224(form_data['password'].encode()).hexdigest()
             if data['password'] != password:
                 if desktop:
-                    return flask.render_template('login.html', error=True, username=form_data['username'])
+                    return flask.render_template('login.html', error='Invalid Credentials', username=form_data['username'])
                 else:
-                    return flask.render_template('mobile/login.html', error=True, username=form_data['username'])
+                    return flask.render_template('mobile/login.html', error='Invalid Credentials', username=form_data['username'])
             else:
                 flask.session['username'] = form_data['username'].lower()
                 user_data = get_user_data(flask.session['username'])
@@ -837,9 +845,9 @@ def login():
                     return flask.redirect('/')
         except FileNotFoundError:
             if desktop:
-                return flask.render_template('login.html', error=True, username=form_data['username'])
+                return flask.render_template('login.html', error='Invalid Credentials', username=form_data['username'])
             else:
-                return flask.render_template('mobile/login.html', error=True, username=form_data['username'])
+                return flask.render_template('mobile/login.html', error='Invalid Credentials', username=form_data['username'])
 
 @app.route('/new_test', methods=['GET', 'POST'])
 def new_test():
@@ -1111,6 +1119,10 @@ def upload_delete(code, file_id):
 @app.route('/t/<code>/static/<file_code>/')
 def t_static(code, file_code):
     return flask.send_file('../data/test_data/'+code+'/files/'+file_code+'/'+[f for f in os.listdir('../data/test_data/'+code+'/files/'+file_code) if os.path.isfile(os.path.join('../data/test_data/'+code+'/files/'+file_code, f))][0])
+
+@app.route('/robots.txt')
+def robot_txt():
+    return 'Telegram: @ChaitanyaPy, Github: https://github.com/ChaitanyaPy/'
 
 #################### Error Handlers ####################
 
