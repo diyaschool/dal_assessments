@@ -5,6 +5,8 @@
 [![Website shields.io](https://img.shields.io/website-up-down-green-red/http/shields.io.svg)](https://diyaassessments.pythonanywhere.com)
 [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
 [![GitHub issues](https://img.shields.io/github/issues/ChaitanyaPy/dal_assessments.svg)](https://github.com/ChaitanyaPy/dal_assessments/issues/)
+[![Last Commit](https://img.shields.io/github/last-commit/chaitanyapy/dal_assessments?style=plastic)](https://github.com/ChaitanyaPy/dal_assessments/commits/)
+[![Contributors](https://img.shields.io/github/contributors/chaitanyapy/dal_assessments?style=plastic)](https://github.com/ChaitanyaPy/dal_assessments/graphs/contributors)
 
 Built with :heart: by the students of [Diya Academy of Learning](https://www.diyaschool.com/).
 
