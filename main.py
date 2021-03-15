@@ -573,11 +573,11 @@ def t_verify(code):
         flask.session['t']['prev_q_res'] = False
     if flask.session['t']['prev_q_res'] == True:
         if flask.session['t']['difficulty'] == 0:
-            ans_score = 1
+            ans_score = 10
         elif flask.session['t']['difficulty'] == 1:
-            ans_score = 2
+            ans_score = 15
         elif flask.session['t']['difficulty'] == 2:
-            ans_score = 3
+            ans_score = 20
         flask.session['t']['score'] = str(ast.literal_eval(flask.session['t']['score'])+ans_score)
     else:
         ans_score = 0
