@@ -1,4 +1,6 @@
 import os
+from os import listdir
+from os.path import isfile, join
 import hashlib
 import shutil
 import getch
@@ -34,6 +36,22 @@ def change_password(username, password):
     with open('../data/user_metadata/'+username, 'w') as f:
         f.write(str({"name": data['name'], "password": hashlib.sha224(password.encode()).hexdigest(), "tags": data['tags']}))
 
+def change_test_owner(file_name, new_owner):
+    with open('../data/test_metadata/'+file_name) as f:
+        data = ast.literal_eval(f.read())
+    data['owner'] = new_owner
+    with open('../data/test_metadata/'+file_name, 'w') as f:
+        f.write(str(data))
+
+def migrate_data(current_username, new_username):
+    os.rename('../data/user_metadata/'+current_username, '../data/user_metadata/'+new_username)
+    os.rename('../data/user_data/'+current_username, '../data/user_data/'+new_username)
+    created_tests = [f for f in listdir('../data/user_data/'+new_username+'/created_tests/') if isfile(join('../data/user_data/'+new_username+'/created_tests/', f))]
+    for test in created_tests:
+        change_test_owner(test, new_username)
+    shutil.rmtree('../data/user_data/'+new_username+'/test_data')
+    os.mkdir('../data/user_data/'+new_username+'/test_data')
+
 def are_you_sure():
     while 1:
         print('Are you sure? [y/n] ')
@@ -67,6 +85,14 @@ if __name__ == '__main__':
             new_password = input('New password: ')
             if are_you_sure():
                 change_password(username, new_password)
+                print('Done.')
+            else:
+                print('Not modified.')
+        elif mode == 'migrate':
+            username = input('Username: ')
+            new_username = input('New username: ')
+            if are_you_sure():
+                migrate_data(username, new_username)
                 print('Done.')
             else:
                 print('Not modified.')
