@@ -65,7 +65,7 @@ def are_you_sure():
 
 if __name__ == '__main__':
     while 1:
-        mode = input('Mode? [create/delete/change_password]: ')
+        mode = input('Mode? [create/delete/change_password/migrate]: ')
         if mode == 'create':
             username = input('Username: ')
             password = input('Password: ')
