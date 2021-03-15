@@ -960,7 +960,7 @@ def test_analytics(code):
     except:
         return flask.render_template('404.html'), 404
     if data.get('owner'):
-        if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags']:
+        if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags']  or 'teacher' in user_data['tags']:
             pass
         else:
             if 'teacher' in user_data['tags']:
@@ -968,7 +968,7 @@ def test_analytics(code):
             else:
                 return flask.redirect('/t/'+code)
     else:
-        if 'teacher' in user_data['tags'] or 'admin' in user_data['tags'] or 'team' in user_data['tags']:
+        if 'teacher' in user_data['tags'] or 'admin' in user_data['tags'] or 'team' in user_data['tags'] or 'teacher' in user_data['tags']:
             pass
         else:
             return flask.redirect('/t/'+code)
