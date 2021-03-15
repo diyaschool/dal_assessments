@@ -102,10 +102,15 @@ def save_test_response(username, test_id):
     data["long_time_stamp"] = str(now.day)+"-"+str(now.month)+"-"+str(now.year)+" "+str(hour)+":"+str(minute)+":"+str(now.second)+' '+c_m
     response_id = get_user_response(username, test_id)
     if response_id != False:
+        print('response_id', response_id)
         with open('../data/response_data/'+test_id+'.json') as f:
             cdata = ast.literal_eval(f.read())
         cresponse_count = len(cdata['responses'])
         data['index'] = int(response_id)+1
+        try:
+            data['attempts'] = cdata['responses'][int(response_id)]['attempts'] + 1
+        except KeyError:
+            data['attempts'] = 2
         cdata['responses'][int(response_id)] = data
         with open('../data/response_data/'+test_id+'.json', 'w') as f:
             f.write(str(cdata))
@@ -120,6 +125,7 @@ def save_test_response(username, test_id):
             with open('../data/user_data/'+test_metadata['owner']+'/created_tests/'+test_id+'.json', 'w') as f:
                 f.write(str(cr_fdata))
             data['index'] = cresponse_count+1
+            data['attempts'] = 1
             cdata['responses'].append(data)
             with open('../data/response_data/'+test_id+'.json', 'w') as f:
                 f.write(str(cdata))
@@ -132,6 +138,7 @@ def save_test_response(username, test_id):
             cdata = {}
             cdata['responses'] = []
             data['index'] = 1
+            data['attempts'] = 1
             cdata['responses'].append(data)
             with open('../data/response_data/'+test_id+'.json', 'w') as f:
                 f.write(str(cdata))

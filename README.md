@@ -7,7 +7,6 @@
 [![Last Commit](https://img.shields.io/github/last-commit/chaitanyapy/dal_assessments?style=plastic)](https://github.com/ChaitanyaPy/dal_assessments/commits/)
 [![Contributors](https://img.shields.io/github/contributors/chaitanyapy/dal_assessments?style=plastic)](https://github.com/ChaitanyaPy/dal_assessments/graphs/contributors)
 [![Lines of Code](https://tokei.rs/b1/github/chaitanyapy/dal_assessments?category=code)](https://github.com/ChaitanyaPy/dal_assessments/blob/production/main.py)
-[![Contributions Welcomed](https://tokei.rs/b1/github/chaitanyapy/dal_assessments?category=code)](https://github.com/ChaitanyaPy/dal_assessments/issues)
 [![Repo Size](https://img.shields.io/github/repo-size/chaitanyapy/dal_assessments.svg)](https://github.com/ChaitanyaPy/dal_assessments/)
 
 [![forthebadge](https://forthebadge.com/images/badges/built-with-love.svg)](https://forthebadge.com)
