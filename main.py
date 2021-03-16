@@ -990,13 +990,7 @@ def test_analytics(code):
             response_data = ast.literal_eval(f.read())
     except FileNotFoundError:
         response_data = {'responses': []}
-    for response in response_data:
-        try:
-            response['attempts']
-            attempts = True
-        except:
-            attempts = False
-    return flask.render_template('test_analytics.html', test_name=title, username=flask.session['username'], name=user_data['name'], responses=response_data['responses'], response_count=len(response_data['responses']), code=code, attempts_bool=attempts)
+    return flask.render_template('test_analytics.html', test_name=title, username=flask.session['username'], name=user_data['name'], responses=response_data['responses'], response_count=len(response_data['responses']), code=code)
 
 @app.route('/t/<code>/analytics/<username>/')
 def test_analytics_user(code, username):
