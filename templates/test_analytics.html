@@ -42,6 +42,7 @@
                     <td>{{response['average_time']}} secs</td>
                     <td>{{response['total_time']}} secs</td>
                     <td data-toggle="tooltip" title="{{response['long_time_stamp']}}">{{response['time_stamp']}}</td>
+                    {%if response['attempts'] > 1%}<td><span class="badge badge-info">Attempts {{response['attempts']}}</span></td>{%endif%}
                   </tr>
                   {%endfor%}
                 </tbody>
