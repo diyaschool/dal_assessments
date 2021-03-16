@@ -1036,7 +1036,7 @@ def test_analytics_user(code, username):
         response['full_given_answer'] = response['given_answer']
         if len(response['given_answer']) > 20:
             response['given_answer'] = response['given_answer'][:20]+'...'
-    return flask.render_template('test_analytics_username.html', test_name=title, username=flask.session['username'], name=user_data['name'], responses=response_data, response_count=len(response_data), code=code, auserdata=auserdata, score=score)
+    return flask.render_template('test_analytics_username.html', test_name=title, username=flask.session['username'], name=user_data['name'], responses=response_data, response_count=len(response_data), code=code, auserdata=auserdata, score=score, fdata=fdata)
 
 @app.route('/sheets_api_authorize/delete')
 def sheets_api_authorize_delete():
