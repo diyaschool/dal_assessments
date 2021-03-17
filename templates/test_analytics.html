@@ -19,7 +19,21 @@
           <br><br>
             <text style='font-size: 45px; font-weight: bold'>Responses</text><br><br><br>
             {%if response_count == 0%}<br><br><text style='font-size: 50px; font-weight: bold; color: lightgray'>No responses yet...</text><br><br>{%else%}
-            <input type="text" id="searchInput" onkeyup="searchfunc()" placeholder="Search for names.." title="Type in a name" autofocus onfocus="this.value = this.value;" style='width: 30%'>
+            <input type="text" id="searchInput" onkeyup="searchfunc()" placeholder="Search for names.." title="Type in a name" autofocus onfocus="this.value = this.value;" style='width: 30%' class="search">
+            <style>
+              .search {
+                border: 3.9px solid #2980b9;
+                padding: 0px 10px;
+                border-radius: 50px;
+                padding: 0px 5px;
+                font-size: 18px;
+                font-family: "Nunito";
+                color: #424242;
+                font-weight: 500;
+              }
+            </style>
+            <br>
+            <br>
             <div style='margin-left: 75px'>
               <table class='table sortable' id='myTable'>
                 <thead>
