@@ -27,8 +27,8 @@ This isn't a static test, it keeps changing. We have used few algorithms to make
 ## Status and usability
 The project is pretty new and we did it mostly just for fun, but it works surprisingly well though.
 This website was particularly built for Diya Academy of Learning. If you want an exclusive copy for yourself, you will have to run your own web server.
+Almost everything is working fine execpt the occasional bugs.
 
-**The project is currently on hold.** Development will continue soon.
 Please report bugs [here](https://github.com/ChaitanyaPy/dal_assessments/issues/new?assignees=&labels=&template=bug_report.md) and suggest ideas [here](https://github.com/ChaitanyaPy/dal_assessments/issues/new?assignees=&labels=&template=feature_request.md), it really helps.
 
 
