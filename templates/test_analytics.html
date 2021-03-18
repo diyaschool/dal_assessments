@@ -19,7 +19,7 @@
           <br><br>
             <text style='font-size: 45px; font-weight: bold'>Responses</text><br><br><br>
             {%if response_count == 0%}<br><br><text style='font-size: 50px; font-weight: bold; color: lightgray'>No responses yet...</text><br><br>{%else%}
-            <input type="text" id="searchInput" onkeyup="searchfunc()" placeholder="Search for names.." title="Type in a name" autofocus onfocus="this.value = this.value;" style='width: 30%' class="search">
+            <input type="text" id="searchInput" onkeyup="searchfunc()" placeholder="Search for names.." title="Type in a name" onfocus="this.value = this.value;" style='width: 30%' class="search">
             <style>
               .search {
                 border: 2px solid #2980b9;
@@ -136,7 +136,6 @@ function sortTable(n, init) {
       dir = 'desc';
     }
   }
-  console.log(dir);
   localStorage.setItem("direction", dir);
   /*Make a loop that will continue until
   no switching has been done:*/
@@ -274,6 +273,13 @@ sortTable(localStorage.getItem('sort_column'), true)
          window.location.href = '/logout' ;
        }
      }
+    </script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        if (window.pageYOffset <= 398){
+           document.getElementById("searchInput").focus();
+        }
+      }, false);
     </script>
   </body>
 </html>
