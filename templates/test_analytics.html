@@ -38,13 +38,13 @@
               <table class='table sortable' id='myTable'>
                 <thead>
                   <tr>
-                    <th class="pointer" scope='col' onclick='sortTable(0)'>#</th>
-                    <th class="pointer" scope='col' onclick='sortTable(1)'>Username</th>
-                    <th class="pointer" scope='col' onclick='sortTable(2)'>Name</th>
-                    <th class="pointer" scope='col' onclick='sortTable(3)'>Score</th>
-                    <th class="pointer" scope='col' onclick='sortTable(4)'>Average Time</th>
-                    <th class="pointer" scope='col' onclick='sortTable(5)'>Total Time</th>
-                    <th class="pointer" scope='col' onclick='sortTable(6)'>Time Stamp</th>
+                    <th class="pointer" scope='col' onclick='sortTable(0, false)'>#</th>
+                    <th class="pointer" scope='col' onclick='sortTable(1, false)'>Username</th>
+                    <th class="pointer" scope='col' onclick='sortTable(2, false)'>Name</th>
+                    <th class="pointer" scope='col' onclick='sortTable(3, false)'>Score</th>
+                    <th scope='col'>Average Time</th>
+                    <th scope='col'>Total Time</th>
+                    <th scope='col'>Time Stamp</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -123,13 +123,22 @@ function searchfunc() {
 searchfunc()
 </script>
 <script>
-function sortTable(n) {
-  localStorage.setItem("sort_row", n)
+function sortTable(n, init) {
+  localStorage.setItem("sort_column", n)
   var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
   table = document.getElementById("myTable");
   switching = true;
   //Set the sorting direction to ascending:
-  dir = "asc";
+  dir = localStorage.getItem('direction');
+  if (init == false){
+    if (dir == "desc" || dir == undefined){
+      dir = 'asc';
+    } else{
+      dir = 'desc';
+    }
+  }
+  console.log(dir);
+  localStorage.setItem("direction", dir);
   /*Make a loop that will continue until
   no switching has been done:*/
   while (switching) {
@@ -171,14 +180,14 @@ function sortTable(n) {
     } else {
       /*If no switching has been done AND the direction is "asc",
       set the direction to "desc" and run the while loop again.*/
-      if (switchcount == 0 && dir == "asc") {
-        dir = "desc";
-        switching = true;
-      }
+      // if (switchcount == 0 && dir == "asc") {
+      //   dir = "desc";
+      //   switching = true;
+      // }
     }
   }
 }
-
+sortTable(localStorage.getItem('sort_column'), true)
 </script>
     <style>
     .pointer {
