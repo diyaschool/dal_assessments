@@ -281,6 +281,8 @@ def convert(sheet):
 
 def create_new_test_sheet(owner):
     dt = datetime.datetime.now()
+    dt.replace(tzinfo=from_zone)
+    dt = dt.astimezone(to_zone)
     c_time = str(dt.hour)+':'+str(dt.minute)+':'+str(dt.second)
     c_date = str(dt.year)+'-'+str(dt.month)+'-'+str(dt.day)
     test_list = [f for f in os.listdir('../data/test_data') if os.path.isdir(os.path.join('../data/test_data', f))]
@@ -386,7 +388,10 @@ def load_questions(test_id):
             fdata = f.read()
     except FileNotFoundError:
         return False
-    data = ast.literal_eval(fdata)
+    try:
+        data = ast.literal_eval(fdata)
+    except SyntaxError:
+        return 'syntax'
     counter = 0
     for q in data["questions"]['easy']:
         if q['question'].strip() == '':
@@ -506,6 +511,32 @@ def get_question(completed_questions, questions):
             break
     return q
 
+def get_created_tests_list(username):
+    created_test_list = [f for f in os.listdir('../data/user_data/'+username+'/created_tests') if os.path.isfile(os.path.join('../data/user_data/'+username+'/created_tests', f))]
+    created_tests = []
+    for test in created_test_list:
+        with open('../data/user_data/'+username+'/created_tests/'+test) as f:
+            created_tests.append(ast.literal_eval(f.read()))
+    sort_prep_list = []
+    for i, test in enumerate(created_tests):
+        test['id'] = created_test_list[i][:-5]
+        temp_id = id_generator(5)
+        sort_prep_list.append(test['last_date']+' '+test['last_time']+' '+temp_id)
+        test['temp_id'] = temp_id
+    sorted_prep_list = sorted(sort_prep_list)
+    print(sorted_prep_list)
+    final_sorted_list = []
+    for test_sort_id in sorted_prep_list:
+        test_sort_id = test_sort_id[-5:]
+        for test in created_tests:
+            if test['temp_id'] == test_sort_id:
+                break
+        final_sorted_list.append(test)
+    for test in final_sorted_list:
+        test.pop('temp_id')
+    final_sorted_list.reverse()
+    return final_sorted_list
+
 #################### Reqeust Handlers ####################
 
 @app.before_request
@@ -549,8 +580,9 @@ def home():
         if agent in flask.request.headers['User-Agent']:
             desktop = False
     user_data = get_user_data(flask.session['username'])
+    created_tests = get_created_tests_list(flask.session['username'])
     if desktop:
-        return flask.render_template('home.html', username=flask.session['username'], name=user_data['name'])
+        return flask.render_template('home.html', username=flask.session['username'], name=user_data['name'], created_tests=created_tests)
     else:
         return flask.render_template('mobile/home.html', username=flask.session['username'], name=user_data['name'])
 
@@ -606,6 +638,8 @@ def t_view(code):
     authorized = False
     if question_data == False:
         return flask.render_template('404.html'), 404
+    if question_data == 'syntax':
+        return "The test was not properly created. Please contact the owner of this test."
     for tag in user_data['tags']:
         if tag in question_data['tags'] or tag == 'admin' or tag == 'teacher' or tag == 'team' or code == 'demo':
             authorized = True
@@ -922,12 +956,15 @@ def test_edit(code):
                     metadata = ast.literal_eval(f.read())
                 with open('../data/test_metadata/'+code+'.json', 'w') as f:
                     dt = datetime.datetime.now()
+                    dt.replace(tzinfo=from_zone)
+                    dt = dt.astimezone(to_zone)
                     c_time = str(dt.hour)+':'+str(dt.minute)+':'+str(dt.second)
                     c_date = str(dt.year)+'-'+str(dt.month)+'-'+str(dt.day)
                     metadata['last_time'] = c_time
                     metadata['last_date'] = c_date
                     f.write(str(metadata))
                 try:
+                    print('test1')
                     with open('../data/user_data/'+flask.session['username']+'/created_tests/'+code+'.json') as f:
                         cr_fdata = ast.literal_eval(f.read())
                     try:
@@ -939,8 +976,13 @@ def test_edit(code):
                         cr_fdata['name'] = n_test_data['test_name']
                         cr_fdata['subject'] = n_test_data['subject']
                         cr_fdata['responses_count'] = responses_count
+                        cr_fdata['last_time'] = c_time
+                        cr_fdata['last_date'] = c_date
+                        print('test')
                         f.write(str(cr_fdata))
+                        print(cr_fdata)
                 except FileNotFoundError:
+                    print('test2')
                     with open('../data/user_data/'+flask.session['username']+'/created_tests/'+code+'.json', 'w') as f:
                         f.write(str({"last_time": c_time, "last_date": c_date, "name": "Undefined", "subject": "Undefined", "responses_count": 0}))
                 return flask.redirect('/t/'+code+'/edit')
