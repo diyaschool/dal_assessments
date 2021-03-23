@@ -882,7 +882,7 @@ def new_test():
     else:
         return flask.render_template('401.html'), 401
     if flask.request.method == 'GET':
-        return flask.render_template('new_test.html')
+        return flask.render_template('new_test.html', username=flask.session['username'], name=user_data['name'])
     else:
         test_data = create_new_test_sheet(flask.session['username'])
         test_id, _ = test_data
