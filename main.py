@@ -43,6 +43,11 @@ to_zone = tz.gettz('Asia/Kolkata')
 
 #################### Utility Functions ####################
 
+def check_sharing_perms(test_metadata, username):
+    for user in test_metadata['sharing']:
+        if user['username'] == username:
+            return user['settings']
+
 def check_hook_integrity(ip):
     if ipaddress.ip_address(ip) in ipaddress.ip_network('192.30.252.0/22') or ipaddress.ip_address(ip) in ipaddress.ip_network('185.199.108.0/22') or ipaddress.ip_address(ip) in ipaddress.ip_network('140.82.112.0/20'):
         return True
@@ -643,6 +648,11 @@ def t_view(code):
     for tag in user_data['tags']:
         if tag in question_data['tags'] or tag == 'admin' or tag == 'teacher' or tag == 'team':
             authorized = True
+            break
+    with open('../data/test_metadata/'+code+'.json') as f:
+        test_metadata = ast.literal_eval(f.read())
+    if check_sharing_perms(test_metadata, flask.session['username'])['attend'] == True:
+        authorized = True
     if authorized == False:
         return flask.render_template('401.html'), 401
     try:
@@ -924,7 +934,7 @@ def test_edit(code):
             data = ast.literal_eval(f.read())
     except:
         return flask.render_template('404.html'), 404
-    if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags']:
+    if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags'] or check_sharing_perms(data, flask.session['username'])['edit'] == True:
         pass
     else:
         return flask.redirect('/t/'+code)
@@ -1006,7 +1016,7 @@ def test_analytics(code):
             data = ast.literal_eval(f.read())
     except:
         return flask.render_template('404.html'), 404
-    if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags']:
+    if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags'] or check_sharing_perms(data, flask.session['username'])['overview-analytics'] == True:
         pass
     else:
         if 'teacher' in user_data['tags']:
@@ -1037,10 +1047,11 @@ def test_analytics_user(code, username):
         return flask.render_template('404.html'), 404
     if data['owner'] != flask.session['username']:
         if username != flask.session['username']:
-            if 'teacher' in user_data['tags']:
-                return flask.render_template('401.html'), 401
-            else:
-                return flask.redirect('/t/'+code)
+            if check_sharing_perms(test_metadata, flask.session['username'])['individual-analytics'] != True:
+                if 'teacher' in user_data['tags']:
+                    return flask.render_template('401.html'), 401
+                else:
+                    return flask.redirect('/t/'+code)
     with open('../data/test_data/'+code+'/config.json') as f:
         test_data = f.read()
     try:
@@ -1118,8 +1129,10 @@ def upload_file(code):
         with open('../data/test_metadata/'+code+'.json') as f:
             test_metadata = ast.literal_eval(f.read())
         if flask.session['username'] != test_metadata['owner']:
-            if 'admin' not in user_data['tags'] or 'team' not in user_data['tags']:
-                return flask.render_template('401.html')
+            if 'admin' in user_data['tags'] or 'team' in user_data['tags'] or check_sharing_perms(test_metadata, flask.session['username'])['files'] == True:
+                pass
+            else:
+                return '<br><br><center>YOU ARE NOT AUTHORIZED TO VIEW/MODIFY FILES</center>'
         files = [f for f in os.listdir('../data/test_data/'+code+'/files') if os.path.isdir(os.path.join('../data/test_data/'+code+'/files', f))]
         all_files = {}
         for file in files:
@@ -1145,7 +1158,9 @@ def upload_delete(code, file_id):
     with open('../data/test_metadata/'+code+'.json') as f:
         test_metadata = ast.literal_eval(f.read())
     if flask.session['username'] != test_metadata['owner']:
-        if 'admin' not in user_data['tags'] or 'team' not in user_data['tags']:
+        if 'admin' in user_data['tags'] or 'team' in user_data['tags'] or check_sharing_perms(test_metadata, flask.session['username'])['files'] == True:
+            pass
+        else:
             return flask.render_template('401.html')
     shutil.rmtree('../data/test_data/'+code+'/files/'+file_id+'/')
     return flask.redirect('/t/'+code+'/upload/')
