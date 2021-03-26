@@ -44,6 +44,8 @@ to_zone = tz.gettz('Asia/Kolkata')
 #################### Utility Functions ####################
 
 def check_sharing_perms(test_metadata, username):
+    if test_metadata.get('sharing') == None:
+        return {"edit": False, "overview-analytics": False, "individual-analytics": False, "files": False, "attend": False}
     for user in test_metadata['sharing']:
         if user['username'] == username:
             return user['settings']
