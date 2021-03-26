@@ -641,7 +641,7 @@ def t_view(code):
     if question_data == 'syntax':
         return "The test was not properly created. Please contact the owner of this test."
     for tag in user_data['tags']:
-        if tag in question_data['tags'] or tag == 'admin' or tag == 'teacher' or tag == 'team' or code == 'demo':
+        if tag in question_data['tags'] or tag == 'admin' or tag == 'teacher' or tag == 'team':
             authorized = True
     if authorized == False:
         return flask.render_template('401.html'), 401
@@ -914,7 +914,7 @@ def sheets_api_authorize():
     else:
         return flask.render_template('404.html'), 404
 
-@app.route('/t/<code>/edit/', methods=['GET', 'POST'])
+@app.route('/t/<code>/edit/', methods=['GET', 'POST', 'PUT'])
 def test_edit(code):
     if '\\' in code or '.' in code:
         return flask.render_template('500.html'), 500
@@ -924,16 +924,10 @@ def test_edit(code):
             data = ast.literal_eval(f.read())
     except:
         return flask.render_template('404.html'), 404
-    if data.get('owner'):
-        if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags']:
-            pass
-        else:
-            return flask.redirect('/t/'+code)
+    if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags']:
+        pass
     else:
-        if 'teacher' in user_data['tags'] or 'admin' in user_data['tags'] or 'team' in user_data['tags']:
-            pass
-        else:
-            return flask.redirect('/t/'+code)
+        return flask.redirect('/t/'+code)
     with open('../data/test_data/'+code+'/config.json') as f:
         test_data = f.read()
     sheet_id = data.get('sheet_id')
@@ -990,15 +984,19 @@ def test_edit(code):
                 return flask.render_template('t_edit.html', test_data=test_data, sheet_id=sheet_id, title=title, username=flask.session['username'], name=user_data['name'], code=code, alert="Error: "+test_validation, base_uri=flask.request.url_root)
         else:
             return flask.render_template('t_edit.html', test_data=test_data, sheet_id=sheet_id, title=title, username=flask.session['username'], name=user_data['name'], code=code, alert=None, base_uri=flask.request.url_root)
-    else:
+    elif flask.request.method == 'POST':
         data = flask.request.form
         v_output = validate_test_data(data['test_data'])
         if v_output == True:
             with open('../data/test_data/'+code+'/config.json', 'w') as f:
                 f.write(data['test_data'])
-            return flask.render_template('t_edit.html', test_data=data['test_data'], sheet_id=sheet_id, title=title, username=flask.session['username'], name=user_data['name'], code=code, alert='Test updated', base_uri=flask.request.url_root)
+            return 'validated, modified config file'
         else:
-            return flask.render_template('t_edit.html', test_data=data['test_data'], sheet_id=sheet_id, title=title, username=flask.session['username'], name=user_data['name'], code=code, alert='Error: '+v_output, base_uri=flask.request.url_root)
+            return v_output, 400
+    elif flask.request.method == 'PUT':
+        with open('../data/test_data/'+code+'/config.json') as f:
+            fdata = f.read()
+        return fdata
 
 @app.route('/t/<code>/analytics/')
 def test_analytics(code):
@@ -1008,17 +1006,11 @@ def test_analytics(code):
             data = ast.literal_eval(f.read())
     except:
         return flask.render_template('404.html'), 404
-    if data.get('owner'):
-        if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags']  or 'teacher' in user_data['tags']:
-            pass
-        else:
-            if 'teacher' in user_data['tags']:
-                return flask.render_template('401.html'), 401
-            else:
-                return flask.redirect('/t/'+code)
+    if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags']:
+        pass
     else:
-        if 'teacher' in user_data['tags'] or 'admin' in user_data['tags'] or 'team' in user_data['tags'] or 'teacher' in user_data['tags']:
-            pass
+        if 'teacher' in user_data['tags']:
+            return flask.render_template('401.html'), 401
         else:
             return flask.redirect('/t/'+code)
     with open('../data/test_data/'+code+'/config.json') as f:
@@ -1043,18 +1035,12 @@ def test_analytics_user(code, username):
             data = ast.literal_eval(f.read())
     except:
         return flask.render_template('404.html'), 404
-    if data.get('owner'):
-        if data['owner'] != flask.session['username']:
-            if username != flask.session['username']:
-                if 'teacher' in user_data['tags']:
-                    return flask.render_template('401.html'), 401
-                else:
-                    return flask.redirect('/t/'+code)
-    else:
-        if 'teacher' in user_data['tags'] or 'admin' in user_data['tags'] or 'team' in user_data['tags']:
-            pass
-        else:
-            return flask.redirect('/t/'+code)
+    if data['owner'] != flask.session['username']:
+        if username != flask.session['username']:
+            if 'teacher' in user_data['tags']:
+                return flask.render_template('401.html'), 401
+            else:
+                return flask.redirect('/t/'+code)
     with open('../data/test_data/'+code+'/config.json') as f:
         test_data = f.read()
     try:
@@ -1132,8 +1118,8 @@ def upload_file(code):
         with open('../data/test_metadata/'+code+'.json') as f:
             test_metadata = ast.literal_eval(f.read())
         if flask.session['username'] != test_metadata['owner']:
-            if 'admin' not in user_data['tags'] or 'team' not in user_data['tags'] or 'teacher' not in user_data['tags']:
-                return flask.redirect('/t/'+code+'/')
+            if 'admin' not in user_data['tags'] or 'team' not in user_data['tags']:
+                return flask.render_template('401.html')
         files = [f for f in os.listdir('../data/test_data/'+code+'/files') if os.path.isdir(os.path.join('../data/test_data/'+code+'/files', f))]
         all_files = {}
         for file in files:
@@ -1155,6 +1141,12 @@ def upload_file(code):
 
 @app.route('/t/<code>/upload/delete/<file_id>/')
 def upload_delete(code, file_id):
+    user_data = get_user_data(flask.session['username'])
+    with open('../data/test_metadata/'+code+'.json') as f:
+        test_metadata = ast.literal_eval(f.read())
+    if flask.session['username'] != test_metadata['owner']:
+        if 'admin' not in user_data['tags'] or 'team' not in user_data['tags']:
+            return flask.render_template('401.html')
     shutil.rmtree('../data/test_data/'+code+'/files/'+file_id+'/')
     return flask.redirect('/t/'+code+'/upload/')
 
@@ -1163,7 +1155,7 @@ def t_static(code, file_code):
     return flask.send_file('../data/test_data/'+code+'/files/'+file_code+'/'+[f for f in os.listdir('../data/test_data/'+code+'/files/'+file_code) if os.path.isfile(os.path.join('../data/test_data/'+code+'/files/'+file_code, f))][0])
 
 @app.route('/robots.txt')
-def robot_txt():
+def robots_txt():
     return 'Telegram: @ChaitanyaPy, Github: https://github.com/ChaitanyaPy/'
 
 #################### Error Handlers ####################
