@@ -889,7 +889,7 @@ def login():
 @app.route('/new_test', methods=['GET', 'POST'])
 def new_test():
     user_data = get_user_data(flask.session['username'])
-    if 'admin' in user_data['tags'] or 'team' in user_data['tags']:
+    if 'admin' in user_data['tags'] or 'team' in user_data['tags'] or 'teacher' in user_data['tags']:
         pass
     else:
         return flask.render_template('401.html'), 401
