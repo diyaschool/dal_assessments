@@ -1141,6 +1141,12 @@ def upload_file(code):
 
 @app.route('/t/<code>/upload/delete/<file_id>/')
 def upload_delete(code, file_id):
+    user_data = get_user_data(flask.session['username'])
+    with open('../data/test_metadata/'+code+'.json') as f:
+        test_metadata = ast.literal_eval(f.read())
+    if flask.session['username'] != test_metadata['owner']:
+        if 'admin' not in user_data['tags'] or 'team' not in user_data['tags']:
+            return flask.render_template('401.html')
     shutil.rmtree('../data/test_data/'+code+'/files/'+file_id+'/')
     return flask.redirect('/t/'+code+'/upload/')
 
