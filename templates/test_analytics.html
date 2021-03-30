@@ -137,6 +137,7 @@ function sortTable(n, init) {
     }
   }
   localStorage.setItem("direction", dir);
+  if (n != 0){
   /*Make a loop that will continue until
   no switching has been done:*/
   while (switching) {
@@ -184,6 +185,9 @@ function sortTable(n, init) {
       // }
     }
   }
+} else if (init == false){
+  reverseTableRows("myTable");
+}
 }
 function reverseTableRows(tableId) {
     var table = document.getElementById(tableId),
