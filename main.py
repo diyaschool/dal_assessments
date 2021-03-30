@@ -314,77 +314,77 @@ def create_new_test_sheet(owner):
 def validate_test_data(data_string):
     try:
         data = ast.literal_eval(data_string)
-        if not isinstance(data['test_name'], str):
-            return 'TEST_NAME_INVALID'
-        if not isinstance(data['subject'], str):
-            return 'SUBJECT_INVALID'
-        if not isinstance(data['tags'], list):
-            return 'TAGS_INVALID'
-        if not isinstance(data['questions'], dict):
-            return 'QUESTIONS_INAVLID'
-        for question in data['questions']['easy']:
-            if not isinstance(question['question'], str):
-                return 'EASY_QUESTION_TEXT_INVALID'
-            try:
-                for answer in question['answers']:
-                    if not isinstance(answer, str):
-                        return 'EASY_QUESTION_ANSWER_INVALID'
-            except:
-                return 'EASY_QUESTION_ANSWERS_INVALID'
-            if not isinstance(question['correct_answer_index'], int):
-                return 'EASY_CORRECT_ANSWER_INDEX_INVALID'
-            try:
-                question['answers'][question['correct_answer_index']]
-            except:
-                return 'EASY_CORRECT_ANSWER_INDEX_OUTBOUND'
-            try:
-                if not isinstance(question['image'], str):
-                    return 'EASY_IMAGE_URL_INVALID'
-            except KeyError:
-                pass
-        for question in data['questions']['medium']:
-            if not isinstance(question['question'], str):
-                return 'MEDIUM_QUESTION_TEXT_INVALID'
-            try:
-                for answer in question['answers']:
-                    if not isinstance(answer, str):
-                        return 'MEDIUM_QUESTION_ANSWER_INVALID'
-            except:
-                return 'MEDIUM_QUESTION_ANSWERS_INVALID'
-            if not isinstance(question['correct_answer_index'], int):
-                return 'MEDIUM_CORRECT_ANSWER_INDEX_INVALID'
-            try:
-                question['answers'][question['correct_answer_index']]
-            except:
-                return 'MEDIUM_CORRECT_ANSWER_INDEX_OUTBOUND'
-            try:
-                if not isinstance(question['image'], str):
-                    return 'MEDIUM_IMAGE_URL_INVALID'
-            except KeyError:
-                pass
-        for question in data['questions']['hard']:
-            if not isinstance(question['question'], str):
-                return 'HARD_QUESTION_TEXT_INVALID'
-            try:
-                for answer in question['answers']:
-                    if not isinstance(answer, str):
-                        return 'HARD_QUESTION_ANSWER_INVALID'
-            except:
-                return 'HARD_QUESTION_ANSWERS_INVALID'
-            if not isinstance(question['correct_answer_index'], int):
-                return 'HARD_CORRECT_ANSWER_INDEX_INVALID'
-            try:
-                question['answers'][question['correct_answer_index']]
-            except:
-                return 'HARD_CORRECT_ANSWER_INDEX_OUTBOUND'
-            try:
-                if not isinstance(question['image'], str):
-                    return 'HARD_IMAGE_URL_INVALID'
-            except KeyError:
-                pass
-        return True
     except:
         return 'SYNTAX_INVALID'
+    if not isinstance(data['test_name'], str):
+        return 'TEST_NAME_INVALID'
+    if not isinstance(data['subject'], str):
+        return 'SUBJECT_INVALID'
+    if not isinstance(data['tags'], list):
+        return 'TAGS_INVALID'
+    if not isinstance(data['questions'], dict):
+        return 'QUESTIONS_INAVLID'
+    for question in data['questions']['easy']:
+        if not isinstance(question['question'], str):
+            return 'EASY_QUESTION_TEXT_INVALID'
+        try:
+            for answer in question['answers']:
+                if not isinstance(answer, str):
+                    return 'EASY_QUESTION_ANSWER_INVALID'
+        except:
+            return 'EASY_QUESTION_ANSWERS_INVALID'
+        if not isinstance(question['correct_answer_index'], int):
+            return 'EASY_CORRECT_ANSWER_INDEX_INVALID'
+        try:
+            question['answers'][question['correct_answer_index']]
+        except:
+            return 'EASY_CORRECT_ANSWER_INDEX_OUTBOUND'
+        try:
+            if not isinstance(question['image'], str):
+                return 'EASY_IMAGE_URL_INVALID'
+        except KeyError:
+            pass
+    for question in data['questions']['medium']:
+        if not isinstance(question['question'], str):
+            return 'MEDIUM_QUESTION_TEXT_INVALID'
+        try:
+            for answer in question['answers']:
+                if not isinstance(answer, str):
+                    return 'MEDIUM_QUESTION_ANSWER_INVALID'
+        except:
+            return 'MEDIUM_QUESTION_ANSWERS_INVALID'
+        if not isinstance(question['correct_answer_index'], int):
+            return 'MEDIUM_CORRECT_ANSWER_INDEX_INVALID'
+        try:
+            question['answers'][question['correct_answer_index']]
+        except:
+            return 'MEDIUM_CORRECT_ANSWER_INDEX_OUTBOUND'
+        try:
+            if not isinstance(question['image'], str):
+                return 'MEDIUM_IMAGE_URL_INVALID'
+        except KeyError:
+            pass
+    for question in data['questions']['hard']:
+        if not isinstance(question['question'], str):
+            return 'HARD_QUESTION_TEXT_INVALID'
+        try:
+            for answer in question['answers']:
+                if not isinstance(answer, str):
+                    return 'HARD_QUESTION_ANSWER_INVALID'
+        except:
+            return 'HARD_QUESTION_ANSWERS_INVALID'
+        if not isinstance(question['correct_answer_index'], int):
+            return 'HARD_CORRECT_ANSWER_INDEX_INVALID'
+        try:
+            question['answers'][question['correct_answer_index']]
+        except:
+            return 'HARD_CORRECT_ANSWER_INDEX_OUTBOUND'
+        try:
+            if not isinstance(question['image'], str):
+                return 'HARD_IMAGE_URL_INVALID'
+        except KeyError:
+            pass
+    return True
 
 def id_generator(size=10, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
