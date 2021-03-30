@@ -123,6 +123,7 @@ searchfunc()
 </script>
 <script>
 function sortTable(n, init) {
+  var prev_column = localStorage.getItem("sort_column")
   localStorage.setItem("sort_column", n)
   var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
   table = document.getElementById("myTable");
@@ -186,7 +187,11 @@ function sortTable(n, init) {
     }
   }
 } else if (init == false){
-  reverseTableRows("myTable");
+    if (prev_column != 0){
+      window.location.reload();
+    } else{
+      reverseTableRows("myTable");
+    }
 }
 }
 function reverseTableRows(tableId) {
