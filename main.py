@@ -109,7 +109,6 @@ def save_test_response(username, test_id):
     data["long_time_stamp"] = str(now.day)+"-"+str(now.month)+"-"+str(now.year)+" "+str(hour)+":"+str(minute)+":"+str(now.second)+' '+c_m
     response_id = get_user_response(username, test_id)
     if response_id != False:
-        print('response_id', response_id)
         with open('../data/response_data/'+test_id+'.json') as f:
             cdata = ast.literal_eval(f.read())
         cresponse_count = len(cdata['responses'])
@@ -531,7 +530,6 @@ def get_created_tests_list(username):
         sort_prep_list.append(test['last_date']+' '+test['last_time']+' '+temp_id)
         test['temp_id'] = temp_id
     sorted_prep_list = sorted(sort_prep_list)
-    print(sorted_prep_list)
     final_sorted_list = []
     for test_sort_id in sorted_prep_list:
         test_sort_id = test_sort_id[-5:]
@@ -970,7 +968,6 @@ def test_edit(code):
                     metadata['last_date'] = c_date
                     f.write(str(metadata))
                 try:
-                    print('test1')
                     with open('../data/user_data/'+flask.session['username']+'/created_tests/'+code+'.json') as f:
                         cr_fdata = ast.literal_eval(f.read())
                     try:
@@ -984,11 +981,8 @@ def test_edit(code):
                         cr_fdata['responses_count'] = responses_count
                         cr_fdata['last_time'] = c_time
                         cr_fdata['last_date'] = c_date
-                        print('test')
                         f.write(str(cr_fdata))
-                        print(cr_fdata)
                 except FileNotFoundError:
-                    print('test2')
                     with open('../data/user_data/'+flask.session['username']+'/created_tests/'+code+'.json', 'w') as f:
                         f.write(str({"last_time": c_time, "last_date": c_date, "name": "Undefined", "subject": "Undefined", "responses_count": 0}))
                 return flask.redirect('/t/'+code+'/edit')
