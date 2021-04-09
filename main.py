@@ -952,7 +952,7 @@ def test_edit(code):
     try:
         title = parse_dict(test_data)['test_name']
     except:
-        title = 'EDIT TEST'
+        title = 'Untitled'
     if flask.request.method == 'GET':
         sync_arg = flask.request.args.get('sync')
         if sync_arg == '':
@@ -1032,7 +1032,9 @@ def test_analytics(code):
     try:
         title = parse_dict(test_data)['test_name']
     except KeyError:
-        title = 'TEST FAILING'
+        return "The test was not properly created. Please contact the owner of this test."
+    except SyntaxError:
+        return "The test was not properly created. Please contact the owner of this test."
     try:
         with open('../data/response_data/'+code+'.json') as f:
             response_data = parse_dict(f.read())
@@ -1061,7 +1063,9 @@ def test_analytics_user(code, username):
     try:
         title = parse_dict(test_data)['test_name']
     except KeyError:
-        title = 'TEST FAILING'
+        return "The test was not properly created. Please contact the owner of this test."
+    except SyntaxError:
+        return "The test was not properly created. Please contact the owner of this test."
     with open('../data/response_data/'+code+'.json') as f:
         fdata = parse_dict(f.read())['responses'][int(get_user_response(username, code))]
         response_data = fdata['question_stream']
