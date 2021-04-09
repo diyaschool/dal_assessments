@@ -56,6 +56,7 @@ def check_sharing_perms(test_metadata, username):
     for user in test_metadata['sharing']:
         if user['username'] == username:
             return user['settings']
+    return {"edit": False, "overview-analytics": False, "individual-analytics": False, "files": False, "attend": False}
 
 def check_hook_integrity(ip):
     if ipaddress.ip_address(ip) in ipaddress.ip_network('192.30.252.0/22') or ipaddress.ip_address(ip) in ipaddress.ip_network('185.199.108.0/22') or ipaddress.ip_address(ip) in ipaddress.ip_network('140.82.112.0/20'):
