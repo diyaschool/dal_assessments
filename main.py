@@ -1,4 +1,5 @@
 import textwrap
+import json
 import shutil
 import datetime
 import ast
@@ -43,6 +44,12 @@ to_zone = tz.gettz('Asia/Kolkata')
 
 #################### Utility Functions ####################
 
+def parse_dict(str_data):
+    try:
+        return json.loads(str_data)
+    except json.decoder.JSONDecodeError:
+        return ast.literal_eval(str_data)
+
 def check_sharing_perms(test_metadata, username):
     if test_metadata.get('sharing') == None:
         return {"edit": False, "overview-analytics": False, "individual-analytics": False, "files": False, "attend": False}
@@ -59,7 +66,7 @@ def check_hook_integrity(ip):
 def get_user_response(username, test_id):
     try:
         with open('../data/response_data/'+test_id+'.json') as f:
-            data = ast.literal_eval(f.read())
+            data = parse_dict(f.read())
     except FileNotFoundError:
         return False
     for i, response in enumerate(data['responses']):
@@ -69,10 +76,10 @@ def get_user_response(username, test_id):
 
 def save_test_response(username, test_id):
     with open('../data/user_data/'+username+'/test_data/'+test_id+'.json') as f:
-        tdata = ast.literal_eval(f.read())
+        tdata = parse_dict(f.read())
     tdata['completed'] = True
     with open('../data/user_data/'+username+'/test_data/'+test_id+'.json', 'w') as f:
-        f.write(str(tdata))
+        f.write(json.dumps(tdata))
     total_time = 0
     times = []
     for i in tdata['question_stream']:
@@ -86,7 +93,7 @@ def save_test_response(username, test_id):
     data['name'] = user_data['name']
     data['average_time'] = round(sum(times)/len(times), 2)
     with open('../data/user_data/'+username+'/test_data/'+test_id+'.json') as f:
-        data['question_stream'] = ast.literal_eval(f.read())['question_stream']
+        data['question_stream'] = parse_dict(f.read())['question_stream']
     now = datetime.datetime.now()
     now.replace(tzinfo=from_zone)
     now = now.astimezone(to_zone)
@@ -104,13 +111,13 @@ def save_test_response(username, test_id):
     else:
         minute = now.minute
     with open('../data/test_metadata/'+test_id+'.json') as f:
-        test_metadata = ast.literal_eval(f.read())
+        test_metadata = parse_dict(f.read())
     data["time_stamp"] = str(hour)+":"+str(minute)+":"+str(now.second)+' '+c_m
     data["long_time_stamp"] = str(now.day)+"-"+str(now.month)+"-"+str(now.year)+" "+str(hour)+":"+str(minute)+":"+str(now.second)+' '+c_m
     response_id = get_user_response(username, test_id)
     if response_id != False:
         with open('../data/response_data/'+test_id+'.json') as f:
-            cdata = ast.literal_eval(f.read())
+            cdata = parse_dict(f.read())
         cresponse_count = len(cdata['responses'])
         data['index'] = int(response_id)+1
         try:
@@ -119,35 +126,35 @@ def save_test_response(username, test_id):
             data['attempts'] = 2
         cdata['responses'][int(response_id)] = data
         with open('../data/response_data/'+test_id+'.json', 'w') as f:
-            f.write(str(cdata))
+            f.write(json.dumps(cdata))
     else:
         try:
             with open('../data/response_data/'+test_id+'.json') as f:
-                cdata = ast.literal_eval(f.read())
+                cdata = parse_dict(f.read())
             cresponse_count = len(cdata['responses'])
             with open('../data/user_data/'+test_metadata['owner']+'/created_tests/'+test_id+'.json') as f:
-                cr_fdata = ast.literal_eval(f.read())
+                cr_fdata = parse_dict(f.read())
             cr_fdata['responses_count'] = len(cdata['responses'])+1
             with open('../data/user_data/'+test_metadata['owner']+'/created_tests/'+test_id+'.json', 'w') as f:
-                f.write(str(cr_fdata))
+                f.write(json.dumps(cr_fdata))
             data['index'] = cresponse_count+1
             data['attempts'] = 1
             cdata['responses'].append(data)
             with open('../data/response_data/'+test_id+'.json', 'w') as f:
-                f.write(str(cdata))
+                f.write(json.dumps(cdata))
         except FileNotFoundError:
             with open('../data/user_data/'+test_metadata['owner']+'/created_tests/'+test_id+'.json') as f:
-                cr_fdata = ast.literal_eval(f.read())
+                cr_fdata = parse_dict(f.read())
             cr_fdata['responses_count'] = 1
             with open('../data/user_data/'+test_metadata['owner']+'/created_tests/'+test_id+'.json', 'w') as f:
-                f.write(str(cr_fdata))
+                f.write(json.dumps(cr_fdata))
             cdata = {}
             cdata['responses'] = []
             data['index'] = 1
             data['attempts'] = 1
             cdata['responses'].append(data)
             with open('../data/response_data/'+test_id+'.json', 'w') as f:
-                f.write(str(cdata))
+                f.write(json.dumps(cdata))
 
 def delete_score(username, test_id):
     try:
@@ -159,7 +166,7 @@ def update_score(username, test_id, ans_res, difficulty, question_id, answer_ind
     try:
         with open('../data/user_data/'+username+'/test_data/'+test_id+'.json') as f:
             fdata = f.read()
-        data = ast.literal_eval(fdata)
+        data = parse_dict(fdata)
         try:
             if data['completed'] == True:
                 data = {}
@@ -201,14 +208,14 @@ def update_score(username, test_id, ans_res, difficulty, question_id, answer_ind
         data['question_stream'].append({"difficulty": difficulty, "question_id": question_id, "question": test_data['questions'][difficulty][question_id]['question'], "given_answer": ans_given_text, "given_answer_index": answer_index, 'ans_res': ans_res, 'ans_score': ans_score, "time_taken": time_taken, "time_stamp": str(hour)+":"+str(minute)+":"+str(now.second)+' '+c_m, "long_time_stamp": str(now.day)+"-"+str(now.month)+"-"+str(now.year)+" "+str(hour)+":"+str(minute)+":"+str(now.second)+' '+c_m, "index": 1})
     data['score'] = score
     with open('../data/user_data/'+username+'/test_data/'+test_id+'.json', 'w') as f:
-        f.write(str(data))
+        f.write(json.dumps(data))
     return True
 
 def get_user_data(user_id):
     try:
         with open('../data/user_metadata/'+user_id) as f:
             fdata = f.read()
-        data = ast.literal_eval(fdata)
+        data = parse_dict(fdata)
         return data
     except FileNotFoundError:
         return False
@@ -242,7 +249,7 @@ def convert(sheet):
         for i in range(len(sheet[2])):
             if sheet[2][i] == '':
                 continue
-            c_a_i = ast.literal_eval(sheet[4][i])-1
+            c_a_i = parse_dict(sheet[4][i])-1
             if sheet[5][i] == '':
                 output['questions']['easy'].append({"question": sheet[2][i], "answers": sheet[3][i].split('\n'), "correct_answer_index": c_a_i})
             else:
@@ -250,7 +257,7 @@ def convert(sheet):
         for i in range(len(sheet[6])):
             if sheet[6][i] == '':
                 continue
-            c_a_i = ast.literal_eval(sheet[8][i])-1
+            c_a_i = parse_dict(sheet[8][i])-1
             if sheet[9][i] == '':
                 output['questions']['medium'].append({"question": sheet[6][i], "answers": sheet[7][i].split('\n'), "correct_answer_index": c_a_i})
             else:
@@ -258,7 +265,7 @@ def convert(sheet):
         for i in range(len(sheet[10])):
             if sheet[10][i] == '':
                 continue
-            c_a_i = ast.literal_eval(sheet[12][i])-1
+            c_a_i = parse_dict(sheet[12][i])-1
             try:
                 if sheet[13][i] == '':
                     output['questions']['hard'].append({"question": sheet[10][i], "answers": sheet[11][i].split('\n'), "correct_answer_index": c_a_i})
@@ -274,7 +281,7 @@ def convert(sheet):
                         q_n += 1
                 output['question_count'] = q_n
             else:
-                output['question_count'] = ast.literal_eval(sheet[0][2])
+                output['question_count'] = parse_dict(sheet[0][2])
         except:
             q_n = 0
             for difficulty in output['questions']:
@@ -305,14 +312,14 @@ def create_new_test_sheet(owner):
     with open('../data/test_data/'+test_id+'/config.json', 'w') as f:
         f.write('')
     with open('../data/test_metadata/'+test_id+'.json', 'w') as f:
-        f.write(str({"owner": owner, "time": c_time, "date": c_date, "sheet_id": sheet_id, "last_time": c_time, "last_date": c_date}))
+        f.write(json.dumps({"owner": owner, "time": c_time, "date": c_date, "sheet_id": sheet_id, "last_time": c_time, "last_date": c_date}))
     with open('../data/user_data/'+owner+'/created_tests/'+test_id+'.json', 'w') as f:
-        f.write(str({"last_time": c_time, "last_date": c_date, "name": "Undefined", "subject": "Undefined", "responses_count": 0}))
+        f.write(json.dumps({"last_time": c_time, "last_date": c_date, "name": "Undefined", "subject": "Undefined", "responses_count": 0}))
     return (test_id, sheet_id)
 
 def validate_test_data(data_string):
     try:
-        data = ast.literal_eval(data_string)
+        data = parse_dict(data_string)
     except:
         return 'SYNTAX_INVALID'
     if not isinstance(data['test_name'], str):
@@ -395,7 +402,7 @@ def load_questions(test_id):
     except FileNotFoundError:
         return False
     try:
-        data = ast.literal_eval(fdata)
+        data = parse_dict(fdata)
     except SyntaxError:
         return 'syntax'
     counter = 0
@@ -522,7 +529,7 @@ def get_created_tests_list(username):
     created_tests = []
     for test in created_test_list:
         with open('../data/user_data/'+username+'/created_tests/'+test) as f:
-            created_tests.append(ast.literal_eval(f.read()))
+            created_tests.append(parse_dict(f.read()))
     sort_prep_list = []
     for i, test in enumerate(created_tests):
         test['id'] = created_test_list[i][:-5]
@@ -622,13 +629,13 @@ def t_verify(code):
             ans_score = 15
         elif flask.session['t']['difficulty'] == 2:
             ans_score = 20
-        flask.session['t']['score'] = str(ast.literal_eval(flask.session['t']['score'])+ans_score)
+        flask.session['t']['score'] = str(parse_dict(flask.session['t']['score'])+ans_score)
     else:
         ans_score = 0
     flask.session['t']['verified'] = True
     time_taken = time.time()-flask.session['t']['time']
-    update_score(flask.session['username'], code, flask.session['t']['prev_q_res'], flask.session['t']['difficulty'], flask.session['t']['q_id'], ast.literal_eval(data['answer']), flask.session['t']['score'], ans_score, time_taken)
-    flask.session['t']['q'] = str(ast.literal_eval(flask.session['t']['q'])+1)
+    update_score(flask.session['username'], code, flask.session['t']['prev_q_res'], flask.session['t']['difficulty'], flask.session['t']['q_id'], parse_dict(data['answer']), flask.session['t']['score'], ans_score, time_taken)
+    flask.session['t']['q'] = str(parse_dict(flask.session['t']['q'])+1)
     flask.session.modified = True
     return flask.redirect('/t/'+code)
 
@@ -650,7 +657,7 @@ def t_view(code):
             authorized = True
             break
     with open('../data/test_metadata/'+code+'.json') as f:
-        test_metadata = ast.literal_eval(f.read())
+        test_metadata = parse_dict(f.read())
     if check_sharing_perms(test_metadata, flask.session['username'])['attend'] == True:
         authorized = True
     if authorized == False:
@@ -697,7 +704,7 @@ def t_view(code):
         delete_score(flask.session['username'], code)
         return flask.render_template('t_completed.html', test_name=question_data['test_name'], score=score, name=user_data['name'], username=flask.session['username'], code=code)
     else:
-        if question_data['question_count'] == ast.literal_eval(flask.session['t']['q'])-1:
+        if question_data['question_count'] == parse_dict(flask.session['t']['q'])-1:
             score = flask.session['t']['score']
             flask.session.pop('t')
             flask.session.modified = True
@@ -710,7 +717,7 @@ def t_view(code):
                 pass
             else:
                 with open('../data/user_metadata/'+flask.session['username'], 'w') as f:
-                    f.write(str(user_data))
+                    f.write(json.dumps(user_data))
             save_test_response(flask.session['username'], code)
             delete_score(flask.session['username'], code)
             return flask.render_template('t_completed.html', test_name=question_data['test_name'], score=score, name=user_data['name'], username=flask.session['username'], code=code)
@@ -860,7 +867,7 @@ def login():
         try:
             with open('../data/user_metadata/'+form_data['username'].lower()) as f:
                 fdata = f.read()
-            data = ast.literal_eval(fdata)
+            data = parse_dict(fdata)
             password = hashlib.sha224(form_data['password'].encode()).hexdigest()
             if data['password'] != password:
                 if desktop:
@@ -931,7 +938,7 @@ def test_edit(code):
     user_data = get_user_data(flask.session['username'])
     try:
         with open('../data/test_metadata/'+code+'.json') as f:
-            data = ast.literal_eval(f.read())
+            data = parse_dict(f.read())
     except:
         return flask.render_template('404.html'), 404
     if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags'] or check_sharing_perms(data, flask.session['username'])['edit'] == True:
@@ -942,7 +949,7 @@ def test_edit(code):
         test_data = f.read()
     sheet_id = data.get('sheet_id')
     try:
-        title = ast.literal_eval(test_data)['test_name']
+        title = parse_dict(test_data)['test_name']
     except:
         title = 'EDIT TEST'
     if flask.request.method == 'GET':
@@ -955,9 +962,9 @@ def test_edit(code):
             test_validation = validate_test_data(str(n_test_data))
             if test_validation == True:
                 with open('../data/test_data/'+code+'/config.json', 'w') as f:
-                    f.write(str(n_test_data))
+                    f.write(json.dumps(n_test_data))
                 with open('../data/test_metadata/'+code+'.json') as f:
-                    metadata = ast.literal_eval(f.read())
+                    metadata = parse_dict(f.read())
                 with open('../data/test_metadata/'+code+'.json', 'w') as f:
                     dt = datetime.datetime.now()
                     dt.replace(tzinfo=from_zone)
@@ -966,13 +973,13 @@ def test_edit(code):
                     c_date = str(dt.year)+'-'+str(dt.month)+'-'+str(dt.day)
                     metadata['last_time'] = c_time
                     metadata['last_date'] = c_date
-                    f.write(str(metadata))
+                    f.write(json.dumps(metadata))
                 try:
                     with open('../data/user_data/'+flask.session['username']+'/created_tests/'+code+'.json') as f:
-                        cr_fdata = ast.literal_eval(f.read())
+                        cr_fdata = parse_dict(f.read())
                     try:
                         with open('../data/response_data/'+code+'.json') as g:
-                            responses_count = len(ast.literal_eval(g.read())['responses'])
+                            responses_count = len(parse_dict(g.read())['responses'])
                     except FileNotFoundError:
                         responses_count = 0
                     with open('../data/user_data/'+flask.session['username']+'/created_tests/'+code+'.json', 'w') as f:
@@ -981,10 +988,10 @@ def test_edit(code):
                         cr_fdata['responses_count'] = responses_count
                         cr_fdata['last_time'] = c_time
                         cr_fdata['last_date'] = c_date
-                        f.write(str(cr_fdata))
+                        f.write(json.dumps(cr_fdata))
                 except FileNotFoundError:
                     with open('../data/user_data/'+flask.session['username']+'/created_tests/'+code+'.json', 'w') as f:
-                        f.write(str({"last_time": c_time, "last_date": c_date, "name": "Undefined", "subject": "Undefined", "responses_count": 0}))
+                        f.write(json.dumps({"last_time": c_time, "last_date": c_date, "name": "Undefined", "subject": "Undefined", "responses_count": 0}))
                 return flask.redirect('/t/'+code+'/edit')
             else:
                 return flask.render_template('t_edit.html', test_data=test_data, sheet_id=sheet_id, title=title, username=flask.session['username'], name=user_data['name'], code=code, alert="Error: "+test_validation, base_uri=flask.request.url_root)
@@ -1009,7 +1016,7 @@ def test_analytics(code):
     user_data = get_user_data(flask.session['username'])
     try:
         with open('../data/test_metadata/'+code+'.json') as f:
-            data = ast.literal_eval(f.read())
+            data = parse_dict(f.read())
     except:
         return flask.render_template('404.html'), 404
     if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags'] or check_sharing_perms(data, flask.session['username'])['overview-analytics'] == True:
@@ -1022,12 +1029,12 @@ def test_analytics(code):
     with open('../data/test_data/'+code+'/config.json') as f:
         test_data = f.read()
     try:
-        title = ast.literal_eval(test_data)['test_name']
+        title = parse_dict(test_data)['test_name']
     except KeyError:
         title = 'TEST FAILING'
     try:
         with open('../data/response_data/'+code+'.json') as f:
-            response_data = ast.literal_eval(f.read())
+            response_data = parse_dict(f.read())
     except FileNotFoundError:
         response_data = {'responses': []}
     return flask.render_template('test_analytics.html', test_name=title, username=flask.session['username'], name=user_data['name'], responses=response_data['responses'], response_count=len(response_data['responses']), code=code)
@@ -1038,7 +1045,7 @@ def test_analytics_user(code, username):
     user_data = get_user_data(flask.session['username'])
     try:
         with open('../data/test_metadata/'+code+'.json') as f:
-            data = ast.literal_eval(f.read())
+            data = parse_dict(f.read())
     except:
         return flask.render_template('404.html'), 404
     if data['owner'] != flask.session['username']:
@@ -1051,11 +1058,11 @@ def test_analytics_user(code, username):
     with open('../data/test_data/'+code+'/config.json') as f:
         test_data = f.read()
     try:
-        title = ast.literal_eval(test_data)['test_name']
+        title = parse_dict(test_data)['test_name']
     except KeyError:
         title = 'TEST FAILING'
     with open('../data/response_data/'+code+'.json') as f:
-        fdata = ast.literal_eval(f.read())['responses'][int(get_user_response(username, code))]
+        fdata = parse_dict(f.read())['responses'][int(get_user_response(username, code))]
         response_data = fdata['question_stream']
         score = fdata['score']
     for response in response_data:
@@ -1123,7 +1130,7 @@ def upload_file(code):
     if flask.request.method == 'GET':
         user_data = get_user_data(flask.session['username'])
         with open('../data/test_metadata/'+code+'.json') as f:
-            test_metadata = ast.literal_eval(f.read())
+            test_metadata = parse_dict(f.read())
         if flask.session['username'] != test_metadata['owner']:
             if 'admin' in user_data['tags'] or 'team' in user_data['tags'] or check_sharing_perms(test_metadata, flask.session['username'])['files'] == True:
                 pass
@@ -1152,7 +1159,7 @@ def upload_file(code):
 def upload_delete(code, file_id):
     user_data = get_user_data(flask.session['username'])
     with open('../data/test_metadata/'+code+'.json') as f:
-        test_metadata = ast.literal_eval(f.read())
+        test_metadata = parse_dict(f.read())
     if flask.session['username'] != test_metadata['owner']:
         if 'admin' in user_data['tags'] or 'team' in user_data['tags'] or check_sharing_perms(test_metadata, flask.session['username'])['files'] == True:
             pass
