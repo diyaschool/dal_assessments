@@ -5,12 +5,19 @@ import hashlib
 import shutil
 import getch
 import ast
+import json
+
+def parse_dict(str_data):
+    try:
+        return json.loads(str_data)
+    except json.decoder.JSONDecodeError:
+        return parse_dict(str_data)
 
 def create(username, password, name, tags):
     if os.path.isfile('../data/user_metadata/'+username):
         return False
     with open('../data/user_metadata/'+username, 'w') as f:
-        f.write(str({"name": name, "password": hashlib.sha224(password.encode()).hexdigest(), "tags": tags, "has_changed_password": False}))
+        f.write(json.dumps({"name": name, "password": hashlib.sha224(password.encode()).hexdigest(), "tags": tags, "has_changed_password": False}))
     os.mkdir('../data/user_data/'+username)
     os.mkdir('../data/user_data/'+username+'/test_data')
     os.mkdir('../data/user_data/'+username+'/created_tests')
@@ -25,23 +32,23 @@ def delete(username):
 
 def get(username):
     with open('../data/user_metadata/'+username) as f:
-        return ast.literal_eval(f.read())
+        return parse_dict(f.read())
 
 def modify(username, password, name, tags):
     with open('../data/user_metadata/'+username, 'w') as f:
-        f.write(str({"name": name, "password": hashlib.sha224(password.encode()).hexdigest(), "tags": tags}))
+        f.write(json.dumps({"name": name, "password": hashlib.sha224(password.encode()).hexdigest(), "tags": tags}))
 
 def change_password(username, password):
     data = get(username)
     with open('../data/user_metadata/'+username, 'w') as f:
-        f.write(str({"name": data['name'], "password": hashlib.sha224(password.encode()).hexdigest(), "tags": data['tags']}))
+        f.write(json.dumps({"name": data['name'], "password": hashlib.sha224(password.encode()).hexdigest(), "tags": data['tags']}))
 
 def change_test_owner(file_name, new_owner):
     with open('../data/test_metadata/'+file_name) as f:
-        data = ast.literal_eval(f.read())
+        data = parse_dict(f.read())
     data['owner'] = new_owner
     with open('../data/test_metadata/'+file_name, 'w') as f:
-        f.write(str(data))
+        f.write(json.dumps(data))
 
 def migrate_data(current_username, new_username):
     os.rename('../data/user_metadata/'+current_username, '../data/user_metadata/'+new_username)
