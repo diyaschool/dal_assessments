@@ -587,7 +587,7 @@ def home():
     user_data = get_user_data(flask.session['username'])
     created_tests = get_created_tests_list(flask.session['username'])
     if desktop:
-        return flask.render_template('home.html', username=flask.session['username'], name=user_data['name'], created_tests=created_tests)
+        return flask.render_template('home.html', username=flask.session['username'], name=user_data['name'], created_tests=created_tests, c_test_len=len(created_tests))
     else:
         return flask.render_template('mobile/home.html', username=flask.session['username'], name=user_data['name'])
 
