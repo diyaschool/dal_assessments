@@ -1128,59 +1128,53 @@ def settings():
 def sheets_api_authorize():
     global user_credentials
     user_data = get_user_data(flask.session['username'])
-    if 'admin' in user_data['tags']:
-        if flask.request.method == 'GET':
-            try:
-                user_credentials.pop(flask.session['username'])
-            except KeyError:
-                pass
-            gauth = sheets_api.authorize()
-            creds = gauth.load_credentials(flask.session['username'])
-            user_credentials[flask.session['username']] = gauth
-            if creds:
-                if gauth.verify_token(creds):
-                    flask.session['settings_alert'] = 'You have already linked your Google Account'
-                    return flask.redirect('/settings')
-                else:
-                    url = gauth.get_url()
-                    return flask.render_template('sheets_code.html', url=url, username=flask.session['username'], name=user_data['name'])
+    if flask.request.method == 'GET':
+        try:
+            user_credentials.pop(flask.session['username'])
+        except KeyError:
+            pass
+        gauth = sheets_api.authorize()
+        creds = gauth.load_credentials(flask.session['username'])
+        user_credentials[flask.session['username']] = gauth
+        if creds:
+            if gauth.verify_token(creds):
+                flask.session['settings_alert'] = 'You have already linked your Google Account'
+                return flask.redirect('/settings')
             else:
                 url = gauth.get_url()
-                print(url)
                 return flask.render_template('sheets_code.html', url=url, username=flask.session['username'], name=user_data['name'])
         else:
-            data = flask.request.form
-            try:
-                gauth = user_credentials[flask.session['username']]
-            except KeyError:
-                flask.session['settings_alert'] = 'Something has gone wrong...'
-                return flask.redirect('/settings')
-            creds = gauth.verify_code(data['code'])
-            if creds != False:
-                gauth.save_credentials(creds, flask.session['username'])
-                user_credentials.pop(flask.session['username'])
-                flask.session['settings_alert'] = 'Your Google account has successfully been linked'
-                return flask.redirect('/settings')
-            else:
-                user_credentials.pop(flask.session['username'])
-                flask.session['settings_alert'] = 'There was an error during authorization'
-                return flask.redirect('/settings')
+            url = gauth.get_url()
+            print(url)
+            return flask.render_template('sheets_code.html', url=url, username=flask.session['username'], name=user_data['name'])
     else:
-        return flask.render_template('404.html'), 404
+        data = flask.request.form
+        try:
+            gauth = user_credentials[flask.session['username']]
+        except KeyError:
+            flask.session['settings_alert'] = 'Something has gone wrong...'
+            return flask.redirect('/settings')
+        creds = gauth.verify_code(data['code'])
+        if creds != False:
+            gauth.save_credentials(creds, flask.session['username'])
+            user_credentials.pop(flask.session['username'])
+            flask.session['settings_alert'] = 'Your Google account has successfully been linked'
+            return flask.redirect('/settings')
+        else:
+            user_credentials.pop(flask.session['username'])
+            flask.session['settings_alert'] = 'There was an error during authorization'
+            return flask.redirect('/settings')
 
 @app.route('/sheets_api_authorize/delete')
 def sheets_api_authorize_delete():
     user_data = get_user_data(flask.session['username'])
-    if  'admin' in user_data['tags']:
-        try:
-            os.remove('../data/credentials/'+flask.session['username']+'.pickle')
-            flask.session['settings_alert'] = 'Your Google account has been successfully unlinked'
-            return flask.redirect('/settings')
-        except FileNotFoundError:
-            flask.session['settings_alert'] = 'There was a problem unlinking your Google Account'
-            return flask.redirect('/settings')
-    else:
-        return flask.render_template('404.html'), 404
+    try:
+        os.remove('../data/credentials/'+flask.session['username']+'.pickle')
+        flask.session['settings_alert'] = 'Your Google account has been successfully unlinked'
+        return flask.redirect('/settings')
+    except FileNotFoundError:
+        flask.session['settings_alert'] = 'There was a problem unlinking your Google Account'
+        return flask.redirect('/settings')
 
 @app.route('/upload_file')
 def u_r():
