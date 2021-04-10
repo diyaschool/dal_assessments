@@ -31,9 +31,7 @@ except:
 
 with open('../data/auth_domains') as f:
     DOMAINS = f.read().split('\n')
-print(DOMAINS)
 DOMAIN = DOMAINS[0]
-print(DOMAIN)
 
 anonymous_urls = ['/favicon.ico', '/clear_test_cookies', '/logo.png', '/background.png', '/loading.gif', '/update_server']
 mobile_agents = ['Android', 'iPhone', 'iPod touch']
@@ -909,45 +907,6 @@ def new_test():
         test_id, _ = test_data
         return flask.redirect('/t/'+test_id+'/edit')
 
-@app.route('/sheets_api_authorize/', methods=['GET', 'POST'])
-def sheets_api_authorize():
-    global user_credentials
-    user_data = get_user_data(flask.session['username'])
-    if 'admin' in user_data['tags']:
-        if flask.request.method == 'GET':
-            try:
-                user_credentials.pop(flask.session['username'])
-            except KeyError:
-                pass
-            gauth = sheets_api.authorize()
-            creds = gauth.load_credentials(flask.session['username'])
-            user_credentials[flask.session['username']] = gauth
-            if creds:
-                if gauth.verify_token(creds):
-                    return 'authorized'
-                else:
-                    url = gauth.get_url()
-                    return "<script>window.open('"+url+"')</script><form action='/sheets_api_authorize/' method='POST'><input type='text' name='code' placeholder='code' autofocus><input type='submit' value='Enter'></form>"
-            else:
-                url = gauth.get_url()
-                return "<script>window.open('"+url+"')</script><form action='/sheets_api_authorize/' method='POST'><input type='text' name='code' placeholder='code' autofocus><input type='submit' value='Enter'></form>"
-        else:
-            data = flask.request.form
-            try:
-                gauth = user_credentials[flask.session['username']]
-            except KeyError:
-                return 'something went wrong'
-            creds = gauth.verify_code(data['code'])
-            if creds != False:
-                gauth.save_credentials(creds, flask.session['username'])
-                user_credentials.pop(flask.session['username'])
-                return 'authorization_complete'
-            else:
-                user_credentials.pop(flask.session['username'])
-                return 'authorization_error'
-    else:
-        return flask.render_template('404.html'), 404
-
 @app.route('/t/<code>/edit/', methods=['GET', 'POST', 'PUT'])
 def test_edit(code):
     if '\\' in code or '.' in code:
@@ -1110,18 +1069,6 @@ def test_analytics_user(code, username):
         attempts = False
     return flask.render_template('test_analytics_username.html', test_name=title, username=flask.session['username'], name=user_data['name'], responses=response_data, response_count=len(response_data), code=code, auserdata=auserdata, score=score, fdata=fdata, attempts_bool=attempts)
 
-@app.route('/sheets_api_authorize/delete')
-def sheets_api_authorize_delete():
-    user_data = get_user_data(flask.session['username'])
-    if  'admin' in user_data['tags']:
-        try:
-            os.remove('../data/credentials/'+flask.session['username']+'.pickle')
-            return flask.redirect('/sheets_api_authorize')
-        except:
-            return 'file_not_found'
-    else:
-        return flask.render_template('404.html'), 404
-
 @app.route('/change_password', methods=['GET', 'POST'])
 def change_password():
     user_data = get_user_data(flask.session['username'])
@@ -1146,7 +1093,7 @@ def change_password():
         else:
             return flask.render_template('change_password.html', username=flask.session['username'], name=user_data['name'], error='Password incorrect')
 
-@app.route('/settings', methods=['GET', 'POST'])
+@app.route('/settings/', methods=['GET', 'POST'])
 def settings():
     user_data = get_user_data(flask.session['username'])
     if flask.request.method == 'GET':
@@ -1173,6 +1120,62 @@ def settings():
                     return flask.render_template('settings.html', username=flask.session['username'], name=user_data['name'], error='Both passwords must match', alert='none')
             else:
                 return flask.render_template('settings.html', username=flask.session['username'], name=user_data['name'], error='Password incorrect', alert='none')
+
+@app.route('/sheets_api_authorize/', methods=['GET', 'POST'])
+def sheets_api_authorize():
+    global user_credentials
+    user_data = get_user_data(flask.session['username'])
+    if 'admin' in user_data['tags']:
+        if flask.request.method == 'GET':
+            try:
+                user_credentials.pop(flask.session['username'])
+            except KeyError:
+                pass
+            gauth = sheets_api.authorize()
+            creds = gauth.load_credentials(flask.session['username'])
+            user_credentials[flask.session['username']] = gauth
+            if creds:
+                if gauth.verify_token(creds):
+                    flask.session['settings_alert'] = 'You have already linked your Google Account'
+                    return flask.redirect('/settings')
+                else:
+                    url = gauth.get_url()
+                    return flask.render_template('sheets_code.html', url=url, username=flask.session['username'], name=user_data['name'])
+            else:
+                url = gauth.get_url()
+                print(url)
+                return flask.render_template('sheets_code.html', url=url, username=flask.session['username'], name=user_data['name'])
+        else:
+            data = flask.request.form
+            try:
+                gauth = user_credentials[flask.session['username']]
+            except KeyError:
+                flask.session['settings_alert'] = 'Something has gone wrong...'
+                return flask.redirect('/settings')
+            creds = gauth.verify_code(data['code'])
+            if creds != False:
+                gauth.save_credentials(creds, flask.session['username'])
+                user_credentials.pop(flask.session['username'])
+                flask.session['settings_alert'] = 'Your Google account has successfully been linked'
+                return flask.redirect('/settings')
+            else:
+                user_credentials.pop(flask.session['username'])
+                flask.session['settings_alert'] = 'There was an error during authorization'
+                return flask.redirect('/settings')
+    else:
+        return flask.render_template('404.html'), 404
+
+@app.route('/sheets_api_authorize/delete')
+def sheets_api_authorize_delete():
+    user_data = get_user_data(flask.session['username'])
+    if  'admin' in user_data['tags']:
+        try:
+            os.remove('../data/credentials/'+flask.session['username']+'.pickle')
+            return flask.redirect('/sheets_api_authorize')
+        except:
+            return 'file_not_found'
+    else:
+        return flask.render_template('404.html'), 404
 
 @app.route('/upload_file')
 def u_r():
@@ -1225,10 +1228,6 @@ def upload_delete(code, file_id):
 def t_static(code, file_code):
     return flask.send_file('../data/test_data/'+code+'/files/'+file_code+'/'+[f for f in os.listdir('../data/test_data/'+code+'/files/'+file_code) if os.path.isfile(os.path.join('../data/test_data/'+code+'/files/'+file_code, f))][0])
 
-@app.route('/robots.txt')
-def robots_txt():
-    return 'Telegram: @ChaitanyaPy, Github: https://github.com/ChaitanyaPy/'
-
 #################### Error Handlers ####################
 
 @app.errorhandler(404)
@@ -1241,6 +1240,10 @@ def e_500(e):
     return flask.render_template('500.html'), 500
 
 #################### Other Endpoints ####################
+
+@app.route('/robots.txt')
+def robots_txt():
+    return 'Telegram: @ChaitanyaPy, Github: https://github.com/ChaitanyaPy/'
 
 @app.route('/update_server', methods=['post'])
 def update_server():
