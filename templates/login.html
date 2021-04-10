@@ -49,11 +49,12 @@
     display: inline-block;
     text-transform: uppercase;
     font-size: 13px;
+    height: 60px;
     -webkit-box-shadow: 0 10px 30px 0 rgba(95,186,233,0.4);
     box-shadow: 0 10px 30px 0 rgba(95,186,233,0.4);
     -webkit-border-radius: 5px 5px 5px 5px;
     border-radius: 5px 5px 5px 5px;
-    margin: 5px 20px 40px 20px;
+    margin: 5px 20px 15px 20px;
     -webkit-transition: all 0.3s ease-in-out;
     -moz-transition: all 0.3s ease-in-out;
     -ms-transition: all 0.3s ease-in-out;
@@ -84,6 +85,7 @@
     font-size: 16px;
     margin: 5px;
     width: 400px;
+    height: 60px;
     border: 2px solid #f6f6f6;
     -webkit-transition: all 0.5s ease-in-out;
     -moz-transition: all 0.5s ease-in-out;
@@ -110,6 +112,7 @@
     color: #0d0d0d;
     padding: 15px 32px;
     text-align: center;
+    height: 60px;
     text-decoration: none;
     display: inline-block;
     font-size: 16px;
@@ -256,7 +259,7 @@
   min-width: 5px;
   text-align: center;
   border-radius: 8px;
-  height: 8px;
+  height: 60px;
   position: relative;
   top: 3px
 }
@@ -278,8 +281,8 @@
           <input type="password" id="password" class="fadeIn third" name="password" placeholder="Password" required>
         </div><br/>
             <input type="checkbox" class="fadeIn fourth" onclick="myFunction()" id='showPassword'><label class="fadeIn fourth" for='showPassword' style='color: white'>&nbsp;Show Password</label><br/><br/>
-          <input type="submit" class="fadeIn fourth" value="Log In">
-        </form>
+          <input type="submit" class="fadeIn fourth" value="Log In"></form><button class="fadeIn fourth" style=' position: relative; top: 15px; height: 60px; width: 150px' onclick='window.location.href = "https://github.com/login/oauth/authorize?client_id=06e4f3b0a5a33a2b9c46&redirect_uri={{url_root()}}github_sign_in/signin/"'><img src="/github_logo.png" alt="GitHub Sign In" style='width: 40px; height: 40px;'></button>
+
       </center>
     </div>
   </div>

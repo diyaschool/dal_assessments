@@ -1,4 +1,5 @@
 import textwrap
+import requests
 import json
 import shutil
 import datetime
@@ -33,7 +34,7 @@ with open('../data/auth_domains') as f:
     DOMAINS = f.read().split('\n')
 DOMAIN = DOMAINS[0]
 
-anonymous_urls = ['/favicon.ico', '/clear_test_cookies', '/logo.png', '/background.png', '/loading.gif', '/update_server']
+anonymous_urls = ['/favicon.ico', '/clear_test_cookies', '/logo.png', '/background.png', '/loading.gif', '/update_server', '/github_sign_in/signin/']
 mobile_agents = ['Android', 'iPhone', 'iPod touch']
 
 user_credentials = {}
@@ -42,6 +43,28 @@ from_zone = tz.tzlocal()
 to_zone = tz.gettz('Asia/Kolkata')
 
 #################### Utility Functions ####################
+
+def get_github_profile(access_token):
+    req = requests.get('https://api.github.com/user', headers={'Authorization': f'token {access_token}'})
+    return req.json()
+
+def parse_access_token_str(token_str):
+    if token_str[:5] == 'error':
+        return False
+    vars = str(token_str).split('&')
+    access_token = vars[0].split('=')[1]
+    return access_token
+
+def get_github_access_token(code):
+    with open('../data/github_credentials.json') as f:
+        data = json.loads(f.read())
+    client_id = data['client_id']
+    client_secret = data['client_secret']
+    req = requests.post(f"https://github.com/login/oauth/access_token?client_id={client_id}&redirect_uri={'http://'+DOMAIN+'/github_sign_in/'}&client_secret={client_secret}&code={code}")
+    access_token = parse_access_token_str(req.text)
+    if access_token == False:
+        return False
+    return access_token
 
 def parse_dict(str_data):
     try:
@@ -555,7 +578,9 @@ def get_created_tests_list(username):
 def before_request():
     if flask.request.headers['Host'] not in DOMAINS:
         return flask.redirect('http://'+DOMAIN+flask.request.path, 301)
+    print(flask.request.path)
     if flask.request.path != '/login' and flask.request.path not in anonymous_urls and 'static' not in flask.request.path:
+        print('ok')
         try:
             username = flask.session['username']
             f = open('../data/user_metadata/'+username)
@@ -858,10 +883,16 @@ def login():
         if agent in flask.request.headers['User-Agent']:
             desktop = False
     if flask.request.method == 'GET':
+        error = None
+        try:
+            error = flask.session['login_error']
+            flask.session.pop('login_error')
+        except KeyError:
+            pass
         if desktop:
-            return flask.render_template('login.html', error=None, username='')
+            return flask.render_template('login.html', error=error, username='')
         else:
-            return flask.render_template('mobile/login.html', error=None, username='')
+            return flask.render_template('mobile/login.html', error=error, username='')
     elif flask.request.method == 'POST':
         form_data = flask.request.form
         try:
@@ -1173,7 +1204,7 @@ def sheets_api_authorize_delete():
         flask.session['settings_alert'] = 'Your Google account has been successfully unlinked'
         return flask.redirect('/settings')
     except FileNotFoundError:
-        flask.session['settings_alert'] = 'There was a problem unlinking your Google Account'
+        flask.session['settings_alert'] = 'There was a problem unlinking your Google account'
         return flask.redirect('/settings')
 
 @app.route('/upload_file')
@@ -1209,6 +1240,49 @@ def upload_file(code):
         os.mkdir('../data/test_data/'+code+'/files/'+file_id)
         f.save('../data/test_data/'+code+'/files/'+file_id+'/'+f.filename)
         return flask.redirect(flask.request.path)
+
+@app.route('/github_sign_in/<loc>/')
+def github_sign_in(loc):
+    code = flask.request.args['code']
+    if loc == 'auth':
+        access_token = get_github_access_token(code)
+        if access_token == False:
+            flask.session['settings_alert'] = 'There was an error during GitHub authentication. Please try again'
+            return flask.redirect('/settings/')
+        profile = get_github_profile(access_token)
+        with open('../data/github_credentials/'+str(profile['id']), 'w') as f:
+            f.write(flask.session['username'])
+        with open('../data/github_username_credentials/'+flask.session['username'], 'w') as f:
+            f.write(str(profile['id']))
+        flask.session['settings_alert'] = 'Your GitHub account has successfully been linked'
+        return flask.redirect('/settings/')
+    elif loc == 'signin':
+        access_token = get_github_access_token(code)
+        if access_token == False:
+            flask.session['login_error'] = 'There was an error during GitHub authentication. Please log in with out password'
+            return flask.redirect('/login')
+        profile = get_github_profile(access_token)
+        try:
+            with open('../data/github_credentials/'+str(profile['id'])) as f:
+                username = f.read()
+        except FileNotFoundError:
+            flask.session['login_error'] = 'You have not linked this GitHub account yet, please sign in with your password'
+            return flask.redirect('/login')
+        print(flask.session)
+        flask.session['username'] = username
+        print(flask.session)
+        return flask.redirect('/')
+    elif loc == 'delete':
+        try:
+            with open('../data/github_profile_credentials/'+flask.session['username']) as f:
+                profile = f.read()
+            os.remove('../data/github_profile_credentials/'+flask.session['username'])
+            os.remove('../data/github_credentials/'++profile)
+            flask.session['settings_alert'] = 'Your GitHub account has been successfully unlinked'
+            return flask.redirect('/settings')
+        except FileNotFoundError:
+            flask.session['settings_alert'] = 'There was a problem unlinking your GitHub account'
+            return flask.redirect('/settings')
 
 @app.route('/t/<code>/upload/delete/<file_id>/')
 def upload_delete(code, file_id):
