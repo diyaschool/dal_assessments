@@ -580,6 +580,12 @@ def after_request(response):
     response.headers["X-Content-Type-Options"] = "nosniff"
     return response
 
+@app.context_processor
+def context_processor():
+    def url_root():
+        return flask.request.url_root
+    return dict(url_root=url_root)
+
 #################### Content Endpoints ####################
 
 @app.route('/')
