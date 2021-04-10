@@ -14,11 +14,13 @@ class authorize:
             return creds
         except:
             return False
-    def save_credentials(self, creds, file='../data/credentials.pickle'):
+    def save_credentials(self, creds, file='credentials'):
+        file = '../data/credentials/'+file+'.pickle'
         with open(file, 'wb') as token:
             pickle.dump(creds, token)
         return True
-    def load_credentials(self, file='../data/credentials.pickle'):
+    def load_credentials(self, file='credentials.pickle'):
+        file = '../data/credentials/'+file+'.pickle'
         try:
             with open(file, 'rb') as token:
                 creds = pickle.load(token)
@@ -54,7 +56,3 @@ def tamper_with_format(sheet_id, credentials):
     tamper_data = ['Name, Subject, Total questions', 'Student Tags', 'Easy Questions', 'Options', 'Correct Option', 'Image', 'Medium Questions', 'Options', 'Correct Option', 'Image', 'Hard Questions', 'Options', 'Correct Option', 'Image']
     req = sheet.values().update(spreadsheetId=sheet_id, range="A1:Z", valueInputOption="USER_ENTERED", body={"range": "A1:Z", "majorDimension": "ROWS", "values": [tamper_data]})
     req.execute()
-
-if __name__=='__main__':
-    gauth = authorize()
-    tamper_with_format('1FqZwkcNI325Tk4nwcbE2wEylHBX8vP9sFb8_F37Uxh4', gauth.load_credentials())

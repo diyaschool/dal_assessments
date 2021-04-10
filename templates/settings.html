@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Change Password | DAL Assessments</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="/jquery.min.js" ></script>
+  </head>
+  <body style='background-size: cover; background-image: url("/background.png");  background-repeat: no-repeat; background-position: center; background-attachment: fixed;overflow:visible'>
+    <center><br><br><br>
+        <br><br>
+        <div style='background-color: white; border-radius: 20px; opacity: 1; height: auto; width: 1000px;'>
+          <div style='height: auto; width: 1000px; border-bottom: 3px solid lightgray;'><br>
+            <text style='font-size: 30px; font-weight: bold'>Linked Accounts</text><br><br>
+            <div style='width: 300px; height: 120px; cursor: pointer; background-color: #fbfcfc; border: 1px solid lightgray; border-radius: 20px' onclick='window.location.href = "/sheets_api_authorize"'>
+              <br><img src="/google_logo.png" alt="Google Logo" style='width: 70px; height: 70px'>&nbsp;&nbsp;<text style='font-size: 25px'>Google</text><br>
+            </div>
+          <br></div>
+          <div style='height: auto; width: 1000px; border-top: 3px solid lightgray;'><br>
+            <text style='font-size: 30px; font-weight: bold'>Change Password</text><br><br>
+            <form action="/settings/?change_password" method="post">
+              <label for="current_password" style="font-size: 20px">Current password</label><br><input style='width: 400px' type='password' name='current_password' placeholder="Enter current password" id='current_password' required><br><br>
+              <label style="font-size: 20px">New password</label><br><input style='width: 400px' type='password' name='new_password' placeholder="Enter new password" required>
+              <br><input style='width: 400px; position: relative; top: 10px' type='password' name='conf_password' placeholder="Confirm password" required>
+              <br><br><input type="submit" value="Change password"><br><br>
+            </form>
+          </div>
+        </div>
+      <style>
+      body {
+        overflow: hidden;
+      }
+      #preloader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #fff;
+        z-index: 99;
+      }
+      #status {
+        width: 200px;
+        height: 200px;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        background-image: url(/loading.gif);
+        background-repeat: no-repeat;
+        background-position: center;
+        margin: -100px 0 0 -100px;
+      }
+      input[type=text], select {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+input[type=submit] {
+  background-color: #4CAF50;
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+input[type=submit]:hover {
+  background-color: #45a049;
+}
+
+      </style>
+      <style>
+#snackbar {
+  visibility: hidden;
+  min-width: 250px;
+  margin-left: -125px;
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  border-radius: 2px;
+  padding: 16px;
+  position: fixed;
+  z-index: 1;
+  left: 50%;
+  bottom: 30px;
+  font-size: 17px;
+}
+
+#snackbar.show {
+  visibility: visible;
+  -webkit-animation: fadein 0.5s, fadeout 0.5s 4.5s;
+  animation: fadein 0.5s, fadeout 0.5s 4.5s;
+}
+
+@-webkit-keyframes fadein {
+  from {bottom: 0; opacity: 0;}
+  to {bottom: 30px; opacity: 1;}
+}
+
+@keyframes fadein {
+  from {bottom: 0; opacity: 0;}
+  to {bottom: 30px; opacity: 1;}
+}
+
+@-webkit-keyframes fadeout {
+  from {bottom: 30px; opacity: 1;}
+  to {bottom: 0; opacity: 0;}
+}
+
+@keyframes fadeout {
+  from {bottom: 30px; opacity: 1;}
+  to {bottom: 0; opacity: 0;}
+}
+</style>
+      <div style='width: 100%; position: fixed; background-color: black; padding: 10px; top: 0px; left:0px; opacity: 1'>
+        <a style='color: white; font-size: 40px; left: 47%; text-decoration: none' href='/'>DAL Assessments</a>
+        <text style='color: white; position: absolute; right: 50px; top: 10px; font-size: 20px'>Hello {{name}}</text>
+        <text style='color: white; position: absolute; right: 50px; top: 35px'>Logged in as {{username}}</text>
+      </div>
+    </center>
+    {%if error != None%}
+    <script>
+      alert("{{error}}");
+    </script>
+    {%endif%}
+{% include "footer.html" %}
+<div id="snackbar">{{alert}}</div>
+<script>
+function show_snackbar() {
+  var x = document.getElementById("snackbar");
+  x.className = "show";
+  setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
+}
+{%if alert != 'none'%}show_snackbar();{%endif%}
+</script>
+  </body>
+</html>
