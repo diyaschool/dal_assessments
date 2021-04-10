@@ -29,10 +29,11 @@ except:
     with open('../data/cookie_key', 'w') as f:
         f.write(key)
 
-DOMAINS = ['localhost', 'diyaassessments.pythonanywhere.com', 'chaitanyapy.ml']
-DOMAIN = 'diyaassessments.pythonanywhere.com'
-
-# gauth = sheets_api.authorize()
+with open('../data/auth_domains') as f:
+    DOMAINS = f.read().split('\n')
+print(DOMAINS)
+DOMAIN = DOMAINS[0]
+print(DOMAIN)
 
 anonymous_urls = ['/favicon.ico', '/clear_test_cookies', '/logo.png', '/background.png', '/loading.gif', '/update_server']
 mobile_agents = ['Android', 'iPhone', 'iPod touch']
@@ -1144,6 +1145,34 @@ def change_password():
                 return flask.render_template('change_password.html', username=flask.session['username'], name=user_data['name'], error='Both passwords must match')
         else:
             return flask.render_template('change_password.html', username=flask.session['username'], name=user_data['name'], error='Password incorrect')
+
+@app.route('/settings', methods=['GET', 'POST'])
+def settings():
+    user_data = get_user_data(flask.session['username'])
+    if flask.request.method == 'GET':
+        alert = flask.session.get('settings_alert')
+        if alert == None:
+            alert = 'none'
+        try:
+            flask.session.pop('settings_alert')
+        except KeyError:
+            pass
+        return flask.render_template('settings.html', username=flask.session['username'], name=user_data['name'], error=None, alert=alert)
+    elif flask.request.method == 'POST':
+        data = flask.request.form
+        if flask.request.args.get('change_password') == '':
+            if hashlib.sha224(data['current_password'].encode()).hexdigest() == user_data['password']:
+                if data['new_password'] == data['conf_password']:
+                    if data['current_password'] != data['new_password']:
+                        user_manager.change_password(flask.session['username'], data['new_password'])
+                        flask.session['settings_alert'] = 'Your password has been changed successfully'
+                        return flask.redirect("/settings")
+                    else:
+                        return flask.render_template('settings.html', username=flask.session['username'], name=user_data['name'], error='Your new password must be different from the current one', alert='none')
+                else:
+                    return flask.render_template('settings.html', username=flask.session['username'], name=user_data['name'], error='Both passwords must match', alert='none')
+            else:
+                return flask.render_template('settings.html', username=flask.session['username'], name=user_data['name'], error='Password incorrect', alert='none')
 
 @app.route('/upload_file')
 def u_r():
