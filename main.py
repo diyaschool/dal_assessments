@@ -889,8 +889,12 @@ def login():
             flask.session.pop('login_error')
         except KeyError:
             pass
+        with open('../data/github_credentials.json') as f:
+            data = json.loads(f.read())
+        client_id = data['client_id']
+        client_secret = data['client_secret']
         if desktop:
-            return flask.render_template('login.html', error=error, username='')
+            return flask.render_template('login.html', error=error, username='', client_id=client_id)
         else:
             return flask.render_template('mobile/login.html', error=error, username='')
     elif flask.request.method == 'POST':
@@ -1138,7 +1142,11 @@ def settings():
             flask.session.pop('settings_alert')
         except KeyError:
             pass
-        return flask.render_template('settings.html', username=flask.session['username'], name=user_data['name'], error=None, alert=alert)
+        with open('../data/github_credentials.json') as f:
+            data = json.loads(f.read())
+        client_id = data['client_id']
+        client_secret = data['client_secret']
+        return flask.render_template('settings.html', username=flask.session['username'], name=user_data['name'], error=None, alert=alert, client_id=client_id)
     elif flask.request.method == 'POST':
         data = flask.request.form
         if flask.request.args.get('change_password') == '':
