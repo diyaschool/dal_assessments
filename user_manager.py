@@ -11,7 +11,7 @@ def parse_dict(str_data):
     try:
         return json.loads(str_data)
     except json.decoder.JSONDecodeError:
-        return parse_dict(str_data)
+        return ast.literal_eval(str_data)
 
 def create(username, password, name, tags):
     if os.path.isfile('../data/user_metadata/'+username):
