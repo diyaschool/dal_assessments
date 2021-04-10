@@ -903,6 +903,9 @@ def new_test():
     else:
         gauth = sheets_api.authorize()
         creds = gauth.load_credentials(flask.session['username'])
+        if creds == None:
+            flask.session['settings_alert'] = 'Please link your Google account before creating a test'
+            return flask.redirect('/settings')
         test_data = create_new_test_sheet(flask.session['username'], creds)
         test_id, _ = test_data
         return flask.redirect('/t/'+test_id+'/edit')
