@@ -60,7 +60,7 @@ def get_github_access_token(code):
         data = json.loads(f.read())
     client_id = data['client_id']
     client_secret = data['client_secret']
-    req = requests.post(f"https://github.com/login/oauth/access_token?client_id={client_id}&redirect_uri={'http://'+DOMAIN+'/github_sign_in/'}&client_secret={client_secret}&code={code}")
+    req = requests.post(f"https://github.com/login/oauth/access_token?client_id={client_id}&redirect_uri={flask.request.url_root+'github_sign_in/'}&client_secret={client_secret}&code={code}")
     access_token = parse_access_token_str(req.text)
     if access_token == False:
         return False
