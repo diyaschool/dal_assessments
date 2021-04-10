@@ -32,12 +32,12 @@ except:
 DOMAINS = ['localhost', 'diyaassessments.pythonanywhere.com', 'chaitanyapy.ml']
 DOMAIN = 'diyaassessments.pythonanywhere.com'
 
-gauth = sheets_api.authorize()
+# gauth = sheets_api.authorize()
 
 anonymous_urls = ['/favicon.ico', '/clear_test_cookies', '/logo.png', '/background.png', '/loading.gif', '/update_server']
 mobile_agents = ['Android', 'iPhone', 'iPod touch']
 
-client_req_times = {}
+user_credentials = {}
 
 from_zone = tz.tzlocal()
 to_zone = tz.gettz('Asia/Kolkata')
@@ -293,7 +293,7 @@ def convert(sheet):
     except:
         return 'ERROR'
 
-def create_new_test_sheet(owner):
+def create_new_test_sheet(owner, creds):
     dt = datetime.datetime.now()
     dt.replace(tzinfo=from_zone)
     dt = dt.astimezone(to_zone)
@@ -307,7 +307,7 @@ def create_new_test_sheet(owner):
         else:
             break
     test_id = r_id
-    sheet_id = sheets_api.create_sheet(test_id, gauth.load_credentials())
+    sheet_id = sheets_api.create_sheet(test_id, creds)
     os.mkdir('../data/test_data/'+test_id)
     os.mkdir('../data/test_data/'+test_id+'/files')
     with open('../data/test_data/'+test_id+'/config.json', 'w') as f:
@@ -554,10 +554,6 @@ def get_created_tests_list(username):
 
 @app.before_request
 def before_request():
-    try:
-        prev_time = client_req_times[flask.request.remote_addr]
-    except KeyError:
-        prev_time = None
     if flask.request.headers['Host'] not in DOMAINS:
         return flask.redirect('http://'+DOMAIN+flask.request.path, 301)
     if flask.request.path != '/login' and flask.request.path not in anonymous_urls and 'static' not in flask.request.path:
@@ -899,32 +895,47 @@ def new_test():
     if flask.request.method == 'GET':
         return flask.render_template('new_test.html', username=flask.session['username'], name=user_data['name'])
     else:
-        test_data = create_new_test_sheet(flask.session['username'])
+        gauth = sheets_api.authorize()
+        creds = gauth.load_credentials(flask.session['username'])
+        test_data = create_new_test_sheet(flask.session['username'], creds)
         test_id, _ = test_data
         return flask.redirect('/t/'+test_id+'/edit')
 
-@app.route('/sheets_api_authorize', methods=['GET', 'POST'])
+@app.route('/sheets_api_authorize/', methods=['GET', 'POST'])
 def sheets_api_authorize():
+    global user_credentials
     user_data = get_user_data(flask.session['username'])
     if 'admin' in user_data['tags']:
         if flask.request.method == 'GET':
-            creds = gauth.load_credentials()
+            try:
+                user_credentials.pop(flask.session['username'])
+            except KeyError:
+                pass
+            gauth = sheets_api.authorize()
+            creds = gauth.load_credentials(flask.session['username'])
+            user_credentials[flask.session['username']] = gauth
             if creds:
                 if gauth.verify_token(creds):
                     return 'authorized'
                 else:
                     url = gauth.get_url()
-                    return "<script>window.open('"+url+"')</script><form action='/sheets_api_authorize' method='POST'><input type='text' name='code' placeholder='code' autofocus><input type='submit' value='Enter'></form>"
+                    return "<script>window.open('"+url+"')</script><form action='/sheets_api_authorize/' method='POST'><input type='text' name='code' placeholder='code' autofocus><input type='submit' value='Enter'></form>"
             else:
                 url = gauth.get_url()
-                return "<script>window.open('"+url+"')</script><form action='/sheets_api_authorize' method='POST'><input type='text' name='code' placeholder='code' autofocus><input type='submit' value='Enter'></form>"
+                return "<script>window.open('"+url+"')</script><form action='/sheets_api_authorize/' method='POST'><input type='text' name='code' placeholder='code' autofocus><input type='submit' value='Enter'></form>"
         else:
             data = flask.request.form
+            try:
+                gauth = user_credentials[flask.session['username']]
+            except KeyError:
+                return 'something went wrong'
             creds = gauth.verify_code(data['code'])
             if creds != False:
-                gauth.save_credentials(creds)
+                gauth.save_credentials(creds, flask.session['username'])
+                user_credentials.pop(flask.session['username'])
                 return 'authorization_complete'
             else:
+                user_credentials.pop(flask.session['username'])
                 return 'authorization_error'
     else:
         return flask.render_template('404.html'), 404
@@ -953,7 +964,11 @@ def test_edit(code):
     if flask.request.method == 'GET':
         sync_arg = flask.request.args.get('sync')
         if sync_arg == '':
-            n_test_data = sheets_api.get_values(sheet_id, gauth.load_credentials())
+            gauth = sheets_api.authorize()
+            creds = gauth.load_credentials(flask.session['username'])
+            if gauth.verify_token(creds) == False:
+                return flask.redirect('/sheets_api_authorize')
+            n_test_data = sheets_api.get_values(sheet_id, creds)
             n_test_data = convert(n_test_data)
             if n_test_data == "ERROR":
                 return flask.render_template('t_edit.html', test_data=test_data, sheet_id=sheet_id, title=title, username=flask.session['username'], name=user_data['name'], code=code, alert="Error during parsing spreadsheet", base_uri=flask.request.url_root)
@@ -1092,7 +1107,7 @@ def sheets_api_authorize_delete():
     user_data = get_user_data(flask.session['username'])
     if  'admin' in user_data['tags']:
         try:
-            os.remove('../data/credentials.pickle')
+            os.remove('../data/credentials/'+flask.session['username']+'.pickle')
             return flask.redirect('/sheets_api_authorize')
         except:
             return 'file_not_found'
