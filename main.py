@@ -694,9 +694,6 @@ def t_view(code):
         flask.session.modified = True
         delete_score(flask.session['username'], code)
         return flask.redirect('/t/'+code)
-    elif flask.request.args.get('skip') == '' and code == 'demo':
-        flask.session['t']['c_q'] = [[0,1,2],[0,1,2],[0,1,2]]
-        flask.session.modified = True
     if len(flask.session['t']['c_q'][0]) == len(question_data['questions']['easy']) and len(flask.session['t']['c_q'][1]) == len(question_data['questions']['medium']) and len(flask.session['t']['c_q'][2]) == len(question_data['questions']['hard']):
         score = flask.session['t']['score']
         flask.session.pop('t')
