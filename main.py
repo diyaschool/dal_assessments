@@ -1174,9 +1174,11 @@ def sheets_api_authorize_delete():
     if  'admin' in user_data['tags']:
         try:
             os.remove('../data/credentials/'+flask.session['username']+'.pickle')
-            return flask.redirect('/sheets_api_authorize')
-        except:
-            return 'file_not_found'
+            flask.session['settings_alert'] = 'Your Google account has been successfully unlinked'
+            return flask.redirect('/settings')
+        except FileNotFoundError:
+            flask.session['settings_alert'] = 'There was a problem unlinking your Google Account'
+            return flask.redirect('/settings')
     else:
         return flask.render_template('404.html'), 404
 
