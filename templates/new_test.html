@@ -51,11 +51,7 @@
         <form class="create" id='main' method='POST' action='/new_test'>
           <input class="create" type='submit' value='Create'>
       </div><br>
-      <div style='width:100%; position: fixed; background-color: black; padding: 10px; top: 0px; left:0px; opacity: 1'>
-        <a style='color: white; font-size: 40px; left: 47%; text-decoration: none' href='/'>DAL Assessments</a>
-        <text style='color: white; position: absolute; right: 50px; top: 10px; font-size: 20px'>Hello {{name}}</text>
-        <text style='color: white; position: absolute; right: 50px; top: 35px'>Logged in as {{username}}</text>
-      </div>
+{% include "header.html" %}
     </center>
   <style>
     input[type=submit] {
