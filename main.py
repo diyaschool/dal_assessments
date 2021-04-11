@@ -1137,8 +1137,6 @@ def settings():
         except KeyError:
             pass
         error = flask.session.get('settings_error')
-        if error == None:
-            error = 'none'
         try:
             flask.session.pop('settings_error')
         except KeyError:
@@ -1147,7 +1145,22 @@ def settings():
             data = json.loads(f.read())
         client_id = data['client_id']
         client_secret = data['client_secret']
-        return flask.render_template('settings.html', username=flask.session['username'], name=user_data['name'], error=None, alert=alert, client_id=client_id)
+
+        github_auth = False
+        google_auth = False
+        try:
+            with open('../data/github_username_credentials/'+flask.session['username']) as f:
+                profile_id = f.read()
+            with open('../data/github_credentials/'+profile_id) as f:
+                if f.read() == flask.session['username']:
+                    github_auth = True
+        except FileNotFoundError:
+            pass
+        gauth = sheets_api.authorize()
+        creds = gauth.load_credentials(flask.session['username'])
+        if creds != None:
+            google_auth = True
+        return flask.render_template('settings.html', username=flask.session['username'], name=user_data['name'], error=error, alert=alert, client_id=client_id, github_auth=github_auth, google_auth=google_auth)
     elif flask.request.method == 'POST':
         data = flask.request.form
         if flask.request.args.get('change_password') == '':
@@ -1158,11 +1171,14 @@ def settings():
                         flask.session['settings_alert'] = 'Your password has been changed successfully'
                         return flask.redirect("/settings")
                     else:
-                        return flask.render_template('settings.html', username=flask.session['username'], name=user_data['name'], error='Your new password must be different from the current one', alert='none')
+                        flask.session['settings_error'] = 'Your new password must be different from the current one'
+                        return flask.redirect('/settings/')
                 else:
-                    return flask.render_template('settings.html', username=flask.session['username'], name=user_data['name'], error='Both passwords must match', alert='none')
+                    flask.session['settings_error'] = 'Both passwords must match'
+                    return flask.redirect('/settings/')
             else:
-                return flask.render_template('settings.html', username=flask.session['username'], name=user_data['name'], error='Password incorrect', alert='none')
+                flask.session['settings_error'] = 'Password incorrect'
+                return flask.redirect('/settings/')
 
 @app.route('/sheets_api_authorize/', methods=['GET', 'POST'])
 def sheets_api_authorize():
