@@ -1251,8 +1251,8 @@ def upload_file(code):
 
 @app.route('/github_sign_in/<loc>/')
 def github_sign_in(loc):
-    code = flask.request.args['code']
     if loc == 'auth':
+        code = flask.request.args['code']
         access_token = get_github_access_token(code)
         if access_token == False:
             flask.session['settings_alert'] = 'There was an error during GitHub authentication. Please try again'
@@ -1265,6 +1265,7 @@ def github_sign_in(loc):
         flask.session['settings_alert'] = 'Your GitHub account has successfully been linked'
         return flask.redirect('/settings/')
     elif loc == 'signin':
+        code = flask.request.args['code']
         access_token = get_github_access_token(code)
         if access_token == False:
             flask.session['login_error'] = 'There was an error during GitHub authentication. Please log in with out password'
