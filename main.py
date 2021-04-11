@@ -1220,7 +1220,7 @@ def sheets_api_authorize():
             flask.session['settings_error'] = 'There was an error during authorization'
             return flask.redirect('/settings')
 
-@app.route('/sheets_api_authorize/delete')
+@app.route('/sheets_api_authorize/delete/')
 def sheets_api_authorize_delete():
     user_data = get_user_data(flask.session['username'])
     try:

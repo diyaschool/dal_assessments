@@ -22,11 +22,23 @@
         <br><br>
         <div style='background-color: white; border-radius: 20px; opacity: 1; height: auto; width: 1000px;'>
           <div style='height: auto; width: 1000px; border-bottom: 3px solid lightgray;'><br>
+            <script>
+            function google_signout(){
+              if (confirm("You have already linked your Google Account. DO YOU WANT TO UNLINK IT?")){
+                window.location.href = '/sheets_api_authorize/delete/'
+              }
+            }
+            function github_signout(){
+              if (confirm("You have already linked your GitHub Account. DO YOU WANT TO UNLINK IT?")){
+                window.location.href = '/github_auth/delete/'
+              }
+            }
+            </script>
             <text style='font-size: 30px; font-weight: bold'>Linked Accounts</text><br><br>
-            <div class='noselect' data-toggle="tooltip" title="Link your Google Account to create tests" style='width: 300px; height: 120px; cursor: pointer; background-color: #fbfcfc; border: 1px solid lightgray; border-radius: 20px' onclick='window.location.href = "/sheets_api_authorize"'>
+            <div class='noselect' data-toggle="tooltip" title="{%if google_auth == False%}Link your Google Account to create tests{%else%}You have already linked your Google Account{%endif%}" style='width: 300px; height: 120px; cursor: pointer; background-color: #fbfcfc; border: 1px solid lightgray; border-radius: 20px' onclick='{%if google_auth == False%}window.location.href = "/sheets_api_authorize"{%else%}google_signout(){%endif%}'>
               <br><img src="/google_logo.png" alt="Google Logo" style='width: 70px; height: 70px'>&nbsp;&nbsp;<text style='font-size: 25px'>Google</text><br>
             </div><br>
-            <div class='noselect' data-toggle="tooltip" title="Link your GitHub Account to enable SSO" style='width: 300px; height: 120px; cursor: pointer; background-color: #fbfcfc; border: 1px solid lightgray; border-radius: 20px' onclick='window.location.href = "https://github.com/login/oauth/authorize?client_id={{client_id}}&redirect_uri={{url_root()}}github_sign_in/auth/"'>
+            <div class='noselect' data-toggle="tooltip" title="{%if github_auth == False%}Link your GitHub Account to enable SSO{%else%}You have already linked your GitHub Account{%endif%}" style='width: 300px; height: 120px; cursor: pointer; background-color: #fbfcfc; border: 1px solid lightgray; border-radius: 20px' onclick='{%if github_auth == False%}window.location.href = "https://github.com/login/oauth/authorize?client_id={{client_id}}&redirect_uri={{url_root()}}github_sign_in/auth/"{%else%}github_signout(){%endif%}'>
               <br><img src="/github_logo.png" alt="Google Logo" style='width: 70px; height: 70px'>&nbsp;&nbsp;<text style='font-size: 25px'>GitHub</text><br>
             </div>
           <br></div>
