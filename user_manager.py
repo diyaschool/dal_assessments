@@ -29,6 +29,17 @@ def fix(username):
 def delete(username):
     shutil.rmtree('../data/user_data/'+username)
     os.remove('../data/user_metadata/'+username)
+    try:
+        os.remove('../data/credentials/'+username+'.pickle')
+    except FileNotFoundError:
+        pass
+    try:
+        with open('../data/github_username_credentials/'+username) as f:
+            gprofile = f.read()
+            os.remove('../data/github_username_credentials/'+username)
+            os.remove('../data/github_credentials/'+gprofile)
+    except FileNotFoundError:
+        pass
 
 def get(username):
     with open('../data/user_metadata/'+username) as f:
@@ -58,6 +69,12 @@ def migrate_data(current_username, new_username):
         change_test_owner(test, new_username)
     shutil.rmtree('../data/user_data/'+new_username+'/test_data')
     os.mkdir('../data/user_data/'+new_username+'/test_data')
+    with open('../data/github_username_credentials/'+current_username) as f:
+        gprofile = f.read()
+    os.rename('../data/github_username_credentials/'+current_username, '../data/github_username_credentials/'+new_username)
+    with open('../data/github_credentials/'+gprofile, 'w') as f:
+        f.write(new_username)
+    os.rename('../data/credentials/'+current_username+'.pickle', '../data/credentials/'+new_username+'.pickle')
 
 def are_you_sure():
     while 1:

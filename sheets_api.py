@@ -4,7 +4,7 @@ from google_auth_oauthlib.flow import Flow
 
 class authorize:
     def get_url(self):
-        self.flow = Flow.from_client_secrets_file('../data/credentials.json', scopes=['https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/userinfo.email'], redirect_uri='urn:ietf:wg:oauth:2.0:oob')
+        self.flow = Flow.from_client_secrets_file('../data/credentials.json', scopes=['https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/drive', 'openid'], redirect_uri='urn:ietf:wg:oauth:2.0:oob')
         self.auth_url, _ = self.flow.authorization_url(prompt='consent')
         return self.auth_url
     def verify_code(self, code):
@@ -12,7 +12,7 @@ class authorize:
             self.flow.fetch_token(code=code)
             creds = self.flow.credentials
             return creds
-        except:
+        except Exception as e:
             return False
     def save_credentials(self, creds, file='credentials'):
         file = '../data/credentials/'+file+'.pickle'
@@ -33,7 +33,7 @@ class authorize:
             sheet = service.spreadsheets()
             sheet.values().get(spreadsheetId='1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms', range='A1:C').execute()
             return True
-        except:
+        except Exception as e:
             return False
 
 def get_values(sheet_id, credentials, sheet_range='A1:Z'):
