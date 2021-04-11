@@ -1136,6 +1136,13 @@ def settings():
             flask.session.pop('settings_alert')
         except KeyError:
             pass
+        error = flask.session.get('settings_error')
+        if error == None:
+            error = 'none'
+        try:
+            flask.session.pop('settings_error')
+        except KeyError:
+            pass
         with open('../data/github_credentials.json') as f:
             data = json.loads(f.read())
         client_id = data['client_id']
@@ -1184,7 +1191,7 @@ def sheets_api_authorize():
         try:
             gauth = user_credentials[flask.session['username']]
         except KeyError:
-            flask.session['settings_alert'] = 'Something has gone wrong...'
+            flask.session['settings_error'] = 'Something has gone wrong...'
             return flask.redirect('/settings')
         creds = gauth.verify_code(data['code'])
         if creds != False:
@@ -1194,7 +1201,7 @@ def sheets_api_authorize():
             return flask.redirect('/settings')
         else:
             user_credentials.pop(flask.session['username'])
-            flask.session['settings_alert'] = 'There was an error during authorization'
+            flask.session['settings_error'] = 'There was an error during authorization'
             return flask.redirect('/settings')
 
 @app.route('/sheets_api_authorize/delete')
@@ -1205,7 +1212,7 @@ def sheets_api_authorize_delete():
         flask.session['settings_alert'] = 'Your Google account has been successfully unlinked'
         return flask.redirect('/settings')
     except FileNotFoundError:
-        flask.session['settings_alert'] = 'There was a problem unlinking your Google account'
+        flask.session['settings_error'] = 'There was a problem unlinking your Google account'
         return flask.redirect('/settings')
 
 @app.route('/upload_file')
@@ -1248,13 +1255,13 @@ def github_sign_in(loc):
         code = flask.request.args['code']
         access_token = get_github_access_token(code)
         if access_token == False:
-            flask.session['settings_alert'] = 'There was an error during GitHub authentication. Please try again'
+            flask.session['settings_error'] = 'There was an error during GitHub authentication. Please try again'
             return flask.redirect('/settings/')
         profile = get_github_profile(access_token)
         try:
             with open('../data/github_credentials/'+str(profile['id'])) as f:
                 if f.read() != flask.session['username']:
-                    flask.session['settings_alert'] = 'This GitHub account has already been linked to another account'
+                    flask.session['settings_error'] = 'This GitHub account has already been linked to another account'
                     return flask.redirect('/settings/')
                 else:
                     flask.session['settings_alert'] = 'You have already linked your GitHub Account'
@@ -1282,17 +1289,19 @@ def github_sign_in(loc):
             return flask.redirect('/login')
         flask.session['username'] = username
         return flask.redirect('/')
-    elif loc == 'delete':
-        try:
-            with open('../data/github_username_credentials/'+flask.session['username']) as f:
-                profile = f.read()
-            os.remove('../data/github_username_credentials/'+flask.session['username'])
-            os.remove('../data/github_credentials/'+profile)
-            flask.session['settings_alert'] = 'Your GitHub account has been successfully unlinked'
-            return flask.redirect('/settings')
-        except FileNotFoundError:
-            flask.session['settings_alert'] = 'There was a problem unlinking your GitHub account'
-            return flask.redirect('/settings')
+
+@app.route('/github_auth/delete/')
+def github_auth_delete():
+    try:
+        with open('../data/github_username_credentials/'+flask.session['username']) as f:
+            profile = f.read()
+        os.remove('../data/github_username_credentials/'+flask.session['username'])
+        os.remove('../data/github_credentials/'+profile)
+        flask.session['settings_alert'] = 'Your GitHub account has been successfully unlinked'
+        return flask.redirect('/settings')
+    except FileNotFoundError:
+        flask.session['settings_error'] = 'There was a problem unlinking your GitHub account'
+        return flask.redirect('/settings')
 
 @app.route('/t/<code>/upload/delete/<file_id>/')
 def upload_delete(code, file_id):
