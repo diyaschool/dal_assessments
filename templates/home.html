@@ -90,13 +90,14 @@
 <div>
 <h1>Completed Test</h1>
 <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Impedit dolor tempore accusamus! Porro molestias, deleniti quae, corporis saepe fuga illum nulla minus vero impedit optio a iste. Accusantium, repellendus inventore!</p>
-</div>
+</div
 <div>
-  <center>
-  <div style='border: 5px solid gray; border-style: dotted; border-radius: 10px; width: 85%; height: 80px; cursor: pointer;' onclick='window.location.href = "/new_test"'>
-    <text style='color: gray; font-size: 30px; position:relative; top: 13px; font-family: sans-serif;'>Create Test</text>
-  </div></center><br>
+  <br>
   <div  class="wrap">
+    <center>
+    <div style='border: 5px solid gray; border-style: dotted; border-radius: 10px; width: 800px; height: 80px; cursor: pointer; position: relative; left: 25px; top: -15px' onclick='window.location.href = "/new_test"'>
+      <text style='color: gray; font-size: 30px; position:relative; top: 13px; font-family: sans-serif;'>Create Test</text>
+    </div></center><br>
     {%for test in created_tests%}
     <a href='/t/{{test['id']}}/edit/' style='text-decoration: none;'>
       <div class="box">
