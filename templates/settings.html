@@ -83,7 +83,6 @@ input[type=submit]:hover {
 #snackbar {
   visibility: hidden;
   min-width: 250px;
-  margin-left: -125px;
   background-color: #333;
   color: #fff;
   text-align: center;
@@ -91,15 +90,15 @@ input[type=submit]:hover {
   padding: 16px;
   position: fixed;
   z-index: 1;
-  left: 50%;
+  left: 35%;
   bottom: 30px;
   font-size: 17px;
 }
 
 #snackbar.show {
   visibility: visible;
-  -webkit-animation: fadein 0.5s, fadeout 0.5s 4.5s;
-  animation: fadein 0.5s, fadeout 0.5s 4.5s;
+  -webkit-animation: fadein 0.5s, fadeout 0.5s 6.5s;
+  animation: fadein 0.5s, fadeout 0.5s 6.5s;
 }
 
 @-webkit-keyframes fadein {
@@ -134,12 +133,17 @@ input[type=submit]:hover {
     </script>
     {%endif%}
 {% include "footer.html" %}
-<div id="snackbar">{{alert}}</div>
+<div id="snackbar">{{alert}}&nbsp;&nbsp;&nbsp;&nbsp;<img src='/close_icon.png' style='width: 20px; height: 20px; position:absolute; right: 10px; top: 16px; cursor:pointer;' onclick="hide_snackbar()"></div>
 <script>
 function show_snackbar() {
   var x = document.getElementById("snackbar");
   x.className = "show";
-  setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
+  setTimeout(function(){ x.className = x.className.replace("show", ""); }, 7000);
+}
+function hide_snackbar() {
+  var x = document.getElementById("snackbar");
+  x.className = x.className.replace("show", "");
+
 }
 {%if alert != 'none'%}show_snackbar();{%endif%}
 </script>
