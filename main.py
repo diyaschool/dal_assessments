@@ -678,6 +678,8 @@ def t_view(code):
         return flask.render_template('404.html'), 404
     if question_data == 'syntax':
         return "The test was not properly created. Please contact the owner of this test."
+    if 'all' in question_data['tags']:
+        authorized = True
     for tag in user_data['tags']:
         if tag in question_data['tags'] or tag == 'admin' or tag == 'teacher' or tag == 'team':
             authorized = True
