@@ -4,8 +4,10 @@
     <meta charset="utf-8">
     <title>Settings | DAL Assessments</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <script src="/jquery.min.js" ></script>
+    <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous"> -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js" ></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     <style>
       .noselect {
         -webkit-touch-callout: none; /* iOS Safari */
@@ -21,27 +23,40 @@
     <center><br><br><br>
         <br><br>
         <div style='background-color: white; border-radius: 20px; opacity: 1; height: auto; width: 1000px;'>
-          <div style='height: auto; width: 1000px; border-bottom: 3px solid lightgray;'><br>
+          <div style='height: auto; width: 1000px; '><br>
             <script>
             function google_signout(){
-              if (confirm("You have already linked your Google Account. DO YOU WANT TO UNLINK IT?")){
+              if (confirm("You have already linked your Google Account. DO YOU WANT TO UNLINK IT? You will lose access from new creating tests.")){
                 window.location.href = '/sheets_api_authorize/delete/'
               }
             }
             function github_signout(){
-              if (confirm("You have already linked your GitHub Account. DO YOU WANT TO UNLINK IT?")){
+              if (confirm("You have already linked your GitHub Account. DO YOU WANT TO UNLINK IT? You will not be able to sign in with your GitHub account.")){
                 window.location.href = '/github_auth/delete/'
+              }
+            }
+            function telegram_signout(){
+              if (confirm("You have already linked your Telegram Account. DO YOU WANT TO UNLINK IT? You will lose access to SSO and the Telegram Assistant Bot.")){
+                window.location.href = '/tg_auth/delete/'
               }
             }
             </script>
             <text style='font-size: 30px; font-weight: bold'>Linked Accounts</text><br><br>
-            <div class='noselect' data-toggle="tooltip" title="{%if google_auth == False%}Link your Google Account to create tests{%else%}You have already linked your Google Account{%endif%}" style='width: 300px; height: 120px; cursor: pointer; background-color: {%if google_auth == True%}#fbfcfc{%else%}#e5e7e9{%endif%} ; border: 1px solid lightgray; border-radius: 20px' onclick='{%if google_auth == False%}window.location.href = "/sheets_api_authorize"{%else%}google_signout(){%endif%}'>
-              <br><img src="/google_logo.png" alt="Google Logo" style='width: 70px; height: 70px'>&nbsp;&nbsp;<text style='font-size: 25px'>Google</text><br>
-            </div><br>
-            <div class='noselect' data-toggle="tooltip" title="{%if github_auth == False%}Link your GitHub Account to enable SSO{%else%}You have already linked your GitHub Account{%endif%}" style='width: 300px; height: 120px; cursor: pointer; background-color: {%if github_auth == True%}#fbfcfc{%else%}#e5e7e9{%endif%}; border: 1px solid lightgray; border-radius: 20px' onclick='{%if github_auth == False%}window.location.href = "https://github.com/login/oauth/authorize?client_id={{client_id}}&redirect_uri={{url_root()}}github_sign_in/auth/"{%else%}github_signout(){%endif%}'>
-              <br><img src="/github_logo.png" alt="Google Logo" style='width: 70px; height: 70px'>&nbsp;&nbsp;<text style='font-size: 25px'>GitHub</text><br>
+            <div class='noselect' data-toggle="tooltip" title="{%if google_auth == False%}Link your Google Account to create tests{%else%}You have already linked your Google Account{%endif%}" style='width: 300px; height: 120px; cursor: pointer; border: 1px solid lightgray; border-radius: 20px' onclick='{%if google_auth == False%}window.location.href = "/sheets_api_authorize"{%else%}google_signout(){%endif%}'>
+              <button type="button" style='width: inherit; height: inherit; position: relative; left:-1px; top: -1px; border-radius: 20px; border: 0px solid black;background-color: {%if google_auth == False%}#fbfcfc{%else%}#e5e7e9{%endif%} ;'>
+              <img src="/google_logo.png" alt="Google Logo" style='width: 70px; height: 70px'>&nbsp;&nbsp;<text style='font-size: 25px'>Google</text><br>
             </div>
-          <br></div>
+            <br>
+            <div class='noselect' data-toggle="tooltip" title="{%if github_auth == False%}Link your GitHub Account to enable SSO{%else%}You have already linked your GitHub Account{%endif%}" style='width: 300px; height: 120px; cursor: pointer; border: 1px solid lightgray; border-radius: 20px' onclick='{%if github_auth == False%}window.location.href = "https://github.com/login/oauth/authorize?client_id={{client_id}}&redirect_uri={{url_root()}}github_sign_in/auth/"{%else%}github_signout(){%endif%}'>
+              <button type="button" style='width: inherit; height: inherit; position: relative; left:-1px; top: -1px; border-radius: 20px; border: 0px solid black;background-color: {%if github_auth == False%}#fbfcfc{%else%}#e5e7e9{%endif%} ;'>
+              <img src="/github_logo.png" alt="GitHub Logo" style='width: 70px; height: 70px'>&nbsp;&nbsp;<text style='font-size: 25px'>GitHub</text><br>
+            </button></div>
+          <br>
+          <div class='noselect container' data-toggle="tooltip" title="{%if telegram_auth == False%}Link your Telegram Account to enable SSO and access the Telegram Assistant{%else%}You have already linked your GitHub Account{%endif%}" style='width: 300px; height: 120px; cursor: pointer;border: 1px solid lightgray; border-radius: 20px' onclick='{%if telegram_auth == True%}telegram_signout(){%endif%}'>
+            <button type="button" {%if telegram_auth == False%}data-toggle="modal" data-target="#exampleModal"{%endif%} style='width: inherit; height: inherit; position: relative; left:-16px; top: -1px; border-radius: 20px; border: 0px solid black;background-color: {%if telegram_auth == False%}#fbfcfc{%else%}#e5e7e9{%endif%} ;'>
+            <br><img src="/telegram_logo.webp" alt="Telegram Logo" style='width: 70px; height: 70px'>&nbsp;&nbsp;<text style='font-size: 25px'>Telegram</text><br>
+        <br></button>
+      </div><br><br>
           <div style='height: auto; width: 1000px; border-top: 3px solid lightgray;'><br>
             <text style='font-size: 30px; font-weight: bold'>Change Password</text><br><br>
             <form action="/settings/?change_password" method="post">
@@ -52,6 +67,26 @@
             </form>
           </div>
         </div>
+        <!-- Modal -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Link Telegram Account</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <script async src="https://telegram.org/js/telegram-widget.js?14" data-telegram-login="DAL_Assisstant_Bot" data-size="large" data-auth-url="{{url_root()}}tg_auth/auth/" data-request-access="write"></script>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
       <style>
       body {
         overflow: hidden;
@@ -184,9 +219,9 @@ body {
   position: absolute;
   left: 50%;
   top: 50%;
+  background-position: center;
   background-image: url(/loading.gif);
   background-repeat: no-repeat;
-  background-position: center;
   margin: -100px 0 0 -100px;
 }
 </style>

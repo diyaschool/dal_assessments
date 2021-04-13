@@ -1,4 +1,8 @@
 import textwrap
+from os import listdir
+from os.path import isfile, join
+import threading
+import telebot
 import requests
 import json
 import shutil
@@ -15,10 +19,18 @@ import random
 import uuid
 import ipaddress
 from dateutil import tz
+import hmac
+from collections import OrderedDict
 
 #################### Initialize ####################
 
 app = flask.Flask(__name__, static_url_path='/')
+
+with open('../data/telebot_key') as f:
+    tg_secret_key = hashlib.sha256(f.read().strip().encode()).digest()
+
+with open('../data/telebot_key') as f:
+    bot = telebot.TeleBot(f.read().strip(), parse_mode='Markdown')
 
 try:
     with open('../data/cookie_key') as f:
@@ -34,7 +46,7 @@ with open('../data/auth_domains') as f:
     DOMAINS = f.read().split('\n')
 DOMAIN = DOMAINS[0]
 
-anonymous_urls = ['/favicon.ico', '/clear_test_cookies', '/logo.png', '/background.png', '/loading.gif', '/update_server', '/github_sign_in/signin/', '/github_logo.png']
+anonymous_urls = ['/favicon.ico', '/clear_test_cookies', '/logo.png', '/background.png', '/loading.gif', '/update_server', '/github_sign_in/signin/', '/github_logo.png', '/telegram_logo.webp', '/tg_auth/signin/']
 mobile_agents = ['Android', 'iPhone', 'iPod touch']
 
 user_credentials = {}
@@ -43,6 +55,36 @@ from_zone = tz.tzlocal()
 to_zone = tz.gettz('Asia/Kolkata')
 
 #################### Utility Functions ####################
+
+def send_telegram_message(username, text, notification=True):
+    try:
+        with open('../data/telegram_username_credentials/'+username) as f:
+            user_id = f.read()
+    except FileNotFoundError:
+        return False
+    try:
+        bot.send_message(user_id, text, disable_notification=not notification)
+        return True
+    except:
+        return False
+
+def get_data_check_string(data):
+    data = OrderedDict(sorted(data.items()))
+    data_check_string = '\n'.join(['%s=%s' % (key, value) for (key, value) in data.items() if key != 'hash'])
+    return data_check_string
+
+def check_telegram_auth_data(dict_data):
+    data_check_string = get_data_check_string(dict_data)
+    signature = hmac.new(tg_secret_key, msg=data_check_string.encode(), digestmod=hashlib.sha256).hexdigest()
+    verified = False
+    if hmac.compare_digest(dict_data.get('hash'), signature):
+        if int(time.time()) - int(dict_data.get('auth_date')) < 86400:
+            verified = True
+        else:
+            return 'The session has expired, please try again.'
+    else:
+        return ''
+    return verified
 
 def get_github_profile(access_token):
     req = requests.get('https://api.github.com/user', headers={'Authorization': f'token {access_token}'})
@@ -98,6 +140,7 @@ def get_user_response(username, test_id):
     return False
 
 def save_test_response(username, test_id):
+    user_data = get_user_data(username)
     with open('../data/user_data/'+username+'/test_data/'+test_id+'.json') as f:
         tdata = parse_dict(f.read())
     tdata['completed'] = True
@@ -346,8 +389,12 @@ def validate_test_data(data_string):
     except:
         return 'SYNTAX_INVALID'
     if not isinstance(data['test_name'], str):
+        if len(data['test_name']) > 30:
+            return 'TEST_NAME_TOO_LONG'
         return 'TEST_NAME_INVALID'
     if not isinstance(data['subject'], str):
+        if len(data['subject']) > 20:
+            return 'SUBJECT_TOO_LONG'
         return 'SUBJECT_INVALID'
     if not isinstance(data['tags'], list):
         return 'TAGS_INVALID'
@@ -355,10 +402,14 @@ def validate_test_data(data_string):
         return 'QUESTIONS_INAVLID'
     for question in data['questions']['easy']:
         if not isinstance(question['question'], str):
+            if len(question['question']) > 100:
+                return 'EASY_QUESTION_TOO_LONG'
             return 'EASY_QUESTION_TEXT_INVALID'
         try:
             for answer in question['answers']:
                 if not isinstance(answer, str):
+                    if len(answer) > 100:
+                        return 'EASY_QUESTION_TOO_LONG'
                     return 'EASY_QUESTION_ANSWER_INVALID'
         except:
             return 'EASY_QUESTION_ANSWERS_INVALID'
@@ -370,15 +421,22 @@ def validate_test_data(data_string):
             return 'EASY_CORRECT_ANSWER_INDEX_OUTBOUND'
         try:
             if not isinstance(question['image'], str):
+                url_root = flask.request.url_root
+                if question['image'][:len(url_root)] != url_root:
+                    return "EASY_IMAGE_URL_SOURCE_IS_EXTERNAL"
                 return 'EASY_IMAGE_URL_INVALID'
         except KeyError:
             pass
     for question in data['questions']['medium']:
         if not isinstance(question['question'], str):
+            if len(question['question']) > 100:
+                return 'MEDIUM_QUESTION_TOO_LONG'
             return 'MEDIUM_QUESTION_TEXT_INVALID'
         try:
             for answer in question['answers']:
                 if not isinstance(answer, str):
+                    if len(answer) > 100:
+                        return 'MEDIUM_QUESTION_TOO_LONG'
                     return 'MEDIUM_QUESTION_ANSWER_INVALID'
         except:
             return 'MEDIUM_QUESTION_ANSWERS_INVALID'
@@ -390,15 +448,21 @@ def validate_test_data(data_string):
             return 'MEDIUM_CORRECT_ANSWER_INDEX_OUTBOUND'
         try:
             if not isinstance(question['image'], str):
+                if question['image'][:len(url_root)] != url_root:
+                    return "MEDIUM_IMAGE_URL_SOURCE_IS_EXTERNAL"
                 return 'MEDIUM_IMAGE_URL_INVALID'
         except KeyError:
             pass
     for question in data['questions']['hard']:
         if not isinstance(question['question'], str):
+            if len(question['question']) > 100:
+                return 'HARD_QUESTION_TOO_LONG'
             return 'HARD_QUESTION_TEXT_INVALID'
         try:
             for answer in question['answers']:
                 if not isinstance(answer, str):
+                    if len(answer) > 100:
+                        return 'HARD_QUESTION_TOO_LONG'
                     return 'HARD_QUESTION_ANSWER_INVALID'
         except:
             return 'HARD_QUESTION_ANSWERS_INVALID'
@@ -410,6 +474,8 @@ def validate_test_data(data_string):
             return 'HARD_CORRECT_ANSWER_INDEX_OUTBOUND'
         try:
             if not isinstance(question['image'], str):
+                if question['image'][:len(url_root)] != url_root:
+                    return "HARD_IMAGE_URL_SOURCE_IS_EXTERNAL"
                 return 'HARD_IMAGE_URL_INVALID'
         except KeyError:
             pass
@@ -578,11 +644,15 @@ def get_created_tests_list(username):
 def before_request():
     if flask.request.headers['Host'] not in DOMAINS:
         return flask.redirect('http://'+DOMAIN+flask.request.path, 301)
-    if flask.request.path != '/login' and flask.request.path not in anonymous_urls and 'static' not in flask.request.path:
+    onlyfiles = [f for f in listdir('static/') if isfile(join('static/', f))]
+    if flask.request.path != '/login' and flask.request.path not in anonymous_urls and flask.request.path.strip("/") not in onlyfiles:
         try:
             username = flask.session['username']
             f = open('../data/user_metadata/'+username)
             f.close()
+            if flask.session['perm_auth_key'] != hashlib.sha256(get_user_data(username)['password'].encode()).hexdigest():
+                flask.session['login_ref'] = flask.request.path
+                return flask.redirect('/login')
         except KeyError:
             flask.session['login_ref'] = flask.request.path
             return flask.redirect('/login')
@@ -912,6 +982,9 @@ def login():
             else:
                 flask.session['username'] = form_data['username'].lower()
                 user_data = get_user_data(flask.session['username'])
+                flask.session['perm_auth_key'] = hashlib.sha256(user_data['password'].encode()).hexdigest()
+                user_data = get_user_data(flask.session['username'])
+                send_telegram_message(flask.session['username'], f'Dear *{user_data["name"]}*,\nThere is a *new login* with your *password* at DAL Assessments.\n\n_If this wasn\'t you, please login quickly and change your password_')
                 if user_data.get('has_changed_password') != None and flask.request.path != '/change_password':
                     return flask.redirect('/change_password')
                 try:
@@ -939,6 +1012,7 @@ def new_test():
             return flask.redirect('/settings')
         test_data = create_new_test_sheet(flask.session['username'], creds)
         test_id, _ = test_data
+        send_telegram_message(flask.session['username'], f'You have just created a new test at *DAL Assessments*. Here is the link to it: {flask.request.url_root}/t/{test_id}/edit')
         return flask.redirect('/t/'+test_id+'/edit')
 
 @app.route('/t/<code>/edit/', methods=['GET', 'POST', 'PUT'])
@@ -1114,6 +1188,9 @@ def change_password():
             if data['new_password'] == data['conf_password']:
                 if data['current_password'] != data['new_password']:
                     user_manager.change_password(flask.session['username'], data['new_password'])
+                    flask.session['perm_auth_key'] = hashlib.sha256(hashlib.sha224(data['new_password'].encode()).hexdigest().encode()).hexdigest()
+                    if user_data.get('has_changed_password') == None:
+                        send_telegram_message(flask.session['username'], f'Dear {user_data["name"]},\nWe have dected a change in your password.\n\n_If this doesn\'t seem to be you, quickly contact us to recover your account._')
                     try:
                         login_ref = flask.session['login_ref']
                         flask.session.pop('login_ref')
@@ -1150,6 +1227,7 @@ def settings():
 
         github_auth = False
         google_auth = False
+        telegram_auth = False
         try:
             with open('../data/github_username_credentials/'+flask.session['username']) as f:
                 profile_id = f.read()
@@ -1162,7 +1240,15 @@ def settings():
         creds = gauth.load_credentials(flask.session['username'])
         if creds != None:
             google_auth = True
-        return flask.render_template('settings.html', username=flask.session['username'], name=user_data['name'], error=error, alert=alert, client_id=client_id, github_auth=github_auth, google_auth=google_auth)
+        try:
+            with open('../data/telegram_username_credentials/'+flask.session['username']) as f:
+                profile_id = f.read()
+            with open('../data/telegram_credentials/'+profile_id) as f:
+                if f.read() == flask.session['username']:
+                    telegram_auth = True
+        except FileNotFoundError:
+            pass
+        return flask.render_template('settings.html', username=flask.session['username'], name=user_data['name'], error=error, alert=alert, client_id=client_id, github_auth=github_auth, google_auth=google_auth, telegram_auth=telegram_auth)
     elif flask.request.method == 'POST':
         data = flask.request.form
         if flask.request.args.get('change_password') == '':
@@ -1170,7 +1256,9 @@ def settings():
                 if data['new_password'] == data['conf_password']:
                     if data['current_password'] != data['new_password']:
                         user_manager.change_password(flask.session['username'], data['new_password'])
+                        flask.session['perm_auth_key'] = hashlib.sha256(hashlib.sha224(data['new_password'].encode()).hexdigest().encode()).hexdigest()
                         flask.session['settings_alert'] = 'Your password has been changed successfully'
+                        send_telegram_message(flask.session['username'], f'Dear {user_data["name"]},\nWe have dected a change in your password.\n\n_If this doesn\'t seem to be you, quickly contact us to recover your account._')
                         return flask.redirect("/settings")
                     else:
                         flask.session['settings_error'] = 'Your new password must be different from the current one'
@@ -1216,6 +1304,8 @@ def sheets_api_authorize():
             gauth.save_credentials(creds, flask.session['username'])
             user_credentials.pop(flask.session['username'])
             flask.session['settings_alert'] = 'Your Google account has successfully been linked'
+            user_data = get_user_data(flask.session['username'])
+            send_telegram_message(flask.session['username'], f'Hello *{user_data["name"]}*!\nYour Google account has successfully been *linked at DAL Assessments*. You can now freely create new tests.')
             return flask.redirect('/settings')
         else:
             user_credentials.pop(flask.session['username'])
@@ -1228,6 +1318,8 @@ def sheets_api_authorize_delete():
     try:
         os.remove('../data/credentials/'+flask.session['username']+'.pickle')
         flask.session['settings_alert'] = 'Your Google account has been successfully unlinked'
+        user_data = get_user_data(flask.session['username'])
+        send_telegram_message(flask.session['username'], f'Hello *{user_data["name"]}*!\nYour Google account has successfully been *unlinked at DAL Assessments*. You will not be able to create new tests anymore.')
         return flask.redirect('/settings')
     except FileNotFoundError:
         flask.session['settings_error'] = 'There was a problem unlinking your Google account'
@@ -1291,12 +1383,14 @@ def github_sign_in(loc):
         with open('../data/github_username_credentials/'+flask.session['username'], 'w') as f:
             f.write(str(profile['id']))
         flask.session['settings_alert'] = 'Your GitHub account has successfully been linked'
+        user_data = get_user_data(flask.session['username'])
+        send_telegram_message(flask.session['username'], f'Hello *{user_data["name"]}*!\nYour GitHub account has successfully been *linked at DAL Assessments*. GitHub SSO has now been enabled for your account.')
         return flask.redirect('/settings/')
     elif loc == 'signin':
         code = flask.request.args['code']
         access_token = get_github_access_token(code)
         if access_token == False:
-            flask.session['login_error'] = 'There was an error during GitHub authentication. Please log in with out password'
+            flask.session['login_error'] = 'There was an error during GitHub authentication. Please log in with your password'
             return flask.redirect('/login')
         profile = get_github_profile(access_token)
         try:
@@ -1306,6 +1400,9 @@ def github_sign_in(loc):
             flask.session['login_error'] = 'You have not linked this GitHub account yet, please sign in with your password'
             return flask.redirect('/login')
         flask.session['username'] = username
+        user_data = get_user_data(flask.session['username'])
+        flask.session['perm_auth_key'] = hashlib.sha256(user_data['password'].encode()).hexdigest()
+        send_telegram_message(flask.session['username'], f'Dear *{user_data["name"]}*,\nThere is a *new login* with your *GitHub Account* at DAL Assessments.\n\n_If this wasn\'t you, please login quickly and change your password_')
         return flask.redirect('/')
 
 @app.route('/github_auth/delete/')
@@ -1316,6 +1413,8 @@ def github_auth_delete():
         os.remove('../data/github_username_credentials/'+flask.session['username'])
         os.remove('../data/github_credentials/'+profile)
         flask.session['settings_alert'] = 'Your GitHub account has been successfully unlinked'
+        user_data = get_user_data(flask.session['username'])
+        send_telegram_message(flask.session['username'], f'Hello *{user_data["name"]}*!\nYour GitHub account has successfully been *unlinked at DAL Assessments*. Your GitHub SSO will no longer work.')
         return flask.redirect('/settings')
     except FileNotFoundError:
         flask.session['settings_error'] = 'There was a problem unlinking your GitHub account'
@@ -1337,6 +1436,68 @@ def upload_delete(code, file_id):
 @app.route('/t/<code>/static/<file_code>/')
 def t_static(code, file_code):
     return flask.send_file('../data/test_data/'+code+'/files/'+file_code+'/'+[f for f in os.listdir('../data/test_data/'+code+'/files/'+file_code) if os.path.isfile(os.path.join('../data/test_data/'+code+'/files/'+file_code, f))][0])
+
+@app.route('/tg_auth/delete/')
+def tg_auth_delete():
+    try:
+        with open('../data/telegram_username_credentials/'+flask.session['username']) as f:
+            profile_id = f.read()
+        os.remove('../data/telegram_username_credentials/'+flask.session['username'])
+        os.remove('../data/telegram_credentials/'+profile_id)
+        user_data = get_user_data(flask.session['username'])
+        flask.session['settings_alert'] = 'Your Telegram account has been successfully unlinked'
+        bot.send_message(profile_id, f"Hello *{user_data['name']}*!\nYour Telegram account has successfully been *unlinked at DAL Assessments*. You will no longer be able to receive notifcations from me.")
+        return flask.redirect('/settings/')
+    except FileNotFoundError:
+        flask.session['settings_error'] = 'There was a problem unlinking your Telegram account'
+        return flask.redirect('/settings/')
+
+@app.route('/tg_auth/<loc>/')
+def tg_auth(loc):
+    data = dict(flask.request.args)
+    if loc == 'auth':
+        integrity = check_telegram_auth_data(data)
+        if integrity == True:
+            with open('../data/telegram_credentials/'+str(data['id']), 'w') as f:
+                f.write(flask.session['username'])
+            with open('../data/telegram_username_credentials/'+flask.session['username'], 'w') as f:
+                f.write(str(data['id']))
+            flask.session['settings_alert'] = 'Your Telegram account has successfully been linked'
+            user_data = get_user_data(flask.session['username'])
+            send_telegram_message(flask.session['username'], f'Hello *{user_data["name"]}*!\nYour Telegram account has successfully been *linked at DAL Assessments*. You will now be receiving notifications from me.')
+            return flask.redirect('/settings/')
+        else:
+            flask.session['settings_error'] = integrity
+            return flask.redirect('/settings/')
+    elif loc == 'signin':
+        integrity = check_telegram_auth_data(data)
+        if integrity == True:
+            try:
+                with open('../data/telegram_credentials/'+str(data['id'])) as f:
+                    username = f.read()
+                with open('../data/telegram_username_credentials/'+username) as g:
+                    tg_id = g.read()
+                if tg_id == data['id']:
+                    flask.session['username'] = username
+                    user_data = get_user_data(flask.session['username'])
+                    flask.session['perm_auth_key'] = hashlib.sha256(user_data['password'].encode()).hexdigest()
+                    user_data = get_user_data(flask.session['username'])
+                    send_telegram_message(flask.session['username'], f'Dear *{user_data["name"]}*,\nThere is a *new login* with your *Telegram Account* at DAL Assessments.\n\n_If this wasn\'t you, please login quickly and change your password_')
+                    return flask.redirect('/')
+                else:
+                    flask.session['login_error'] = 'There was an error while logging you in with Telegram. Please contact us soon.'
+                    return flask.redirect('/login')
+            except FileNotFoundError:
+                flask.session['login_error'] = 'This Telegram Account has not been linked yet. Please use your password to log in.'
+                return flask.redirect('/login')
+        else:
+            flask.session['login_error'] = integrity
+            return flask.redirect('/login')
+    return dict(flask.request.args)
+
+@app.route('/test')
+def test():
+    return flask.render_template('tg_auth.html')
 
 #################### Error Handlers ####################
 
@@ -1369,6 +1530,9 @@ def update_server():
     return 'not pulled'
 
 #################### Main ####################
+
+# tg_bot_thread = threading.Thread(target=bot.polling)
+# tg_bot_thread.start()
 
 if __name__=='__main__':
     app.run(debug=True , port=80, host='0.0.0.0', threaded=True)
