@@ -32,6 +32,8 @@ with open('../data/telebot_key') as f:
 with open('../data/telebot_key') as f:
     bot = telebot.TeleBot(f.read().strip(), parse_mode='Markdown')
 
+tg_bot_username = bot.get_me().username
+
 try:
     with open('../data/cookie_key') as f:
         fdata = f.read()
@@ -964,9 +966,9 @@ def login():
         client_id = data['client_id']
         client_secret = data['client_secret']
         if desktop:
-            return flask.render_template('login.html', error=error, username='', client_id=client_id)
+            return flask.render_template('login.html', error=error, username='', client_id=client_id, tg_bot_username=tg_bot_username)
         else:
-            return flask.render_template('mobile/login.html', error=error, username='')
+            return flask.render_template('mobile/login.html', error=error, username='', tg_bot_username=tg_bot_username)
     elif flask.request.method == 'POST':
         form_data = flask.request.form
         try:
@@ -976,9 +978,9 @@ def login():
             password = hashlib.sha224(form_data['password'].encode()).hexdigest()
             if data['password'] != password:
                 if desktop:
-                    return flask.render_template('login.html', error='Invalid Credentials', username=form_data['username'])
+                    return flask.render_template('login.html', error='Invalid Credentials', username=form_data['username'], tg_bot_username=tg_bot_username)
                 else:
-                    return flask.render_template('mobile/login.html', error='Invalid Credentials', username=form_data['username'])
+                    return flask.render_template('mobile/login.html', error='Invalid Credentials', username=form_data['username'], tg_bot_username=tg_bot_username)
             else:
                 flask.session['username'] = form_data['username'].lower()
                 user_data = get_user_data(flask.session['username'])
@@ -995,9 +997,9 @@ def login():
                     return flask.redirect('/')
         except FileNotFoundError:
             if desktop:
-                return flask.render_template('login.html', error='Invalid Credentials', username=form_data['username'])
+                return flask.render_template('login.html', error='Invalid Credentials', username=form_data['username'], tg_bot_username=tg_bot_username)
             else:
-                return flask.render_template('mobile/login.html', error='Invalid Credentials', username=form_data['username'])
+                return flask.render_template('mobile/login.html', error='Invalid Credentials', username=form_data['username'], tg_bot_username=tg_bot_username)
 
 @app.route('/new_test', methods=['GET', 'POST'])
 def new_test():
@@ -1248,7 +1250,7 @@ def settings():
                     telegram_auth = True
         except FileNotFoundError:
             pass
-        return flask.render_template('settings.html', username=flask.session['username'], name=user_data['name'], error=error, alert=alert, client_id=client_id, github_auth=github_auth, google_auth=google_auth, telegram_auth=telegram_auth)
+        return flask.render_template('settings.html', username=flask.session['username'], name=user_data['name'], error=error, alert=alert, client_id=client_id, github_auth=github_auth, google_auth=google_auth, telegram_auth=telegram_auth, tg_bot_username=tg_bot_username)
     elif flask.request.method == 'POST':
         data = flask.request.form
         if flask.request.args.get('change_password') == '':
@@ -1494,10 +1496,6 @@ def tg_auth(loc):
             flask.session['login_error'] = integrity
             return flask.redirect('/login')
     return dict(flask.request.args)
-
-@app.route('/test')
-def test():
-    return flask.render_template('tg_auth.html')
 
 #################### Error Handlers ####################
 
