@@ -16,7 +16,7 @@ Any URL request on this server without logging in will be returned with a redire
 /change_password/                  - [HTML] change_password.html
 /settings                          - [HTML] settings.html
 /sheets_api_authorize/             - [HTML] sheets_code.html
-/sheets_api_authorize/delete/      - [HTML]
+/sheets_api_authorize/delete/      - [REDIRECT] /settings
 /upload_file                       - [REDIRECT] /t/<code>/upload/
 /t/<code>/upload/                  - [HTML] upload.html
 /t/<code>/upload/delete/<file_id>/ - [REDIRECT] /t/<code>/upload/
