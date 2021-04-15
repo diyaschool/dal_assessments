@@ -59,8 +59,11 @@ to_zone = tz.gettz('Asia/Kolkata')
 #################### Utility Functions ####################
 
 def send_telegram_message(username, text, type, notification=True):
-    with open('../data/tg_bot_settings/'+username) as f:
-        tg_settings = parse_dict(f.read())
+    try:
+        with open('../data/tg_bot_settings/'+username) as f:
+            tg_settings = parse_dict(f.read())
+    except FileNotFoundError:
+        return False
     if tg_settings.get(type) != True:
         return False
     try:
