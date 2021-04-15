@@ -1248,6 +1248,7 @@ def settings():
         creds = gauth.load_credentials(flask.session['username'])
         if creds != None:
             google_auth = True
+        tg_bot_settings = {}
         try:
             with open('../data/telegram_username_credentials/'+flask.session['username']) as f:
                 profile_id = f.read()
