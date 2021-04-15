@@ -58,6 +58,39 @@ to_zone = tz.gettz('Asia/Kolkata')
 
 #################### Utility Functions ####################
 
+def get_difficulty_percentage(data):
+    output_data = [0, 0, 0]
+    try:
+        output_data[0] = int(data[0][0]/data[0][1]*100)
+    except ZeroDivisionError:
+        output_data[0] = None
+    try:
+        output_data[1] = int(data[1][0]/data[1][1]*100)
+    except ZeroDivisionError:
+        output_data[1] = None
+    try:
+        output_data[2] = int(data[2][0]/data[2][1]*100)
+    except ZeroDivisionError:
+        output_data[2] = None
+    return output_data
+
+def get_difficulty_fraction(data):
+    output_data = [[0, 0], [0, 0], [0, 0]]
+    for question in data:
+        if question['difficulty'] == 'easy':
+            output_data[0][1] += 1
+            if question['ans_res'] == True:
+                output_data[0][0] += 1
+        elif question['difficulty'] == 'medium':
+            output_data[1][1] += 1
+            if question['ans_res'] == True:
+                output_data[1][0] += 1
+        elif question['difficulty'] == 'hard':
+            output_data[2][1] += 1
+            if question['ans_res'] == True:
+                output_data[2][0] += 1
+    return output_data
+
 def send_telegram_message(username, text, type, notification=True):
     try:
         with open('../data/tg_bot_settings/'+username) as f:
@@ -1136,6 +1169,9 @@ def test_analytics(code):
             response_data = parse_dict(f.read())
     except FileNotFoundError:
         response_data = {'responses': []}
+    for user in response_data['responses']:
+        user['difficulty_fraction'] = get_difficulty_fraction(user['question_stream'])
+        user['difficulty_percentage'] = get_difficulty_percentage(user['difficulty_fraction'])
     return flask.render_template('test_analytics.html', test_name=title, username=flask.session['username'], name=user_data['name'], responses=response_data['responses'], response_count=len(response_data['responses']), code=code)
 
 @app.route('/t/<code>/analytics/<username>/')
