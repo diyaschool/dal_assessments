@@ -20,9 +20,9 @@
     </style>
   </head>
   <body style='background-size: cover; background-image: url("/background.png");  background-repeat: no-repeat; background-position: center; background-attachment: fixed;overflow:visible'>
-    <center><br><br><br>
+    <br><br><br>
         <br><br>
-        <div style='background-color: white; border-radius: 20px; opacity: 1; height: auto; width: 1000px;'>
+        <div style='background-color: white; border-radius: 20px; opacity: 1; height: auto; width: 1000px; margin:auto;'>
           <div style='height: auto; width: 1000px; '><br>
             <script>
             function google_signout(){
@@ -41,8 +41,8 @@
               }
             }
             </script>
-            <text style='font-size: 30px; font-weight: bold'>Linked Accounts</text><br><br>
-            <div class='noselect' data-toggle="tooltip" title="{%if google_auth == False%}Link your Google Account to create tests{%else%}You have already linked your Google Account{%endif%}" style='width: 300px; height: 120px; cursor: pointer; border: 1px solid lightgray; border-radius: 20px' onclick='{%if google_auth == False%}window.location.href = "/sheets_api_authorize"{%else%}google_signout(){%endif%}'>
+            <center><text style='font-size: 30px; font-weight: bold;'>Linked Accounts</text><br><br></center>
+            <center><div class='noselect' data-toggle="tooltip" title="{%if google_auth == False%}Link your Google Account to create tests{%else%}You have already linked your Google Account{%endif%}" style='width: 300px; height: 120px; cursor: pointer; border: 1px solid lightgray; border-radius: 20px' onclick='{%if google_auth == False%}window.location.href = "/sheets_api_authorize"{%else%}google_signout(){%endif%}'>
               <button type="button" style='width: inherit; height: inherit; position: relative; left:-1px; top: -1px; border-radius: 20px; border: 0px solid black;background-color: {%if google_auth == False%}#fbfcfc{%else%}#e5e7e9{%endif%} ;'>
               <img src="/google_logo.png" alt="Google Logo" style='width: 70px; height: 70px'>&nbsp;&nbsp;<text style='font-size: 25px'>Google</text><br>
             </div>
@@ -57,7 +57,10 @@
             <br><img src="/telegram_logo.webp" alt="Telegram Logo" style='width: 70px; height: 70px'>&nbsp;&nbsp;<text style='font-size: 25px'>Telegram</text><br>
         <br></button>
       </div><br><br>
-          <div style='height: auto; width: 1000px; border-top: 3px solid lightgray;'><br>
+      </
+    </center>
+    </div>
+          <center><div style='height: auto; width: 1000px; border-top: 3px solid lightgray;'><br>
             <text style='font-size: 30px; font-weight: bold'>Change Password</text><br><br>
             <form action="/settings/?change_password" method="post">
               <label for="current_password" style="font-size: 20px">Current password</label><br><input style='width: 400px' type='password' name='current_password' placeholder="Enter current password" id='current_password' required><br><br>
@@ -65,7 +68,18 @@
               <br><input style='width: 400px; position: relative; top: 10px' type='password' name='conf_password' placeholder="Confirm password" required>
               <br><br><input type="submit" value="Change password"><br><br>
             </form>
-          </div>
+          </div></center>
+          {%if telegram_auth == True%}<div style='height: auto; width: 1000px; border-top: 3px solid lightgray;'><br>
+            <center><text style='font-size: 30px; font-weight: bold'>Telegram Assistant</text><br><br></center>
+            <section style='margin-left: 37%; font-size: 15px'>
+              <form action="/settings/?tg_bot" method="post" class='noselect'>
+                <label><input type='checkbox' name='on_login' value='True' {%if tg_bot_settings.get("on_login") == True %}checked{%endif%} >&nbsp;&nbsp;Send alert on new login</label><br>
+                <label><input type='checkbox' name='on_linked_accounts' value='True' {%if tg_bot_settings.get("on_linked_accounts") == True %}checked{%endif%}>&nbsp;&nbsp;Send alert on add/remove linked accounts</label><br>
+                <label><input type='checkbox' name='on_password_change' value='True' {%if tg_bot_settings.get("on_password_change") == True %}checked{%endif%}>&nbsp;&nbsp;Send alert when password change detected</label><br>
+            </section>
+            <center><br><input type="submit" value="Apply Changes"><br><br></center>
+          </form>
+          </div>{%endif%}
         </div>
         <!-- Modal -->
         <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -178,7 +192,6 @@ input[type=submit]:hover {
   to {bottom: 0; opacity: 0;}
 }
 </style>
-</center>
 {% include "header.html" %}
     {%if error != None%}
     <script>

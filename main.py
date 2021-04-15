@@ -58,7 +58,11 @@ to_zone = tz.gettz('Asia/Kolkata')
 
 #################### Utility Functions ####################
 
-def send_telegram_message(username, text, notification=True):
+def send_telegram_message(username, text, type, notification=True):
+    with open('../data/tg_bot_settings/'+username) as f:
+        tg_settings = parse_dict(f.read())
+    if tg_settings.get(type) != True:
+        return False
     try:
         with open('../data/telegram_username_credentials/'+username) as f:
             user_id = f.read()
@@ -986,7 +990,7 @@ def login():
                 user_data = get_user_data(flask.session['username'])
                 flask.session['perm_auth_key'] = hashlib.sha256(user_data['password'].encode()).hexdigest()
                 user_data = get_user_data(flask.session['username'])
-                send_telegram_message(flask.session['username'], f'Dear *{user_data["name"]}*,\nThere is a *new login* with your *password* at DAL Assessments.\n\n_If this wasn\'t you, please login quickly and change your password_')
+                send_telegram_message(flask.session['username'], f'Dear *{user_data["name"]}*,\nThere is a *new login* with your *password* at DAL Assessments.\n\n_If this wasn\'t you, please login quickly and change your password_', 'on_login')
                 if user_data.get('has_changed_password') != None and flask.request.path != '/change_password':
                     return flask.redirect('/change_password')
                 try:
@@ -1014,7 +1018,7 @@ def new_test():
             return flask.redirect('/settings')
         test_data = create_new_test_sheet(flask.session['username'], creds)
         test_id, _ = test_data
-        send_telegram_message(flask.session['username'], f'You have just created a new test at *DAL Assessments*. Here is the link to it: {flask.request.url_root}/t/{test_id}/edit')
+        send_telegram_message(flask.session['username'], f'You have just created a new test at *DAL Assessments*. Here is the link to it: {flask.request.url_root}/t/{test_id}/edit', 'test_attend', False)
         return flask.redirect('/t/'+test_id+'/edit')
 
 @app.route('/t/<code>/edit/', methods=['GET', 'POST', 'PUT'])
@@ -1192,7 +1196,7 @@ def change_password():
                     user_manager.change_password(flask.session['username'], data['new_password'])
                     flask.session['perm_auth_key'] = hashlib.sha256(hashlib.sha224(data['new_password'].encode()).hexdigest().encode()).hexdigest()
                     if user_data.get('has_changed_password') == None:
-                        send_telegram_message(flask.session['username'], f'Dear {user_data["name"]},\nWe have dected a change in your password.\n\n_If this doesn\'t seem to be you, quickly contact us to recover your account._')
+                        send_telegram_message(flask.session['username'], f'Dear {user_data["name"]},\nWe have dected a change in your password.\n\n_If this doesn\'t seem to be you, quickly contact us to recover your account._', 'on_password_change')
                     try:
                         login_ref = flask.session['login_ref']
                         flask.session.pop('login_ref')
@@ -1226,7 +1230,6 @@ def settings():
             data = json.loads(f.read())
         client_id = data['client_id']
         client_secret = data['client_secret']
-
         github_auth = False
         google_auth = False
         telegram_auth = False
@@ -1245,12 +1248,14 @@ def settings():
         try:
             with open('../data/telegram_username_credentials/'+flask.session['username']) as f:
                 profile_id = f.read()
+            with open('../data/tg_bot_settings/'+flask.session['username']) as f:
+                tg_bot_settings = parse_dict(f.read())
             with open('../data/telegram_credentials/'+profile_id) as f:
                 if f.read() == flask.session['username']:
                     telegram_auth = True
         except FileNotFoundError:
             pass
-        return flask.render_template('settings.html', username=flask.session['username'], name=user_data['name'], error=error, alert=alert, client_id=client_id, github_auth=github_auth, google_auth=google_auth, telegram_auth=telegram_auth, tg_bot_username=tg_bot_username)
+        return flask.render_template('settings.html', username=flask.session['username'], name=user_data['name'], error=error, alert=alert, client_id=client_id, github_auth=github_auth, google_auth=google_auth, telegram_auth=telegram_auth, tg_bot_username=tg_bot_username, tg_bot_settings=tg_bot_settings)
     elif flask.request.method == 'POST':
         data = flask.request.form
         if flask.request.args.get('change_password') == '':
@@ -1260,7 +1265,7 @@ def settings():
                         user_manager.change_password(flask.session['username'], data['new_password'])
                         flask.session['perm_auth_key'] = hashlib.sha256(hashlib.sha224(data['new_password'].encode()).hexdigest().encode()).hexdigest()
                         flask.session['settings_alert'] = 'Your password has been changed successfully'
-                        send_telegram_message(flask.session['username'], f'Dear {user_data["name"]},\nWe have dected a change in your password.\n\n_If this doesn\'t seem to be you, quickly contact us to recover your account._')
+                        send_telegram_message(flask.session['username'], f'Dear {user_data["name"]},\nWe have dected a change in your password.\n\n_If this doesn\'t seem to be you, quickly contact us to recover your account._', 'on_password_change')
                         return flask.redirect("/settings")
                     else:
                         flask.session['settings_error'] = 'Your new password must be different from the current one'
@@ -1271,6 +1276,23 @@ def settings():
             else:
                 flask.session['settings_error'] = 'Password incorrect'
                 return flask.redirect('/settings/')
+        elif flask.request.args.get('tg_bot') == '':
+            form_data = flask.request.form.to_dict(flat=False)
+            with open('../data/tg_bot_settings/'+flask.session['username']) as f:
+                fdata =  parse_dict(f.read())
+            keys = list(fdata.keys())
+            keys.extend(x for x in list(form_data.keys()) if x not in keys)
+            for key in keys:
+                try:
+                    fdata[key] = bool(form_data[key][0])
+                except ValueError:
+                    fdata[key] = False
+                except KeyError:
+                    fdata[key] = False
+            with open('../data/tg_bot_settings/'+flask.session['username'], 'w') as f:
+                f.write(json.dumps(fdata))
+            flask.session['settings_alert'] = 'Applied Telegram Assistant settings'
+            return flask.redirect('/settings/')
 
 @app.route('/sheets_api_authorize/', methods=['GET', 'POST'])
 def sheets_api_authorize():
@@ -1307,7 +1329,7 @@ def sheets_api_authorize():
             user_credentials.pop(flask.session['username'])
             flask.session['settings_alert'] = 'Your Google account has successfully been linked'
             user_data = get_user_data(flask.session['username'])
-            send_telegram_message(flask.session['username'], f'Hello *{user_data["name"]}*!\nYour Google account has successfully been *linked at DAL Assessments*. You can now freely create new tests.')
+            send_telegram_message(flask.session['username'], f'Hello *{user_data["name"]}*!\nYour *Google account* has successfully been *linked at DAL Assessments*. You can now freely create new tests.', 'on_linked_accounts')
             return flask.redirect('/settings')
         else:
             user_credentials.pop(flask.session['username'])
@@ -1321,7 +1343,7 @@ def sheets_api_authorize_delete():
         os.remove('../data/credentials/'+flask.session['username']+'.pickle')
         flask.session['settings_alert'] = 'Your Google account has been successfully unlinked'
         user_data = get_user_data(flask.session['username'])
-        send_telegram_message(flask.session['username'], f'Hello *{user_data["name"]}*!\nYour Google account has successfully been *unlinked at DAL Assessments*. You will not be able to create new tests anymore.')
+        send_telegram_message(flask.session['username'], f'Hello *{user_data["name"]}*!\nYour *Google account* has successfully been *unlinked at DAL Assessments*. You will not be able to create new tests anymore.', 'on_linked_accounts')
         return flask.redirect('/settings')
     except FileNotFoundError:
         flask.session['settings_error'] = 'There was a problem unlinking your Google account'
@@ -1386,7 +1408,7 @@ def github_sign_in(loc):
             f.write(str(profile['id']))
         flask.session['settings_alert'] = 'Your GitHub account has successfully been linked'
         user_data = get_user_data(flask.session['username'])
-        send_telegram_message(flask.session['username'], f'Hello *{user_data["name"]}*!\nYour GitHub account has successfully been *linked at DAL Assessments*. GitHub SSO has now been enabled for your account.')
+        send_telegram_message(flask.session['username'], f'Hello *{user_data["name"]}*!\nYour *GitHub account* has successfully been *linked at DAL Assessments*. GitHub SSO has now been enabled for your account.', 'on_linked_accounts')
         return flask.redirect('/settings/')
     elif loc == 'signin':
         code = flask.request.args['code']
@@ -1404,7 +1426,7 @@ def github_sign_in(loc):
         flask.session['username'] = username
         user_data = get_user_data(flask.session['username'])
         flask.session['perm_auth_key'] = hashlib.sha256(user_data['password'].encode()).hexdigest()
-        send_telegram_message(flask.session['username'], f'Dear *{user_data["name"]}*,\nThere is a *new login* with your *GitHub Account* at DAL Assessments.\n\n_If this wasn\'t you, please login quickly and change your password_')
+        send_telegram_message(flask.session['username'], f'Dear *{user_data["name"]}*,\nThere is a *new login* with your *GitHub Account* at DAL Assessments.\n\n_If this wasn\'t you, please login quickly and change your password_', 'on_linked_accounts')
         return flask.redirect('/')
 
 @app.route('/github_auth/delete/')
@@ -1416,7 +1438,7 @@ def github_auth_delete():
         os.remove('../data/github_credentials/'+profile)
         flask.session['settings_alert'] = 'Your GitHub account has been successfully unlinked'
         user_data = get_user_data(flask.session['username'])
-        send_telegram_message(flask.session['username'], f'Hello *{user_data["name"]}*!\nYour GitHub account has successfully been *unlinked at DAL Assessments*. Your GitHub SSO will no longer work.')
+        send_telegram_message(flask.session['username'], f'Hello *{user_data["name"]}*!\nYour *GitHub account* has successfully been *unlinked at DAL Assessments*. Your GitHub SSO will no longer work.', 'on_linked_accounts')
         return flask.redirect('/settings')
     except FileNotFoundError:
         flask.session['settings_error'] = 'There was a problem unlinking your GitHub account'
@@ -1448,7 +1470,7 @@ def tg_auth_delete():
         os.remove('../data/telegram_credentials/'+profile_id)
         user_data = get_user_data(flask.session['username'])
         flask.session['settings_alert'] = 'Your Telegram account has been successfully unlinked'
-        bot.send_message(profile_id, f"Hello *{user_data['name']}*!\nYour Telegram account has successfully been *unlinked at DAL Assessments*. You will no longer be able to receive notifcations from me.")
+        bot.send_message(profile_id, f"Hello *{user_data['name']}*!\nYour *Telegram account* has successfully been *unlinked at DAL Assessments*. You will no longer be able to receive notifcations from me.")
         return flask.redirect('/settings/')
     except FileNotFoundError:
         flask.session['settings_error'] = 'There was a problem unlinking your Telegram account'
@@ -1465,8 +1487,10 @@ def tg_auth(loc):
             with open('../data/telegram_username_credentials/'+flask.session['username'], 'w') as f:
                 f.write(str(data['id']))
             flask.session['settings_alert'] = 'Your Telegram account has successfully been linked'
+            with open('../data/tg_bot_settings/'+flask.session['username'], 'w') as f:
+                f.write(json.dumps({"on_login": True, "on_linked_accounts": True, "on_password_chane": True}))
             user_data = get_user_data(flask.session['username'])
-            send_telegram_message(flask.session['username'], f'Hello *{user_data["name"]}*!\nYour Telegram account has successfully been *linked at DAL Assessments*. You will now be receiving notifications from me.')
+            send_telegram_message(flask.session['username'], f'Hello *{user_data["name"]}*!\nYour *Telegram account* has successfully been *linked at DAL Assessments*. You will now be receiving notifications from me.', 'on_linked_accounts')
             return flask.redirect('/settings/')
         else:
             flask.session['settings_error'] = integrity
@@ -1484,7 +1508,7 @@ def tg_auth(loc):
                     user_data = get_user_data(flask.session['username'])
                     flask.session['perm_auth_key'] = hashlib.sha256(user_data['password'].encode()).hexdigest()
                     user_data = get_user_data(flask.session['username'])
-                    send_telegram_message(flask.session['username'], f'Dear *{user_data["name"]}*,\nThere is a *new login* with your *Telegram Account* at DAL Assessments.\n\n_If this wasn\'t you, please login quickly and change your password_')
+                    send_telegram_message(flask.session['username'], f'Dear *{user_data["name"]}*,\nThere is a *new login* with your *Telegram Account* at DAL Assessments.\n\n_If this wasn\'t you, please login quickly and change your password_', 'on_login')
                     return flask.redirect('/')
                 else:
                     flask.session['login_error'] = 'There was an error while logging you in with Telegram. Please contact us soon.'
