@@ -4,22 +4,25 @@
     <meta charset="utf-8">
     <title>{{test_name}} | DAL Assessments</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js" ></script>
-    <!-- <script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" crossorigin="anonymous"></script>
+    <script>
     window.setTimeout(function () {
       window.location.reload();
     }, 5000);
-    </script> -->
+    </script>
   </head>
   <body style='background-size: cover; background-image: url("/background.png");  background-repeat: no-repeat; background-position: center; background-attachment: fixed;overflow:visible'>
     <center><br><br><br>
         <br><br>
         <div style='background-color: white; border-radius: 20px; opacity: 1; height: auto; max-width: 1400px; min-height: 350px'>
           <br><br>
-            <text style='font-size: 45px; font-weight: bold'>Responses</text><br><br><br>
+            <text style='font-size: 45px; font-weight: bold'>Responses</text><br>
             {%if response_count == 0%}<br><br><text style='font-size: 50px; font-weight: bold; color: lightgray'>No responses yet...</text><br><br>{%else%}
-            <input type="text" id="searchInput" onkeyup="searchfunc()" placeholder="Search for names.." title="Type in a name" onfocus="this.value = this.value;" style='width: 30%' class="search">
+            <text style='font-size: 35px; font-weight: bold'>Test: {{test_name}}</text><br><br>
+            <button type="button" style="margin-bottom: 10px;" id="exampleModalButton" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">Spreadsheet</button><br><input type="text" id="searchInput" onkeyup="searchfunc()" placeholder="Search for names.." title="Type in a name" onfocus="this.value = this.value;" style='width: 30%' class="search">
             <style>
               .search {
                 border: 2px solid #2980b9;
@@ -38,14 +41,14 @@
                 <thead>
                   <tr>
                     <th data-toggle="tooltip" title="Rank based on submission of the user's first attempt" style="cursor: pointer" scope='col' onclick='sortTable(0, false)'>#</th>
-                    <th data-toggle="tooltip" title="Username of user" style="cursor: pointer" scope='col' onclick='sortTable(1, false)'>Username</th>
-                    <th data-toggle="tooltip" title="Name of user" style="cursor: pointer" scope='col' onclick='sortTable(2, false)'>Name</th>
+                    <th data-toggle="tooltip" title="Username of attendee" style="cursor: pointer" scope='col' onclick='sortTable(1, false)'>Username</th>
+                    <th data-toggle="tooltip" title="Name of attendee" style="cursor: pointer" scope='col' onclick='sortTable(2, false)'>Name</th>
                     <th data-toggle="tooltip" title="Total score, based on difficulty of question answered" style="cursor: pointer" scope='col' onclick='sortTable(3, false)'>Score</th>
                     <th data-toggle="tooltip" title="Average time spent answering for each question" scope='col'>Average Time</th>
                     <th data-toggle="tooltip" title="Total time spent to complete test on their latest attempt" scope='col'>Total Time</th>
                     <th data-toggle="tooltip" title="Time stamp of the submission of the user's latest attempt" scope='col'>Time Stamp</th>
                     <th data-toggle="tooltip" title="Correct answers of total questions by difficulty - easy, medium, hard" scope='col'>Total Scores by Difficulty</th>
-                    <th data-toggle="tooltip" title="Percentage of correct answers by total questions by difficulty - easy, medium, hard" scope='col'>Total Percentage by difficulty</th>
+                    <th data-toggle="tooltip" title="Percentage of correct answers by total questions by difficulty - easy, medium, hard" scope='col'>Total Percentage by Difficulty</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -95,6 +98,45 @@ function searchfunc() {
   }
 }
 searchfunc()
+</script>
+<!-- Modal -->
+<div class="modal" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Generate Spreadsheet</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <button type="button" class="btn btn-info" style='margin-bottom: 10px' onclick='window.location.href = "/t/{{code}}/analytics_download/csv"'>Download CSV</button><br>
+        <button type="button" class="btn btn-info" style='margin-bottom: 10px' onclick='window.location.href = "/t/{{code}}/analytics_download/google_sheets"'>Generate Google Sheet</button><br>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+$(window).on('show.bs.modal', function() {
+    localStorage.setItem("analytics-modal", "true");
+});
+$(window).on('hidden.bs.modal', function() {
+    $('#exampleModal').modal('hide');
+    localStorage.setItem("analytics-modal", "false");
+});
+
+function refresh_modal(){
+  if (localStorage.getItem("analytics-modal") == "false"){
+    $('#exampleModal').modal('hide');
+  } else{
+    $('#exampleModal').modal('show');
+  }
+}
+refresh_modal()
 </script>
 <script>
 function sortTable(n, init) {
@@ -188,6 +230,63 @@ if (sort_column != 0){
 } else if (localStorage.getItem('direction') == 'desc'){
   reverseTableRows("myTable");
 }
+</script>
+<style>
+#snackbar {
+visibility: hidden;
+min-width: 250px;
+background-color: #333;
+color: #fff;
+text-align: center;
+border-radius: 2px;
+padding: 16px;
+position: fixed;
+z-index: 1;
+left: 35%;
+bottom: 30px;
+font-size: 17px;
+}
+
+#snackbar.show {
+visibility: visible;
+-webkit-animation: fadein 0.5s, fadeout 0.5s 6.5s;
+animation: fadein 0.5s, fadeout 0.5s 6.5s;
+}
+
+@-webkit-keyframes fadein {
+from {bottom: 0; opacity: 0;}
+to {bottom: 30px; opacity: 1;}
+}
+
+@keyframes fadein {
+from {bottom: 0; opacity: 0;}
+to {bottom: 30px; opacity: 1;}
+}
+
+@-webkit-keyframes fadeout {
+from {bottom: 30px; opacity: 1;}
+to {bottom: 0; opacity: 0;}
+}
+
+@keyframes fadeout {
+from {bottom: 30px; opacity: 1;}
+to {bottom: 0; opacity: 0;}
+}
+</style>
+<div id="snackbar">{{alert}}&nbsp;&nbsp;&nbsp;&nbsp;<img src='/close_icon.png' style='width: 20px; height: 20px; position:absolute; right: 10px; top: 16px; cursor:pointer;' onclick="hide_snackbar()"></div>
+<script>
+function show_snackbar() {
+var x = document.getElementById("snackbar");
+x.className = "show";
+setTimeout(function(){ x.className = x.className.replace("show", ""); }, 7000);
+}
+function hide_snackbar() {
+var x = document.getElementById("snackbar");
+x.className = x.className.replace("show", "");
+
+}
+{%if alert != 'none'%}show_snackbar();{%endif%}
+{%if open_redirect != 'none'%}window.open("{{open_redirect}}"); $('#exampleModal').modal('hide');{%endif%}
 </script>
   </body>
 </html>

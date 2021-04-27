@@ -4,6 +4,7 @@ from os.path import isfile, join
 import threading
 import telebot
 import requests
+import csv
 import json
 import shutil
 import datetime
@@ -57,6 +58,33 @@ from_zone = tz.tzlocal()
 to_zone = tz.gettz('Asia/Kolkata')
 
 #################### Utility Functions ####################
+
+def list_to_csv(data):
+    output_data = ""
+    for row in data:
+        for cell in row:
+            output_data += str(cell)+","
+        output_data += "\n"
+    return output_data
+
+def convert_analytics_to_csv(data):
+    output_data = []
+    output_data.append(['#', 'Username', 'Name', 'Score', 'Average Time', 'Total Time', 'Time Stamp', 'Total Scores by Difficulty', 'Total Percentage by Difficulty'])
+    for response in data:
+        total_diff_scores_list = []
+        for diff in response['difficulty_fraction']:
+            total_diff_scores_list.append(f"{diff[0]}/{diff[1]}")
+        total_diff_scores = " | ".join(total_diff_scores_list)
+        total_diff_p_list = []
+        for diff in response['difficulty_percentage']:
+            if diff != None:
+                total_diff_p_list.append(f"{diff}%")
+            else:
+                total_diff_p_list.append("null")
+        total_diff_percentage = " | ".join(total_diff_p_list)
+        row_var = [response['index'], response['username'], response['name'], response['score'], response['average_time'], response['total_time'], response['long_time_stamp'], total_diff_scores, total_diff_percentage, f'Attempts {response["attempts"]}']
+        output_data.append(row_var)
+    return output_data
 
 def get_difficulty_percentage(data):
     output_data = [0, 0, 0]
@@ -155,6 +183,8 @@ def parse_dict(str_data):
         return json.loads(str_data)
     except json.decoder.JSONDecodeError:
         return ast.literal_eval(str_data)
+    except SyntaxError:
+        return False
 
 def check_sharing_perms(test_metadata, username):
     if test_metadata.get('sharing') == None:
@@ -1172,7 +1202,94 @@ def test_analytics(code):
     for user in response_data['responses']:
         user['difficulty_fraction'] = get_difficulty_fraction(user['question_stream'])
         user['difficulty_percentage'] = get_difficulty_percentage(user['difficulty_fraction'])
-    return flask.render_template('test_analytics.html', test_name=title, username=flask.session['username'], name=user_data['name'], responses=response_data['responses'], response_count=len(response_data['responses']), code=code)
+    csv_data = convert_analytics_to_csv(response_data['responses'])
+    alert = flask.session.get('analytics_alert')
+    if alert == None:
+        alert = 'none'
+    try:
+        flask.session.pop('analytics_alert')
+    except KeyError:
+        pass
+    open_redirect = flask.session.get('analytics_redirect')
+    if open_redirect == None:
+        open_redirect = 'none'
+    try:
+        flask.session.pop('analytics_redirect')
+    except KeyError:
+        pass
+    return flask.render_template('test_analytics.html', test_name=title, username=flask.session['username'], name=user_data['name'], responses=response_data['responses'], response_count=len(response_data['responses']), code=code, alert=alert, open_redirect=open_redirect)
+
+@app.route('/t/<code>/analytics_download/<mode>')
+def test_analytics_download(code, mode):
+    user_data = get_user_data(flask.session['username'])
+    try:
+        with open('../data/test_metadata/'+code+'.json') as f:
+            data = parse_dict(f.read())
+    except:
+        return flask.render_template('404.html'), 404
+    if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags'] or check_sharing_perms(data, flask.session['username'])['overview-analytics'] == True:
+        pass
+    else:
+        if 'teacher' in user_data['tags']:
+            return flask.render_template('401.html'), 401
+        else:
+            return flask.redirect('/t/'+code)
+    with open('../data/test_data/'+code+'/config.json') as f:
+        test_data = f.read()
+    try:
+        title = parse_dict(test_data)['test_name']
+    except KeyError:
+        return "The test was not properly created. Please contact the owner of this test."
+    except SyntaxError:
+        return "The test was not properly created. Please contact the owner of this test."
+    try:
+        with open('../data/response_data/'+code+'.json') as f:
+            response_data = parse_dict(f.read())
+    except FileNotFoundError:
+        response_data = {'responses': []}
+    for user in response_data['responses']:
+        user['difficulty_fraction'] = get_difficulty_fraction(user['question_stream'])
+        user['difficulty_percentage'] = get_difficulty_percentage(user['difficulty_fraction'])
+    csv_data = convert_analytics_to_csv(response_data['responses'])
+    if mode == 'csv':
+        csv_data_str = list_to_csv(csv_data)
+        return flask.Response(csv_data_str, mimetype="text/csv", headers={"Content-disposition": f"attachment; filename={title} - Analytics.csv"})
+    elif mode == 'google_sheets':
+        try:
+            with open('../data/user_data/'+flask.session['username']+'/google_sheets_analytics_records') as f:
+                gdata = parse_dict(f.read())
+            if gdata == False:
+                gdata = {}
+        except FileNotFoundError:
+            gdata = {}
+        if gdata.get(code) == None:
+            gauth = sheets_api.authorize()
+            creds = gauth.load_credentials(flask.session['username'])
+            if creds == None:
+                flask.session['settings_alert'] = 'Please link your Google account before creating a test'
+                return flask.redirect('/settings')
+            sheet_id = sheets_api.create_data_sheet(f"{title} - Analytics", creds, csv_data)
+            gdata[code] = sheet_id
+            with open('../data/user_data/'+flask.session['username']+'/google_sheets_analytics_records', 'w') as f:
+                f.write(json.dumps(gdata))
+            flask.session['analytics_alert'] = "Generated Google Sheet"
+        else:
+            gauth = sheets_api.authorize()
+            creds = gauth.load_credentials(flask.session['username'])
+            if creds == None:
+                flask.session['settings_alert'] = 'Please link your Google account before creating a test'
+                return flask.redirect('/settings')
+            sheet_id = sheets_api.update_sheet(gdata[code], creds, csv_data)
+            flask.session['analytics_alert'] = "Generated Google Sheet"
+            if sheet_id == False:
+                sheet_id = sheets_api.create_data_sheet(f"{title} - Analytics", creds, csv_data)
+                gdata[code] = sheet_id
+                with open('../data/user_data/'+flask.session['username']+'/google_sheets_analytics_records', 'w') as f:
+                    f.write(json.dumps(gdata))
+                flask.session['analytics_alert'] = "Re-generated Google Sheet"
+        flask.session['analytics_redirect'] = 'https://docs.google.com/spreadsheets/d/'+sheet_id
+        return flask.redirect('/t/'+code+'/analytics/')
+
 
 @app.route('/t/<code>/analytics/<username>/')
 def test_analytics_user(code, username):
@@ -1466,7 +1583,7 @@ def github_sign_in(loc):
         flask.session['username'] = username
         user_data = get_user_data(flask.session['username'])
         flask.session['perm_auth_key'] = hashlib.sha256(user_data['password'].encode()).hexdigest()
-        send_telegram_message(flask.session['username'], f'Dear *{user_data["name"]}*,\nThere is a *new login* with your *GitHub Account* at DAL Assessments.\n\n_If this wasn\'t you, please login quickly and change your password_', 'on_linked_accounts')
+        send_telegram_message(flask.session['username'], f'Dear *{user_data["name"]}*,\nThere is a *new login* with your *GitHub Account* at DAL Assessments.\n\n_If this wasn\'t you, please login quickly and change your password_', 'on_login')
         return flask.redirect('/')
 
 @app.route('/github_auth/delete/')
@@ -1528,7 +1645,7 @@ def tg_auth(loc):
                 f.write(str(data['id']))
             flask.session['settings_alert'] = 'Your Telegram account has successfully been linked'
             with open('../data/tg_bot_settings/'+flask.session['username'], 'w') as f:
-                f.write(json.dumps({"on_login": True, "on_linked_accounts": True, "on_password_chane": True}))
+                f.write(json.dumps({"on_login": True, "on_linked_accounts": True, "on_password_change": True}))
             user_data = get_user_data(flask.session['username'])
             send_telegram_message(flask.session['username'], f'Hello *{user_data["name"]}*!\nYour *Telegram account* has successfully been *linked at DAL Assessments*. You will now be receiving notifications from me.', 'on_linked_accounts')
             return flask.redirect('/settings/')

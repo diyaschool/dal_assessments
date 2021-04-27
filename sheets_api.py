@@ -1,5 +1,6 @@
 import pickle
 from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
 from google_auth_oauthlib.flow import Flow
 
 class authorize:
@@ -49,6 +50,29 @@ def create_sheet(title, credentials):
     result = service.spreadsheets().create(body=spreadsheet, fields='spreadsheetId').execute()
     tamper_with_format(result.get('spreadsheetId'), credentials)
     return result.get('spreadsheetId')
+
+def create_data_sheet(title, credentials, data):
+    service = build('sheets', 'v4', credentials=credentials)
+    spreadsheet = {'properties': {'title': title}}
+    result = service.spreadsheets().create(body=spreadsheet, fields='spreadsheetId').execute()
+    sheet_id = result.get('spreadsheetId')
+    req = service.spreadsheets().values().update(spreadsheetId=sheet_id, range="A1:Z", valueInputOption="USER_ENTERED", body={"range": "A1:Z", "majorDimension": "ROWS", "values": data})
+    req.execute()
+    return sheet_id
+
+def update_sheet(sheet_id, credentials, data):
+    service = build('sheets', 'v4', credentials=credentials)
+    req = service.spreadsheets().values().update(spreadsheetId=sheet_id, range="A1:Z", valueInputOption="USER_ENTERED", body={"range": "A1:Z", "majorDimension": "ROWS", "values": data})
+    try:
+        req.execute()
+    except HttpError as err:
+        if err.resp.status == 404:
+            return False
+        else:
+            print(err)
+            print(err.resp)
+            print(err.resp.status)
+    return sheet_id
 
 def tamper_with_format(sheet_id, credentials):
     service = build('sheets', 'v4', credentials=credentials)
