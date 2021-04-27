@@ -82,7 +82,11 @@ def convert_analytics_to_csv(data):
             else:
                 total_diff_p_list.append("null")
         total_diff_percentage = " | ".join(total_diff_p_list)
-        row_var = [response['index'], response['username'], response['name'], response['score'], response['average_time'], response['total_time'], response['long_time_stamp'], total_diff_scores, total_diff_percentage, f'Attempts {response["attempts"]}']
+        if response.get('attempts') == None:
+            attempts = f'Attempts 1'
+        else:
+            attempts = f'Attempts {response.get("attempts")}'
+        row_var = [response['index'], response['username'], response['name'], response['score'], response['average_time'], response['total_time'], response['long_time_stamp'], total_diff_scores, total_diff_percentage, attempts]
         output_data.append(row_var)
     return output_data
 
@@ -1202,7 +1206,6 @@ def test_analytics(code):
     for user in response_data['responses']:
         user['difficulty_fraction'] = get_difficulty_fraction(user['question_stream'])
         user['difficulty_percentage'] = get_difficulty_percentage(user['difficulty_fraction'])
-    csv_data = convert_analytics_to_csv(response_data['responses'])
     alert = flask.session.get('analytics_alert')
     if alert == None:
         alert = 'none'
