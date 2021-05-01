@@ -93,16 +93,51 @@
 </div>
 <div class="tab-indicator"></div>
 <div class="tab-body">
-<div class="active">
-<h1>Current Test</h1>
-<p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Impedit dolor tempore accusamus! Porro molestias, deleniti quae, corporis saepe fuga illum nulla minus vero impedit optio a iste. Accusantium, repellendus inventore!</p>
+  <div class='active wrap'>
+      {%for test in current_tests%}
+      <a href='/t/{{test['id']}}/edit/' style='text-decoration: none;'>
+        <div class="box">
+          <br>
+          <text style='font-size: 20px;'>{{test['name']}}</text><br>
+          <text style='font-size: 17px;'>Subject: {{test['subject']}}</text><br>
+          <text style='font-size: 16px;'>Responses: {{test['responses_count']}}</text>
+        </div>
+      </a>
+      {%endfor%}
+    <br>
+  </div>
+  <div>
+    <div  class="wrap">
+      {%for test in completed_tests%}
+      <a href='/t/{{test['id']}}/edit/' style='text-decoration: none;'>
+        <div class="box">
+          <br>
+          <text style='font-size: 20px;'>{{test['name']}}</text><br>
+          <text style='font-size: 17px;'>Subject: {{test['subject']}}</text><br>
+          <text style='font-size: 16px;'>Responses: {{test['responses_count']}}</text>
+        </div>
+      </a>
+      {%endfor%}
+    </div><br>
+  </div>
+<div class='wrap'>
+    <center>
+    <div class='noselect' style='border: 5px solid gray; border-style: dotted; border-radius: 10px; width: 800px; height: 80px; cursor: pointer; position: relative; left: 25px; top: -15px' onclick='window.location.href = "/new_test"'>
+      <text style='color: gray; font-size: 30px; position:relative; top: 13px; font-family: sans-serif;'>Create Test</text>
+    </div></center><br>
+    {%for test in created_tests%}
+    <a href='/t/{{test['id']}}/edit/' style='text-decoration: none;'>
+      <div class="box">
+        <br>
+        <text style='font-size: 20px;'>{{test['name']}}</text><br>
+        <text style='font-size: 17px;'>Subject: {{test['subject']}}</text><br>
+        <text style='font-size: 16px;'>Responses: {{test['responses_count']}}</text>
+      </div>
+    </a>
+    {%endfor%}
+  <br>
 </div>
 <div>
-<h1>Completed Test</h1>
-<p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Impedit dolor tempore accusamus! Porro molestias, deleniti quae, corporis saepe fuga illum nulla minus vero impedit optio a iste. Accusantium, repellendus inventore!</p>
-</div
-<div>
-  <br>
   <div  class="wrap">
     <center>
     <div class='noselect' style='border: 5px solid gray; border-style: dotted; border-radius: 10px; width: 800px; height: 80px; cursor: pointer; position: relative; left: 25px; top: -15px' onclick='window.location.href = "/new_test"'>
@@ -245,6 +280,7 @@ let tabBodyNodes = tabs.querySelectorAll(".tab-body > div");
 
 for(let i=0;i<tabHeaderNodes.length;i++){
 tabHeaderNodes[i].addEventListener("click",function(){
+  console.log(i)
   localStorage.setItem('home_selected_section', i)
   tabHeader.querySelector(".active").classList.remove("active");
   tabHeaderNodes[i].classList.add("active");
@@ -252,6 +288,9 @@ tabHeaderNodes[i].addEventListener("click",function(){
   tabBodyNodes[i].classList.add("active");
   tabIndicator.style.left = `calc(calc(calc(25% - 5px) * ${i}) + 10px)`;
 });
+}
+if (localStorage.getItem('home_selected_section') == null){
+  localStorage.setItem('home_selected_section', 0)
 }
 tabHeader.querySelector(".active").classList.remove("active");
 tabHeaderNodes[localStorage.getItem('home_selected_section')].classList.add("active");
