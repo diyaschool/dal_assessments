@@ -1208,7 +1208,10 @@ def test_edit(code):
                             try:
                                 with open('../data/global_test_records/'+tag) as f:
                                     fdata = parse_dict(f.read())
-                                fdata.pop(code)
+                                try:
+                                    fdata.pop(code)
+                                except KeyError:
+                                    pass
                             except FileNotFoundError:
                                 fdata = {}
                             with open('../data/global_test_records/'+tag, 'w') as f:
