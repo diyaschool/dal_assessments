@@ -757,7 +757,10 @@ def get_current_tests_list(username):
     return test_data
 
 def get_completed_tests_list(username):
-    tests = [f for f in listdir('../data/user_data/'+username+'/response_data/') if isfile(join('../data/user_data/'+username+'/response_data/', f))]
+    try:
+        tests = [f for f in listdir('../data/user_data/'+username+'/response_data/') if isfile(join('../data/user_data/'+username+'/response_data/', f))]
+    except FileNotFoundError:
+        return []
     output = []
     for test in tests:
         with open('../data/user_data/'+username+'/response_data/'+test) as f:
