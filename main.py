@@ -1203,6 +1203,8 @@ def test_edit(code):
                             if tag not in n_test_data['tags']:
                                 removal_tag_records.append(tag)
                         for tag in removal_tag_records:
+                            if tag.strip() == '':
+                                continue
                             try:
                                 with open('../data/global_test_records/'+tag) as f:
                                     fdata = parse_dict(f.read())
