@@ -30,7 +30,7 @@ class authorize:
             return None
     def verify_token(self, creds):
         try:
-            service = build('sheets', 'v4', credentials=creds)
+            service = build('sheets', 'v4', credentials=creds, cache_discovery=False)
             sheet = service.spreadsheets()
             sheet.values().get(spreadsheetId='1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms', range='A1:C').execute()
             return True
@@ -38,21 +38,21 @@ class authorize:
             return False
 
 def get_values(sheet_id, credentials, sheet_range='A1:Z'):
-    service = build('sheets', 'v4', credentials=credentials)
+    service = build('sheets', 'v4', credentials=credentials, cache_discovery=False)
     sheet = service.spreadsheets()
     result = sheet.values().get(spreadsheetId=sheet_id, range=sheet_range).execute()
     values = result.get('values', [])
     return values
 
 def create_sheet(title, credentials):
-    service = build('sheets', 'v4', credentials=credentials)
+    service = build('sheets', 'v4', credentials=credentials, cache_discovery=False)
     spreadsheet = {'properties': {'title': title}}
     result = service.spreadsheets().create(body=spreadsheet, fields='spreadsheetId').execute()
     tamper_with_format(result.get('spreadsheetId'), credentials)
     return result.get('spreadsheetId')
 
 def create_data_sheet(title, credentials, data):
-    service = build('sheets', 'v4', credentials=credentials)
+    service = build('sheets', 'v4', credentials=credentials, cache_discovery=False)
     spreadsheet = {'properties': {'title': title}}
     result = service.spreadsheets().create(body=spreadsheet, fields='spreadsheetId').execute()
     sheet_id = result.get('spreadsheetId')
@@ -61,7 +61,7 @@ def create_data_sheet(title, credentials, data):
     return sheet_id
 
 def update_sheet(sheet_id, credentials, data):
-    service = build('sheets', 'v4', credentials=credentials)
+    service = build('sheets', 'v4', credentials=credentials, cache_discovery=False)
     req = service.spreadsheets().values().update(spreadsheetId=sheet_id, range="A1:Z", valueInputOption="USER_ENTERED", body={"range": "A1:Z", "majorDimension": "ROWS", "values": data})
     try:
         req.execute()
@@ -75,7 +75,7 @@ def update_sheet(sheet_id, credentials, data):
     return sheet_id
 
 def tamper_with_format(sheet_id, credentials):
-    service = build('sheets', 'v4', credentials=credentials)
+    service = build('sheets', 'v4', credentials=credentials, cache_discovery=False)
     sheet = service.spreadsheets()
     tamper_data = ['Name, Subject, Total questions', 'Student Tags', 'Easy Questions', 'Options', 'Correct Option', 'Image', 'Medium Questions', 'Options', 'Correct Option', 'Image', 'Hard Questions', 'Options', 'Correct Option', 'Image']
     req = sheet.values().update(spreadsheetId=sheet_id, range="A1:Z", valueInputOption="USER_ENTERED", body={"range": "A1:Z", "majorDimension": "ROWS", "values": [tamper_data]})
