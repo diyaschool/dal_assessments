@@ -130,9 +130,11 @@ $(window).on('hidden.bs.modal', function() {
 });
 
 function refresh_modal(){
-  if (localStorage.getItem("analytics-modal") == "false"){
+  if (localStorage.getItem("analytics-modal") == "false" || localStorage.getItem("analytics-modal") == null){
+    console.log('ok')
     $('#exampleModal').modal('hide');
   } else{
+    console.log('kk')
     $('#exampleModal').modal('show');
   }
 }
