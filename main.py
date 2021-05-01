@@ -256,6 +256,12 @@ def save_test_response(username, test_id):
         test_metadata = parse_dict(f.read())
     data["time_stamp"] = str(hour)+":"+str(minute)+":"+str(now.second)+' '+c_m
     data["long_time_stamp"] = str(now.day)+"-"+str(now.month)+"-"+str(now.year)+" "+str(hour)+":"+str(minute)+":"+str(now.second)+' '+c_m
+    if os.path.isdir('../data/user_data/'+username+'/response_data/') == False:
+        os.makedirs('../data/user_data/'+username+'/response_data/')
+    with open('../data/user_data/'+username+'/response_data/'+test_id+'.json', 'w') as f:
+        with open('../data/test_data/'+test_id+'/config.json') as g:
+            n_test_data = parse_dict(g.read())
+        f.write(json.dumps({"time_stamp": data['time_stamp'], "long_time_stamp": data['long_time_stamp'], 'score': data['score'], "id": test_id}))
     response_id = get_user_response(username, test_id)
     if response_id != False:
         with open('../data/response_data/'+test_id+'.json') as f:
@@ -376,17 +382,20 @@ def row_to_column(sheet):
             output[i].append(c_cell)
     return output
 
-def convert(sheet):
+def convert(sheet, teacher=False):
     try:
         sheet = sheet[1:]
         sheet = row_to_column(sheet)
         output = {}
         output['test_name'] = sheet[0][0]
         output['subject'] = sheet[0][1]
-        output['tags'] = sheet[1]
-        for i, tag in enumerate(output['tags']):
-            if tag == '':
-                output['tags'].pop(i)
+        if teacher == True:
+            sheet[1] = [x for x in sheet[1] if x]
+            output['tags'] = sheet[1]
+            if 'all' in sheet[1]:
+                output['tags'] = ['all']
+        else:
+            output['tags'] = ['all']
         output['questions'] = {"easy": [], "medium": [], "hard": []}
         for i in range(len(sheet[2])):
             if sheet[2][i] == '':
@@ -431,8 +440,9 @@ def convert(sheet):
                     q_n += 1
             output['question_count'] = q_n
         return output
-    except:
-        return 'ERROR'
+    except Exception as e:
+        print(e)
+        return "ERROR"
 
 def create_new_test_sheet(owner, creds):
     dt = datetime.datetime.now()
@@ -714,6 +724,53 @@ def get_created_tests_list(username):
     final_sorted_list.reverse()
     return final_sorted_list
 
+def get_current_tests_list(username):
+    user_data = get_user_data(username)
+    test_id_list = []
+    for tag in user_data['tags']:
+        try:
+            with open('../data/global_test_records/'+tag) as f:
+                fdata = parse_dict(f.read())
+            test_id_list.extend(list(fdata.keys()))
+        except FileNotFoundError:
+            pass
+    try:
+        with open('../data/global_test_records/all') as f:
+            fdata = parse_dict(f.read())
+        test_id_list.extend(list(fdata.keys()))
+    except FileNotFoundError:
+        pass
+    completed_list = get_completed_tests_list(username)
+    for test in completed_list:
+        if test['id'] in test_id_list:
+            test_id_list.remove(test['id'])
+    test_data = []
+    for test in test_id_list:
+        temp = {}
+        with open('../data/test_data/'+test+'/config.json') as f:
+            fdata = parse_dict(f.read())
+        temp['id'] = test
+        temp['name'] = fdata['test_name']
+        temp['subject'] = fdata['subject']
+        temp['total_questions'] = len(fdata['questions']['easy'])+len(fdata['questions']['medium'])+len(fdata['questions']['hard'])
+        test_data.append(temp)
+    return test_data
+
+def get_completed_tests_list(username):
+    tests = [f for f in listdir('../data/user_data/'+username+'/response_data/') if isfile(join('../data/user_data/'+username+'/response_data/', f))]
+    output = []
+    for test in tests:
+        with open('../data/user_data/'+username+'/response_data/'+test) as f:
+            fdata = parse_dict(f.read())
+            temp = fdata.copy()
+        with open('../data/test_data/'+os.path.splitext(test)[0]+'/config.json') as f:
+            fdata = parse_dict(f.read())
+        temp['name'] = fdata['test_name']
+        temp['subject'] = fdata['subject']
+        print(temp)
+        output.append(temp)
+    return output
+
 #################### Reqeust Handlers ####################
 
 @app.before_request
@@ -752,6 +809,7 @@ def after_request(response):
 @app.context_processor
 def context_processor():
     def url_root():
+        print(flask.request.url_root)
         return flask.request.url_root
     return dict(url_root=url_root)
 
@@ -764,9 +822,12 @@ def home():
         if agent in flask.request.headers['User-Agent']:
             desktop = False
     user_data = get_user_data(flask.session['username'])
+    current_tests = get_current_tests_list(flask.session['username'])
+    print(current_tests)
+    completed_tests = get_completed_tests_list(flask.session['username'])
     created_tests = get_created_tests_list(flask.session['username'])
     if desktop:
-        return flask.render_template('home.html', username=flask.session['username'], name=user_data['name'], created_tests=created_tests, c_test_len=len(created_tests))
+        return flask.render_template('home.html', username=flask.session['username'], name=user_data['name'], created_tests=created_tests, created_tests_len=len(created_tests), current_tests=current_tests, current_tests_len=len(current_tests), completed_tests=completed_tests, completed_tests_len=len(completed_tests))
     else:
         return flask.render_template('mobile/home.html', username=flask.session['username'], name=user_data['name'])
 
@@ -1106,12 +1167,14 @@ def test_edit(code):
     else:
         return flask.redirect('/t/'+code)
     with open('../data/test_data/'+code+'/config.json') as f:
-        test_data = f.read()
+        try:
+            test_data = parse_dict(f.read())
+            title = test_data['test_name']
+        except SyntaxError:
+            test_data = {}
+            test_data['tags'] = []
+            title = 'Untitled'
     sheet_id = data.get('sheet_id')
-    try:
-        title = parse_dict(test_data)['test_name']
-    except:
-        title = 'Untitled'
     if flask.request.method == 'GET':
         sync_arg = flask.request.args.get('sync')
         if sync_arg == '':
@@ -1120,15 +1183,42 @@ def test_edit(code):
             if gauth.verify_token(creds) == False:
                 return flask.redirect('/sheets_api_authorize')
             n_test_data = sheets_api.get_values(sheet_id, creds)
-            n_test_data = convert(n_test_data)
+            if 'teacher'in user_data['tags'] or 'team' in user_data['tags'] or 'admin' in user_data['tags']:
+                n_test_data = convert(n_test_data, True)
+            else:
+                n_test_data = convert(n_test_data, False)
             if n_test_data == "ERROR":
                 return flask.render_template('t_edit.html', test_data=test_data, sheet_id=sheet_id, title=title, username=flask.session['username'], name=user_data['name'], code=code, alert="Error during parsing spreadsheet", base_uri=flask.request.url_root)
             test_validation = validate_test_data(str(n_test_data))
             if test_validation == True:
-                with open('../data/test_data/'+code+'/config.json', 'w') as f:
-                    f.write(json.dumps(n_test_data))
                 with open('../data/test_metadata/'+code+'.json') as f:
                     metadata = parse_dict(f.read())
+                if data.get('visible') == True or data.get('visible') == None:
+                    if 'teacher' in user_data['tags'] or 'team' in user_data['tags'] or 'admin' in user_data['tags']:
+                        removal_tag_records = []
+                        for tag in test_data['tags']:
+                            if tag not in n_test_data['tags']:
+                                removal_tag_records.append(tag)
+                        for tag in removal_tag_records:
+                            try:
+                                with open('../data/global_test_records/'+tag) as f:
+                                    fdata = parse_dict(f.read())
+                                fdata.pop(code)
+                            except FileNotFoundError:
+                                fdata = {}
+                            with open('../data/global_test_records/'+tag, 'w') as f:
+                                f.write(json.dumps(fdata))
+                        for tag in n_test_data['tags']:
+                            try:
+                                with open('../data/global_test_records/'+tag) as f:
+                                    fdata = parse_dict(f.read())
+                            except FileNotFoundError:
+                                fdata = {}
+                            fdata[code] = ''
+                            with open('../data/global_test_records/'+tag, 'w') as f:
+                                f.write(json.dumps(fdata))
+                with open('../data/test_data/'+code+'/config.json', 'w') as f:
+                    f.write(json.dumps(n_test_data))
                 with open('../data/test_metadata/'+code+'.json', 'w') as f:
                     dt = datetime.datetime.now()
                     dt.replace(tzinfo=from_zone)
@@ -1509,9 +1599,9 @@ def sheets_api_authorize_delete():
         flask.session['settings_error'] = 'There was a problem unlinking your Google account'
         return flask.redirect('/settings')
 
-@app.route('/upload_file')
-def u_r():
-    return flask.render_template('u_r.html')
+@app.route('/upload_file/<code>')
+def u_r(code):
+    return flask.render_template('u_r.html', code=code)
 
 @app.route('/t/<code>/upload/', methods=['GET', 'POST'])
 def upload_file(code):

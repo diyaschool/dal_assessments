@@ -5,7 +5,7 @@
     <title>HOME | DAL Assessments</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js" ></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <style>
       .noselect {
         -webkit-touch-callout: none; /* iOS Safari */
@@ -94,30 +94,39 @@
 <div class="tab-indicator"></div>
 <div class="tab-body">
   <div class='active wrap'>
+    {%if current_tests_len != 0%}
       {%for test in current_tests%}
-      <a href='/t/{{test['id']}}/edit/' style='text-decoration: none;'>
+      <a href='/t/{{test['id']}}/' style='text-decoration: none;'>
         <div class="box">
           <br>
-          <text style='font-size: 20px;'>{{test['name']}}</text><br>
-          <text style='font-size: 17px;'>Subject: {{test['subject']}}</text><br>
-          <text style='font-size: 16px;'>Responses: {{test['responses_count']}}</text>
+          <text style='font-size: 20px;'><b>{{test['name']}}</b></text><br>
+          <text style='font-size: 17px;'>Subject: <b>{{test['subject']}}</b></text><br>
+          <text style='font-size: 16px;'>Total Questions: {{test['total_questions']}}</text>
         </div>
       </a>
       {%endfor%}
+    {%else%}
+    <div style="text-align: center; width: 850px"><p style='font-size: 20px'>You have no new tests to attend...</p></div>
+    {%endif%}
     <br>
   </div>
   <div>
     <div  class="wrap">
-      {%for test in completed_tests%}
-      <a href='/t/{{test['id']}}/edit/' style='text-decoration: none;'>
-        <div class="box">
-          <br>
-          <text style='font-size: 20px;'>{{test['name']}}</text><br>
-          <text style='font-size: 17px;'>Subject: {{test['subject']}}</text><br>
-          <text style='font-size: 16px;'>Responses: {{test['responses_count']}}</text>
-        </div>
-      </a>
-      {%endfor%}
+      {%if completed_tests_len != 0%}
+        {%for test in completed_tests%}
+        <a href='/t/{{test['id']}}/analytics/{{username}}' style='text-decoration: none;'>
+          <div class="box">
+            <br>
+            <text style='font-size: 20px;position:relative;top:-10px'><b>{{test['name']}}</b></text><br>
+            <text style='font-size: 17px;position:relative;top:-10px'>Subject: <b>{{test['subject']}}</b></text><br>
+            <text style='font-size: 17px;position:relative;top:-10px'>Score: <b>{{test['score']}}</b></text><br>
+            <text style='font-size: 16px;position:relative;top:-10px' data-toggle="tooltip" title="{{test['long_time_stamp']}}">Last submit: {{test['time_stamp']}}</text>
+          </div>
+        </a>
+        {%endfor%}
+      {%else%}
+      <div style="text-align: center; width: 850px"><p style='font-size: 20px'>You have no completed tests...</p></div>
+      {%endif%}
     </div><br>
   </div>
 <div class='wrap'>
@@ -125,16 +134,20 @@
     <div class='noselect' style='border: 5px solid gray; border-style: dotted; border-radius: 10px; width: 800px; height: 80px; cursor: pointer; position: relative; left: 25px; top: -15px' onclick='window.location.href = "/new_test"'>
       <text style='color: gray; font-size: 30px; position:relative; top: 13px; font-family: sans-serif;'>Create Test</text>
     </div></center><br>
-    {%for test in created_tests%}
-    <a href='/t/{{test['id']}}/edit/' style='text-decoration: none;'>
-      <div class="box">
-        <br>
-        <text style='font-size: 20px;'>{{test['name']}}</text><br>
-        <text style='font-size: 17px;'>Subject: {{test['subject']}}</text><br>
-        <text style='font-size: 16px;'>Responses: {{test['responses_count']}}</text>
-      </div>
-    </a>
-    {%endfor%}
+    {%if created_tests_len != 0%}
+      {%for test in created_tests%}
+      <a href='/t/{{test['id']}}/edit/' style='text-decoration: none;'>
+        <div class="box">
+          <br>
+          <text style='font-size: 20px;'><b>{{test['name']}}</b></text><br>
+          <text style='font-size: 17px;'>Subject: <b>{{test['subject']}}</b></text><br>
+          <text style='font-size: 16px;'>Responses: {{test['responses_count']}}</text>
+        </div>
+      </a>
+      {%endfor%}
+    {%else%}
+    <div style="text-align: center; width: 850px; padding-top:20px"><p style='font-size: 20px'>You have not created any tests yet...</p></div>
+    {%endif%}
   <br>
 </div>
 <div>
@@ -187,7 +200,6 @@ box-shadow: 10px;
 position: relative;
 margin: 6px;
 text-align: center;
-t
 }
 
 .active {

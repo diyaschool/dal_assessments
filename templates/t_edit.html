@@ -48,7 +48,7 @@ box-shadow: 0 6px #999;
       <input type="button" onclick="window.open('/t/{{code}}/analytics/')" value='Open Analytics'>&nbsp;<input type="text" readonly value='{{base_uri}}t/{{code}}/analytics/' style='border: 2px black solid; border-radius 10px; width: 400px'><br><br>
       <input type="button" onclick="window.open('https://docs.google.com/spreadsheets/d/{{sheet_id}}/')" value='Open Google Sheet'>&nbsp;<input type="button" onclick="window.location.href = '?sync'" value='Sync with Google Sheets'>&nbsp;<input type="text" readonly value='https://docs.google.com/spreadsheets/d/{{sheet_id}}/' style='border: 2px black solid; border-radius 10px; width: 400px'><br><br><br>
       <text style='font-size: 25px; font-weight: bold'>Images</text><br>
-      <iframe src="/upload_file" frameborder="0" scrolling="no" onload="resizeIframe(this)" width="900px"></iframe><br><br>
+      <iframe src="/upload_file/{{code}}" frameborder="0" scrolling="no" onload="resizeIframe(this)" width="900px"></iframe><br><br>
       <!-- <form action="/t/{{code}}/edit/" method="post" id='main_form'>
         <textarea name="test_data" rows="12" cols="80" style='border: 3px black solid; border-radius: 10px; resize: none;' form='main_form' required>{{test_data}}</textarea><br><br>
         <input type="submit" value='Validate and Save'>
@@ -97,7 +97,6 @@ body {
 </style>
 <script>
 $(window).on('load', function() { // makes sure the whole site is loaded
-  console.log('ok');
   $('#status').fadeOut(); // will first fade out the loading animation
   {%if image_url%}
     $('#preloader').delay(100).fadeOut('slow'); // will fade out the white DIV that covers the website.
