@@ -832,7 +832,7 @@ def home():
     if desktop:
         return flask.render_template('home.html', username=flask.session['username'], name=user_data['name'], created_tests=created_tests, created_tests_len=len(created_tests), current_tests=current_tests, current_tests_len=len(current_tests), completed_tests=completed_tests, completed_tests_len=len(completed_tests))
     else:
-        return flask.render_template('mobile/home.html', username=flask.session['username'], name=user_data['name'])
+        return flask.render_template('mobile/home.html', username=flask.session['username'], name=user_data['name'], created_tests=created_tests, created_tests_len=len(created_tests), current_tests=current_tests, current_tests_len=len(current_tests), completed_tests=completed_tests, completed_tests_len=len(completed_tests))
 
 @app.route('/logout')
 def logout():
@@ -1438,7 +1438,14 @@ def test_analytics_user(code, username):
         attempts = True
     except:
         attempts = False
-    return flask.render_template('test_analytics_username.html', test_name=title, username=flask.session['username'], name=user_data['name'], responses=response_data, response_count=len(response_data), code=code, auserdata=auserdata, score=score, fdata=fdata, attempts_bool=attempts)
+    desktop = True
+    for agent in mobile_agents:
+        if agent in flask.request.headers['User-Agent']:
+            desktop = False
+    if desktop:
+        return flask.render_template('test_analytics_username.html', test_name=title, username=flask.session['username'], name=user_data['name'], responses=response_data, response_count=len(response_data), code=code, auserdata=auserdata, score=score, fdata=fdata, attempts_bool=attempts)
+    else:
+        return flask.render_template('mobile/test_analytics_username.html', test_name=title, username=flask.session['username'], name=user_data['name'], responses=response_data, response_count=len(response_data), code=code, auserdata=auserdata, score=score, fdata=fdata, attempts_bool=attempts)
 
 @app.route('/change_password', methods=['GET', 'POST'])
 def change_password():
