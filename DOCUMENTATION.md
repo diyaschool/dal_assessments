@@ -4,31 +4,8 @@
 ```
 . (MASTER FOLDER)
 ├── dal_assessments (chaitanyapy/dal_assessments)
-│   ├── static
-│   │   ├── background.png
-│   │   ├── favicon.ico
-│   │   ├── jquery.min.js
-│   │   ├── loading.gif
-│   │   └── logo.png
-│   ├── templates
-│   │   ├── 401.html
-│   │   ├── 404.html
-│   │   ├── 500.html
-│   │   ├── change_password.html
-│   │   ├── cookie_cleared.html
-│   │   ├── home.html
-│   │   ├── login.html
-│   │   ├── mobile
-│   │   │   ├── home.html
-│   │   │   ├── login.html
-│   │   │   ├── t0.html
-│   │   │   └── t.html
-│   │   ├── new_test.html
-│   │   ├── t0.html
-│   │   ├── t_completed.html
-│   │   ├── t_edit.html
-│   │   ├── test_analytics.html
-│   │   └── t.html
+│   ├── static/
+│   ├── templates/
 │   ├── main.py
 │   ├── sheets_api.py
 │   ├── user_manager.py
@@ -38,11 +15,21 @@
 │   ├── DOCUMENTATION.md
 │   └── README.md
 └── data
+    ├── credentials/
+    ├── github_credentials/
+    ├── github_username_credentials/
+    ├── global_test_records/
+    ├── response_data/
+    ├── telegram_credentials/
+    ├── telegram_username_credentials/
+    ├── test_data/
+    ├── test_metadata/
+    ├── tg_bot_settings/
+    ├── user_data/
+    ├── user_metadata/
+    ├── auth_domains (authorized host domains)
+    ├── cookie_key (Randomly generated secret key for cookies)
     ├── credentials.json (Google API Credentials)
-    ├── credentials.pickle (Python generated pickled credentials)
-    ├── response_data
-    ├── test_data
-    ├── test_metadata
-    ├── user_data
-    └── user_metadata
+    ├── github_credentials.json (GitHub OAuth key)
+    └── telebot_key (Telegram Bot Access Token)
 ```
