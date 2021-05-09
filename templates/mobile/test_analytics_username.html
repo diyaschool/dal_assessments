@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>{{test_name}} | DAL Assessments</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js" ></script>
+  </head>
+  <body style='background-size: cover; background-image: url("/background.png");  background-repeat: no-repeat; background-position: center; background-attachment: fixed;overflow:visible'>
+    <style>
+    body {
+      overflow: hidden;
+    }
+    #preloader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #fff;
+      z-index: 99;
+    }
+    #status {
+      width: 200px;
+      height: 200px;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      background-image: url(/loading.gif);
+      background-repeat: no-repeat;
+      background-position: center;
+      margin: -100px 0 0 -100px;
+    }
+    </style>
+<script>
+    $(window).on('load', function() { // makes sure the whole site is loaded
+      $('#status').fadeOut(); // will first fade out the loading animation
+      {%if image_url%}
+        $('#preloader').delay(100).fadeOut('slow'); // will fade out the white DIV that covers the website.
+        $('body').delay(1000).css({'overflow':'visible'});
+      {%else%}
+        $('#preloader').delay(100).fadeOut('slow'); // will fade out the white DIV that covers the website.
+        $('body').delay(725).css({'overflow':'visible'});
+      {%endif%}
+    })
+    </script>
+    <div id="preloader">
+      <div id="status">&nbsp;</div>
+    </div>
+    <center><br><br><br>
+        <br><br>
+        <div style='background-color: white; border-radius: 20px; opacity: 1; height: auto; max-width: 1400px; min-height: 350px'>
+          <br><br>
+            <text style='font-size: 45px; font-weight: bold'>Individual Analytics</text><br><text style='font-size: 35px; font-weight: bold'>{{auserdata['name']}}</text><br><text style='font-size: 25px; font-weight: bold'>Score: {{score}}</text><br>
+            <text style='font-size: 20px; font-weight: bold'>Attempts: {{fdata['attempts']}}</text>
+            <br><br>
+            {%if response_count == 0%}<br><br><text style='font-size: 50px; font-weight: bold; color: lightgray'>No responses yet...</text><br><br>{%else%}
+            <div style='margin-left: 75px'>
+              <table class='table'>
+                <thead>
+                  <tr>
+                    <th scope='col'>#</th>
+                    <th scope='col'>Question</th>
+                    <th scope='col'>Answer</th>
+                    <th scope='col'>Difficulty</th>
+                    <th scope='col'>Time Taken</th>
+                    <th scope='col'>Score</th>
+                    <th scope='col'>Result</th>
+                    <th scope='col'>Time Stamp</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {%set counter = 1 %}
+                  {%for response in responses%}
+                  <tr>
+                    <td>{{response['index']}}.</td>
+                    <td data-toggle="tooltip" title="{{response['full_question']}}" width='20px'>{{response['question']}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                    <td data-toggle="tooltip" title="{{response['full_given_answer']}}">{{response['given_answer']}}</td>
+                    <td>{{response['difficulty']}}</td>
+                    <td>{{response['time_taken']}} secs</td>
+                    <td>+{{response['ans_score']}}</td>
+                    <td>{{response['ans_res']}}</td>
+                    <td data-toggle="tooltip" title="{{response['long_time_stamp']}}">{{response['time_stamp']}}</td>
+                  </tr>
+                  {%set counter = counter+ 1%}{%endfor%}
+                </tbody>
+            </table>
+            </div>
+            {%endif%}<br><br>
+        </div>
+{% include "header.html" %}
+    </center>
+{% include "footer.html" %}
+  </body>
+</html>

@@ -21,6 +21,10 @@ import uuid
 import ipaddress
 from dateutil import tz
 import hmac
+import base64
+from Crypto import Random
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad, unpad
 from collections import OrderedDict
 
 #################### Initialize ####################
@@ -49,7 +53,8 @@ with open('../data/auth_domains') as f:
     DOMAINS = f.read().split('\n')
 DOMAIN = DOMAINS[0]
 
-anonymous_urls = ['/favicon.ico', '/clear_test_cookies', '/logo.png', '/background.png', '/loading.gif', '/update_server', '/github_sign_in/signin/', '/github_logo.png', '/telegram_logo.webp', '/tg_auth/signin/']
+anonymous_urls = ['/favicon.ico', '/clear_test_cookies', '/logo.png', '/background.png', '/loading.gif', '/update_server',
+                '/github_sign_in/signin/', '/github_logo.png', '/telegram_logo.webp', '/tg_auth/signin/', '/functions/enc_pass', '/functions/dec_pass']
 mobile_agents = ['Android', 'iPhone', 'iPod touch']
 
 user_credentials = {}
@@ -170,6 +175,23 @@ def parse_access_token_str(token_str):
     vars = str(token_str).split('&')
     access_token = vars[0].split('=')[1]
     return access_token
+
+def encrypt(text, password):
+    bs = AES.block_size
+    key = hashlib.sha256(password.encode()).digest()
+    text = text + (bs - len(text) % bs) * chr(bs - len(text) % bs)
+    iv = Random.new().read(bs)
+    cipher = AES.new(key, AES.MODE_CBC, iv)
+    return base64.b64encode(iv+cipher.encrypt(text.encode()))
+
+def decrypt(enc, password):
+    bs = AES.block_size
+    key = hashlib.sha256(password.encode()).digest()
+    enc = base64.b64decode(enc)
+    iv = enc[:bs]
+    cipher = AES.new(key, AES.MODE_CBC, iv)
+    s = cipher.decrypt(enc[bs:])
+    return s[:-ord(s[len(s)-1:])].decode('utf-8')
 
 def get_github_access_token(code):
     with open('../data/github_credentials.json') as f:
@@ -809,6 +831,8 @@ def after_request(response):
     response.headers["X-Content-Type-Options"] = "nosniff"
     return response
 
+#################### Context Processors ####################
+
 @app.context_processor
 def context_processor():
     def url_root():
@@ -832,7 +856,7 @@ def home():
     if desktop:
         return flask.render_template('home.html', username=flask.session['username'], name=user_data['name'], created_tests=created_tests, created_tests_len=len(created_tests), current_tests=current_tests, current_tests_len=len(current_tests), completed_tests=completed_tests, completed_tests_len=len(completed_tests))
     else:
-        return flask.render_template('mobile/home.html', username=flask.session['username'], name=user_data['name'])
+        return flask.render_template('mobile/home.html', username=flask.session['username'], name=user_data['name'], created_tests=created_tests, created_tests_len=len(created_tests), current_tests=current_tests, current_tests_len=len(current_tests), completed_tests=completed_tests, completed_tests_len=len(completed_tests))
 
 @app.route('/logout')
 def logout():
@@ -1438,7 +1462,14 @@ def test_analytics_user(code, username):
         attempts = True
     except:
         attempts = False
-    return flask.render_template('test_analytics_username.html', test_name=title, username=flask.session['username'], name=user_data['name'], responses=response_data, response_count=len(response_data), code=code, auserdata=auserdata, score=score, fdata=fdata, attempts_bool=attempts)
+    desktop = True
+    for agent in mobile_agents:
+        if agent in flask.request.headers['User-Agent']:
+            desktop = False
+    if desktop:
+        return flask.render_template('test_analytics_username.html', test_name=title, username=flask.session['username'], name=user_data['name'], responses=response_data, response_count=len(response_data), code=code, auserdata=auserdata, score=score, fdata=fdata, attempts_bool=attempts)
+    else:
+        return flask.render_template('mobile/test_analytics_username.html', test_name=title, username=flask.session['username'], name=user_data['name'], responses=response_data, response_count=len(response_data), code=code, auserdata=auserdata, score=score, fdata=fdata, attempts_bool=attempts)
 
 @app.route('/change_password', methods=['GET', 'POST'])
 def change_password():
@@ -1779,10 +1810,44 @@ def tg_auth(loc):
             return flask.redirect('/login')
     return dict(flask.request.args)
 
+#################### Other Function Endpoints ####################
+
+@app.route('/functions/enc_pass', methods=["POST"])
+def enc_pass():
+    try:
+        data = flask.request.json
+        password = data['password']
+        try:
+            return encrypt(str(data['data']), password)
+        except ValueError:
+            return 'ERROR DURING ENCRYPTION'
+    except KeyError:
+        return '400 BAD REQUEST', 400
+    except TypeError:
+        return '400 BAD REQUEST', 400
+
+@app.route('/functions/dec_pass', methods=["POST"])
+def dec_pass():
+    try:
+        data = flask.request.json
+        password = data['password']
+        try:
+            dec = decrypt(str(data['data']), password)
+            if dec == '':
+                return 'ERROR DURING DECRYPTION'
+            return dec
+        except ValueError:
+            return 'ERROR DURING DECRYPTION'
+    except KeyError:
+        return '400 BAD REQUEST', 400
+    except TypeError:
+        return '400 BAD REQUEST', 400
+
 #################### Error Handlers ####################
 
 @app.errorhandler(404)
 def e_404(e):
+    print('nop not found')
     return flask.render_template('404.html'), 404
 
 @app.errorhandler(500)

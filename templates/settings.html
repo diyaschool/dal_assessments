@@ -63,6 +63,7 @@
           <center><div style='height: auto; width: 1000px; border-top: 3px solid lightgray;'><br>
             <text style='font-size: 30px; font-weight: bold'>Change Password</text><br><br>
             <form action="/settings/?change_password" method="post">
+              <input type='hidden' name='username' value='{{username}}'>
               <label for="current_password" style="font-size: 20px">Current password</label><br><input style='width: 400px' type='password' name='current_password' placeholder="Enter current password" id='current_password' required><br><br>
               <label style="font-size: 20px">New password</label><br><input style='width: 400px' type='password' name='new_password' placeholder="Enter new password" required>
               <br><input style='width: 400px; position: relative; top: 10px' type='password' name='conf_password' placeholder="Confirm password" required>

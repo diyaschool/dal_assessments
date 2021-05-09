@@ -5,6 +5,17 @@
     <title>HOME | DAL Assessments</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js" ></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <style>
+      .noselect {
+        -webkit-touch-callout: none; /* iOS Safari */
+        -webkit-user-select: none; /* Safari */
+        -khtml-user-select: none; /* Konqueror HTML */
+        -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+        user-select: none; /* Non-prefixed version, currently supported by Chrome, Edge, Opera and Firefox */
+      }
+    </style>
   </head>
   <body style='background-size: cover; background-image: url("/background.png");  background-repeat: no-repeat; background-position: center; background-attachment: fixed;'>
     <style>
@@ -32,6 +43,31 @@
       margin: -100px 0 0 -100px;
     }
     </style>
+    <style>
+.tooltip {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted black;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+
+  /* Position the tooltip */
+  position: absolute;
+  z-index: 1;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+}
+</style>
     <script>
     $(window).on('load', function() { // makes sure the whole site is loaded
       $('#status').fadeOut(); // will first fade out the loading animation
@@ -48,11 +84,232 @@
       <div id="status">&nbsp;</div>
     </div>
     <center><br><br><br>
-      <br><br><div style='background-color: white; height: 110vw; width: 300px; border-radius: 20px; opacity: 0.7'>
-      </div><br>
-      <div style='width:100%; position: fixed; background-color: black; padding: 10px; top: 0px; left:0px; opacity: 0.7'>
-        <a style='color: white; font-size: 40px; left: 47%; text-decoration: none' href='/'>DAL Assessments</a>
+      <br><br><div style='background-color: white; height: 600px; width: 900px; border-radius: 20px; opacity: 1; z-index: 1;' class='tooltip'>
+        <div class="tabs">
+<div class="tab-header">
+<div class="active">Current Tests</div>
+<div>Completed Tests</div>
+<div>Created Tests</div>
+</div>
+<div class="tab-indicator"></div>
+<div class="tab-body">
+  <div class='active wrap'>
+    {%if current_tests_len != 0%}
+      {%for test in current_tests%}
+      <a href='/t/{{test['id']}}/' style='text-decoration: none;'>
+        <div class="box">
+          <br>
+          <text style='font-size: 20px;'><b>{{test['name']}}</b></text><br>
+          <text style='font-size: 17px;'>Subject: <b>{{test['subject']}}</b></text><br>
+          <text style='font-size: 16px;'>Total Questions: {{test['total_questions']}}</text>
+        </div>
+      </a>
+      {%endfor%}
+    {%else%}
+    <div style="text-align: center; width: 850px"><p style='font-size: 20px'>You have no new tests to attend...</p></div>
+    {%endif%}
+    <br>
+  </div>
+  <div>
+    <div  class="wrap">
+      {%if completed_tests_len != 0%}
+        {%for test in completed_tests%}
+        <a href='/t/{{test['id']}}/analytics/{{username}}' style='text-decoration: none;'>
+          <div class="box">
+            <br>
+            <text style='font-size: 20px;position:relative;top:-10px'><b>{{test['name']}}</b></text><br>
+            <text style='font-size: 17px;position:relative;top:-10px'>Subject: <b>{{test['subject']}}</b></text><br>
+            <text style='font-size: 17px;position:relative;top:-10px'>Score: <b>{{test['score']}}</b></text><br>
+            <text style='font-size: 16px;position:relative;top:-10px' data-toggle="tooltip" title="{{test['long_time_stamp']}}">Last submit: {{test['time_stamp']}}</text>
+          </div>
+        </a>
+        {%endfor%}
+      {%else%}
+      <div style="text-align: center; width: 850px"><p style='font-size: 20px'>You have no completed tests...</p></div>
+      {%endif%}
+    </div><br>
+  </div>
+<div class='wrap'>
+    <center>
+    <div class='noselect' style='border: 5px solid gray; border-style: dotted; border-radius: 10px; width: 800px; height: 80px; cursor: pointer; position: relative; left: 25px; top: -15px' onclick='window.location.href = "/new_test"'>
+      <text style='color: gray; font-size: 30px; position:relative; top: 13px; font-family: sans-serif;'>Create Test</text>
+    </div></center><br>
+    {%if created_tests_len != 0%}
+      {%for test in created_tests%}
+      <a href='/t/{{test['id']}}/edit/' style='text-decoration: none;'>
+        <div class="box">
+          <br>
+          <text style='font-size: 20px;'><b>{{test['name']}}</b></text><br>
+          <text style='font-size: 17px;'>Subject: <b>{{test['subject']}}</b></text><br>
+          <text style='font-size: 16px;'>Responses: {{test['responses_count']}}</text>
+        </div>
+      </a>
+      {%endfor%}
+    {%else%}
+    <div style="text-align: center; width: 850px; padding-top:20px"><p style='font-size: 20px'>You have not created any tests yet...</p></div>
+    {%endif%}
+  <br>
+</div>
+<div>
+  <div  class="wrap">
+    <center>
+    <div class='noselect' style='border: 5px solid gray; border-style: dotted; border-radius: 10px; width: 800px; height: 80px; cursor: pointer; position: relative; left: 25px; top: -15px' onclick='window.location.href = "/new_test"'>
+      <text style='color: gray; font-size: 30px; position:relative; top: 13px; font-family: sans-serif;'>Create Test</text>
+    </div></center><br>
+    {%for test in created_tests%}
+    <a href='/t/{{test['id']}}/edit/' style='text-decoration: none;'>
+      <div class="box">
+        <br>
+        <text style='font-size: 20px;'>{{test['name']}}</text><br>
+        <text style='font-size: 17px;'>Subject: {{test['subject']}}</text><br>
+        <text style='font-size: 16px;'>Responses: {{test['responses_count']}}</text>
       </div>
-    </center>
+    </a>
+    {%endfor%}
+  </div><br>
+</div>
+</div>
+</div>
+</div>
+<div style='width: 100%; position: fixed; background-color: black; padding: 10px; top: 0px; left:0px; opacity: 1; z-index: 2'>
+  <a style='color: white; font-size: 40px; left: 47%; text-decoration: none' href='/' autofocus>DAL Assessments</a>
+  <text style='color: white; position: absolute; right: 50px; top: 10px; font-size: 20px'>Hello {{name}}</text>
+  <text style='color: white; position: absolute; right: 50px; top: 35px'>Logged in as {{username}}</text>
+</div>
+</center>
+<style>
+.tab-body {
+  text-align: center;
+}
+.wrap {
+  display: flex;
+  flex-wrap: wrap;
+  flex: 1 20px;
+}
+.box {
+font-size: 1em;
+padding: 10px;
+width: 200px;
+height: 150px;
+border: 2px solid darkslategray;
+border-radius: 10px;
+text-decoration: none;
+color: black;
+cursor: pointer;
+box-shadow: 10px;
+position: relative;
+margin: 6px;
+text-align: center;
+}
+
+.active {
+  text-align: center;
+  font-size: 16px;
+}
+.tab-header {
+  border-radius: 25px;
+}
+.tab-body {
+  border-radius: 25px;
+}
+.tabs {
+position:absolute;
+top:50%;
+left:50%;
+right:50%;
+transform:translate(-50%,-50%);
+width:100%;
+height:100%;
+}
+.tabs .tab-header {
+background:white;
+padding:10px;
+display:flex;
+}
+.tabs .tab-header > div {
+position:relative;
+width:25%;
+text-align:center;
+padding:10px;
+z-index:2;
+font-weight:600;
+color:#888;
+cursor:pointer;
+transition:all 300ms ease-in-out;
+}
+.tabs .tab-header > div.active {
+color:#387be2;
+}
+.tabs .tab-indicator {
+position:absolute;
+width:calc(25% - 5px);
+height:40px;
+background:#d9e5f9;
+top:10px;
+left:10px;
+border-radius:20px;
+transition:all 300ms ease-in-out;
+}
+.tabs .tab-body {
+position:relative;
+padding:20px;
+background: white;
+border-top:1px solid #ddd;
+height:calc(100% - 50px);
+overflow-y:scroll;
+}
+.tabs .tab-body > div {
+position:absolute;
+opacity:0;
+z-index: -1;
+top:-100%;
+transform:translateY(-10px);
+transition:opacity 300ms ease-in-out,
+          transform 300ms ease-in-out;
+}
+.tabs .tab-body > div.active {
+transform:translateY(0px);
+top:30px;
+opacity:1;
+z-index: 1;
+}
+.tabs .tab-body h1 {
+color:#222;
+margin-bottom:10px;
+}
+.tabs .tab-body p {
+color:#555;
+font-size:15px;
+}
+</style>
+<script>
+let tabs = document.querySelector(".tabs");
+let tabHeader = tabs.querySelector(".tab-header");
+let tabBody = tabs.querySelector(".tab-body");
+let tabIndicator = tabs.querySelector(".tab-indicator");
+let tabHeaderNodes = tabs.querySelectorAll(".tab-header > div");
+let tabBodyNodes = tabs.querySelectorAll(".tab-body > div");
+
+for(let i=0;i<tabHeaderNodes.length;i++){
+tabHeaderNodes[i].addEventListener("click",function(){
+  console.log(i)
+  localStorage.setItem('home_selected_section', i)
+  tabHeader.querySelector(".active").classList.remove("active");
+  tabHeaderNodes[i].classList.add("active");
+  tabBody.querySelector(".active").classList.remove("active");
+  tabBodyNodes[i].classList.add("active");
+  tabIndicator.style.left = `calc(calc(calc(25% - 5px) * ${i}) + 10px)`;
+});
+}
+if (localStorage.getItem('home_selected_section') == null){
+  localStorage.setItem('home_selected_section', 0)
+}
+tabHeader.querySelector(".active").classList.remove("active");
+tabHeaderNodes[localStorage.getItem('home_selected_section')].classList.add("active");
+tabBody.querySelector(".active").classList.remove("active");
+tabBodyNodes[localStorage.getItem('home_selected_section')].classList.add("active");
+tabIndicator.style.left = `calc(calc(calc(25% - 5px) * ${localStorage.getItem('home_selected_section')}) + 10px)`;
+</script>
+{% include "footer.html" %}
   </body>
 </html>
