@@ -21,6 +21,10 @@ import uuid
 import ipaddress
 from dateutil import tz
 import hmac
+import base64
+from Crypto import Random
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad, unpad
 from collections import OrderedDict
 
 #################### Initialize ####################
@@ -49,7 +53,8 @@ with open('../data/auth_domains') as f:
     DOMAINS = f.read().split('\n')
 DOMAIN = DOMAINS[0]
 
-anonymous_urls = ['/favicon.ico', '/clear_test_cookies', '/logo.png', '/background.png', '/loading.gif', '/update_server', '/github_sign_in/signin/', '/github_logo.png', '/telegram_logo.webp', '/tg_auth/signin/']
+anonymous_urls = ['/favicon.ico', '/clear_test_cookies', '/logo.png', '/background.png', '/loading.gif', '/update_server',
+                '/github_sign_in/signin/', '/github_logo.png', '/telegram_logo.webp', '/tg_auth/signin/', '/functions/enc_pass', '/functions/dec_pass']
 mobile_agents = ['Android', 'iPhone', 'iPod touch']
 
 user_credentials = {}
@@ -170,6 +175,23 @@ def parse_access_token_str(token_str):
     vars = str(token_str).split('&')
     access_token = vars[0].split('=')[1]
     return access_token
+
+def encrypt(text, password):
+    bs = AES.block_size
+    key = hashlib.sha256(password.encode()).digest()
+    text = text + (bs - len(text) % bs) * chr(bs - len(text) % bs)
+    iv = Random.new().read(bs)
+    cipher = AES.new(key, AES.MODE_CBC, iv)
+    return base64.b64encode(iv+cipher.encrypt(text.encode()))
+
+def decrypt(enc, password):
+    bs = AES.block_size
+    key = hashlib.sha256(password.encode()).digest()
+    enc = base64.b64decode(enc)
+    iv = enc[:bs]
+    cipher = AES.new(key, AES.MODE_CBC, iv)
+    s = cipher.decrypt(enc[bs:])
+    return s[:-ord(s[len(s)-1:])].decode('utf-8')
 
 def get_github_access_token(code):
     with open('../data/github_credentials.json') as f:
@@ -808,6 +830,8 @@ def after_request(response):
     response.headers["X-Frame-Options"] = "SAMEORIGIN"
     response.headers["X-Content-Type-Options"] = "nosniff"
     return response
+
+#################### Context Processors ####################
 
 @app.context_processor
 def context_processor():
@@ -1786,10 +1810,44 @@ def tg_auth(loc):
             return flask.redirect('/login')
     return dict(flask.request.args)
 
+#################### Other Function Endpoints ####################
+
+@app.route('/functions/enc_pass', methods=["POST"])
+def enc_pass():
+    try:
+        data = flask.request.json
+        password = data['password']
+        try:
+            return encrypt(str(data['data']), password)
+        except ValueError:
+            return 'ERROR DURING ENCRYPTION'
+    except KeyError:
+        return '400 BAD REQUEST', 400
+    except TypeError:
+        return '400 BAD REQUEST', 400
+
+@app.route('/functions/dec_pass', methods=["POST"])
+def dec_pass():
+    try:
+        data = flask.request.json
+        password = data['password']
+        try:
+            dec = decrypt(str(data['data']), password)
+            if dec == '':
+                return 'ERROR DURING DECRYPTION'
+            return dec
+        except ValueError:
+            return 'ERROR DURING DECRYPTION'
+    except KeyError:
+        return '400 BAD REQUEST', 400
+    except TypeError:
+        return '400 BAD REQUEST', 400
+
 #################### Error Handlers ####################
 
 @app.errorhandler(404)
 def e_404(e):
+    print('nop not found')
     return flask.render_template('404.html'), 404
 
 @app.errorhandler(500)
