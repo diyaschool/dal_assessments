@@ -43,17 +43,17 @@
             </script>
             <center><text style='font-size: 30px; font-weight: bold;'>Linked Accounts</text><br><br></center>
             <center><div class='noselect' data-toggle="tooltip" title="{%if google_auth == False%}Link your Google Account to create tests{%else%}You have already linked your Google Account{%endif%}" style='width: 300px; height: 120px; cursor: pointer; border: 1px solid lightgray; border-radius: 20px' onclick='{%if google_auth == False%}window.location.href = "/sheets_api_authorize"{%else%}google_signout(){%endif%}'>
-              <button type="button" style='width: inherit; height: inherit; position: relative; left:-1px; top: -1px; border-radius: 20px; border: 0px solid black;background-color: {%if google_auth == False%}#fbfcfc{%else%}#e5e7e9{%endif%} ;'>
+              <button type="button" style='width: inherit; height: inherit; position: relative; left:-1px; top: -1px; border-radius: 20px; border: 0px solid black;background-color: {%if google_auth == True%}#fbfcfc{%else%}#e5e7e9{%endif%} ;'>
               <img src="/google_logo.png" alt="Google Logo" style='width: 70px; height: 70px'>&nbsp;&nbsp;<text style='font-size: 25px'>Google</text><br>
             </div>
             <br>
             <div class='noselect' data-toggle="tooltip" title="{%if github_auth == False%}Link your GitHub Account to enable SSO{%else%}You have already linked your GitHub Account{%endif%}" style='width: 300px; height: 120px; cursor: pointer; border: 1px solid lightgray; border-radius: 20px' onclick='{%if github_auth == False%}window.location.href = "https://github.com/login/oauth/authorize?client_id={{client_id}}&redirect_uri={{url_root()}}github_sign_in/auth/"{%else%}github_signout(){%endif%}'>
-              <button type="button" style='width: inherit; height: inherit; position: relative; left:-1px; top: -1px; border-radius: 20px; border: 0px solid black;background-color: {%if github_auth == False%}#fbfcfc{%else%}#e5e7e9{%endif%} ;'>
+              <button type="button" style='width: inherit; height: inherit; position: relative; left:-1px; top: -1px; border-radius: 20px; border: 0px solid black;background-color: {%if github_auth == True%}#fbfcfc{%else%}#e5e7e9{%endif%} ;'>
               <img src="/github_logo.png" alt="GitHub Logo" style='width: 70px; height: 70px'>&nbsp;&nbsp;<text style='font-size: 25px'>GitHub</text><br>
             </button></div>
           <br>
           <div class='noselect container' data-toggle="tooltip" title="{%if telegram_auth == False%}Link your Telegram Account to enable SSO and access the Telegram Assistant{%else%}You have already linked your GitHub Account{%endif%}" style='width: 300px; height: 120px; cursor: pointer;border: 1px solid lightgray; border-radius: 20px' onclick='{%if telegram_auth == True%}telegram_signout(){%endif%}'>
-            <button type="button" {%if telegram_auth == False%}data-toggle="modal" data-target="#exampleModal"{%endif%} style='width: inherit; height: inherit; position: relative; left:-16px; top: -1px; border-radius: 20px; border: 0px solid black;background-color: {%if telegram_auth == False%}#fbfcfc{%else%}#e5e7e9{%endif%} ;'>
+            <button type="button" {%if telegram_auth == False%}data-toggle="modal" data-target="#exampleModal"{%endif%} style='width: inherit; height: inherit; position: relative; left:-16px; top: -1px; border-radius: 20px; border: 0px solid black;background-color: {%if telegram_auth == True%}#fbfcfc{%else%}#e5e7e9{%endif%} ;'>
             <br><img src="/telegram_logo.webp" alt="Telegram Logo" style='width: 70px; height: 70px'>&nbsp;&nbsp;<text style='font-size: 25px'>Telegram</text><br>
         <br></button>
       </div><br><br>
