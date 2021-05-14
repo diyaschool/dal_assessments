@@ -463,7 +463,6 @@ def convert(sheet, teacher=False):
             output['question_count'] = q_n
         return output
     except Exception as e:
-        print(e)
         return "ERROR"
 
 def create_new_test_sheet(owner, creds):
@@ -792,7 +791,6 @@ def get_completed_tests_list(username):
             fdata = parse_dict(f.read())
         temp['name'] = fdata['test_name']
         temp['subject'] = fdata['subject']
-        print(temp)
         output.append(temp)
     return output
 
@@ -836,7 +834,6 @@ def after_request(response):
 @app.context_processor
 def context_processor():
     def url_root():
-        print(flask.request.url_root)
         return flask.request.url_root
     return dict(url_root=url_root)
 
@@ -850,7 +847,6 @@ def home():
             desktop = False
     user_data = get_user_data(flask.session['username'])
     current_tests = get_current_tests_list(flask.session['username'])
-    print(current_tests)
     completed_tests = get_completed_tests_list(flask.session['username'])
     created_tests = get_created_tests_list(flask.session['username'])
     if desktop:
@@ -860,7 +856,9 @@ def home():
 
 @app.route('/logout')
 def logout():
-    flask.session.pop('username')
+    for var in flask.session:
+        flask.session.pop(var)
+    flask.session.modified = True
     return flask.redirect('/login')
 
 @app.route('/clear_test_cookies')
@@ -1544,7 +1542,14 @@ def settings():
                     telegram_auth = True
         except FileNotFoundError:
             pass
-        return flask.render_template('settings.html', username=flask.session['username'], name=user_data['name'], error=error, alert=alert, client_id=client_id, github_auth=github_auth, google_auth=google_auth, telegram_auth=telegram_auth, tg_bot_username=tg_bot_username, tg_bot_settings=tg_bot_settings)
+        desktop = True
+        for agent in mobile_agents:
+            if agent in flask.request.headers['User-Agent']:
+                desktop = False
+        if desktop:
+            return flask.render_template('settings.html', username=flask.session['username'], name=user_data['name'], error=error, alert=alert, client_id=client_id, github_auth=github_auth, google_auth=google_auth, telegram_auth=telegram_auth, tg_bot_username=tg_bot_username, tg_bot_settings=tg_bot_settings)
+        else:
+            return flask.render_template('mobile/settings.html', username=flask.session['username'], name=user_data['name'], error=error, alert=alert, client_id=client_id, github_auth=github_auth, google_auth=google_auth, telegram_auth=telegram_auth, tg_bot_username=tg_bot_username, tg_bot_settings=tg_bot_settings)
     elif flask.request.method == 'POST':
         data = flask.request.form
         if flask.request.args.get('change_password') == '':
@@ -1814,7 +1819,6 @@ def tg_auth(loc):
 
 @app.errorhandler(404)
 def e_404(e):
-    print('nop not found')
     return flask.render_template('404.html'), 404
 
 @app.errorhandler(500)
@@ -1826,7 +1830,10 @@ def e_500(e):
 
 @app.route('/robots.txt')
 def robots_txt():
-    return 'Telegram: @ChaitanyaPy, Github: https://github.com/ChaitanyaPy/'
+    return '''
+    User-agent: *
+    Allow: /
+    '''
 
 @app.route('/update_server', methods=['post'])
 def update_server():
