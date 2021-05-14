@@ -3,20 +3,47 @@
   <meta charset="utf-8">
   <title>LOGIN | DAL Assessments</title>
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js" ></script>
+   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+   <link rel="icon" href="logo.png" type="image/icon type">
+   <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css">
+   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
 </head>
 <body style='background-size: cover; background-image: url("/background.png");  background-repeat: no-repeat; background-position: center; background-attachment: fixed;'>
   <center>
     <div>
-    <br><text style="font-family:Arial, Helvetica, sans-serif; font-size: 40px; font-weight: bold; color: white">Diya Academy of Learning</text><br>
-    <br><img src='/logo.png' style="height: 150px;" id='logo' /><br><br>
-    <div style="position:relative; border: 5px solid blue; border-radius: 20px; height: 200px; width: 300px; background-color: cyan; opacity: 0.8;">
+    <br><text style="font-family:Arial, Helvetica, sans-serif; font-size: 30px; font-weight: bold; color: white">Diya Academy of Learning</text><br>
+    <br><img src='/logo.png' style="height: 120px;" id='logo' /><br><br>
+    <div style="position:relative; border: 5px solid blue; border-radius: 20px; height: 300px; width: 300px; background-color: cyan; opacity: 0.9;">
       <form method='POST' action='/login' style="position:relative; top: 50px">
         <label style="font-family: courier; position:relative; left: 0px; top: -20px; font-size: 20px; font-weight: bold" for='username'>Username</label><br>
-        <input style="font-family: courier; position:relative; left: 0px; top: -20px; width: 150px;height: 20px;border-radius: 5px; font-weight: bold" type='text' name='username' id='username' required value='{{username}}' autofocus><br><br>
+        <input style="font-family: courier; position:relative; left: 0px; top: -20px; width: 150px;height: 20px;border-radius: 5px; font-weight: bold" type='text' name='username' id='username' required value='{{username}}' autofocus><br>
         <label style="font-family: courier; position:relative; left: 0px; top: -20px; font-size: 20px; font-weight: bold" for='password'>Password</label><br>
-        <input type='password' name='password' id='password' required style="position:relative; left: 0px; top: -20px; width: 150px; border-radius: 5px; height: 20px;"><br><br></br>
-        <input type='submit' value='Login' style='width:200px; height:30px;font-size: 20px;border-radius: 10px; position: relative; top: -40px'>
+        <input type='password' name='password' id='password' required style="position:relative; left: 0px; top: -20px; width: 150px; border-radius: 5px; height: 20px;"><br><br>
+        <input type='submit' value='Login' style='width:200px; height:40px;font-size: 20px;border-radius: 10px; position: relative; top: -30px'>
       </form>
+      <button class="fadeIn fourth" style=' position: relative; top: 15px; height: 60px; width: 120px' onclick='window.location.href = "https://github.com/login/oauth/authorize?client_id={{client_id}}&redirect_uri={{url_root()}}github_sign_in/signin/"'><img src="/github_logo.png" alt="GitHub Sign In" style='width: 40px; height: 40px;'></button>
+      <button data-toggle="modal" data-target="#exampleModal" class="fadeIn fourth" style=' position: relative; top: 15px; height: 60px; width: 120px'><img src="/telegram_logo.webp" alt="GitHub Sign In" style='width: 40px; height: 40px;'></button>
+    </div>
+  </div>
+  <!-- Modal -->
+  <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Log in with your Telegram Account</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <script async src="https://telegram.org/js/telegram-widget.js?14" data-telegram-login="{{tg_bot_username}}" data-size="medium" data-auth-url="{{url_root()}}tg_auth/signin/" data-request-access="write"></script>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
     </div>
   </div>
   </center>
