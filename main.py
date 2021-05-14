@@ -357,6 +357,10 @@ def update_score(username, test_id, ans_res, difficulty, question_id, answer_ind
         answer_index = -1
         ans_given_text = 'Skipped'
     else:
+        print(difficulty)
+        print(question_id)
+        print(answer_index)
+        print(test_data)
         ans_given_text = test_data['questions'][difficulty][question_id]['answers'][answer_index]
     now = datetime.datetime.now()
     now.replace(tzinfo=from_zone)
@@ -995,6 +999,11 @@ def t_view(code):
                     question = get_question(flask.session['t']['c_q'][0], question_data['questions']['easy'])
                     if question == "QUESTIONS_COMPLETED":
                         question = get_question(flask.session['t']['c_q'][2], question_data['questions']['hard'])
+                        flask.session['t']['difficulty'] = 2
+                    else:
+                        flask.session['t']['difficulty'] = 0
+                else:
+                    flask.session['t']['difficulty'] = 1
                 print(question)
                 flask.session['t']['q_id'] = question['id']
                 if question == 'QUESTIONS_COMPLETED':
