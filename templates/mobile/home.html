@@ -17,7 +17,7 @@
       }
     </style>
   </head>
-  <body style='background-size: cover; background-image: url("/background.png");  background-repeat: no-repeat; background-position: center; background-attachment: fixed;'>
+  <body style='background-size: cover; background-image: url("/background.png");  background-repeat: no-repeat; background-position: center; background-attachment: absolute;'>
     <style>
     body {
       overflow: hidden;
@@ -83,13 +83,12 @@
     <div id="preloader">
       <div id="status">&nbsp;</div>
     </div>
-    <center><br><br><br>
-      <br><br><div style='background-color: white; height: 600px; width: 900px; border-radius: 20px; opacity: 1; z-index: 1;' class='tooltip'>
+    <center><br>
+      <br><br><div style='background-color: white; height: 530px; width: 100%; border-radius: 20px; opacity: 1; z-index: 1;' class='tooltip'>
         <div class="tabs">
 <div class="tab-header">
 <div class="active">Current Tests</div>
 <div>Completed Tests</div>
-<div>Created Tests</div>
 </div>
 <div class="tab-indicator"></div>
 <div class="tab-body">
@@ -106,7 +105,7 @@
       </a>
       {%endfor%}
     {%else%}
-    <div style="text-align: center; width: 850px"><p style='font-size: 20px'>You have no new tests to attend...</p></div>
+    <div style="text-align: center; width: 100%"><p style='font-size: 20px'>You have no new tests to attend...</p></div>
     {%endif%}
     <br>
   </div>
@@ -125,56 +124,15 @@
         </a>
         {%endfor%}
       {%else%}
-      <div style="text-align: center; width: 850px"><p style='font-size: 20px'>You have no completed tests...</p></div>
+      <div style="text-align: center; width: 100%"><p style='font-size: 20px'>You have no completed tests...</p></div>
       {%endif%}
     </div><br>
   </div>
-<div class='wrap'>
-    <center>
-    <div class='noselect' style='border: 5px solid gray; border-style: dotted; border-radius: 10px; width: 800px; height: 80px; cursor: pointer; position: relative; left: 25px; top: -15px' onclick='window.location.href = "/new_test"'>
-      <text style='color: gray; font-size: 30px; position:relative; top: 13px; font-family: sans-serif;'>Create Test</text>
-    </div></center><br>
-    {%if created_tests_len != 0%}
-      {%for test in created_tests%}
-      <a href='/t/{{test['id']}}/edit/' style='text-decoration: none;'>
-        <div class="box">
-          <br>
-          <text style='font-size: 20px;'><b>{{test['name']}}</b></text><br>
-          <text style='font-size: 17px;'>Subject: <b>{{test['subject']}}</b></text><br>
-          <text style='font-size: 16px;'>Responses: {{test['responses_count']}}</text>
-        </div>
-      </a>
-      {%endfor%}
-    {%else%}
-    <div style="text-align: center; width: 850px; padding-top:20px"><p style='font-size: 20px'>You have not created any tests yet...</p></div>
-    {%endif%}
-  <br>
-</div>
-<div>
-  <div  class="wrap">
-    <center>
-    <div class='noselect' style='border: 5px solid gray; border-style: dotted; border-radius: 10px; width: 800px; height: 80px; cursor: pointer; position: relative; left: 25px; top: -15px' onclick='window.location.href = "/new_test"'>
-      <text style='color: gray; font-size: 30px; position:relative; top: 13px; font-family: sans-serif;'>Create Test</text>
-    </div></center><br>
-    {%for test in created_tests%}
-    <a href='/t/{{test['id']}}/edit/' style='text-decoration: none;'>
-      <div class="box">
-        <br>
-        <text style='font-size: 20px;'>{{test['name']}}</text><br>
-        <text style='font-size: 17px;'>Subject: {{test['subject']}}</text><br>
-        <text style='font-size: 16px;'>Responses: {{test['responses_count']}}</text>
-      </div>
-    </a>
-    {%endfor%}
-  </div><br>
-</div>
 </div>
 </div>
 </div>
 <div style='width: 100%; position: fixed; background-color: black; padding: 10px; top: 0px; left:0px; opacity: 1; z-index: 2'>
-  <a style='color: white; font-size: 40px; left: 47%; text-decoration: none' href='/' autofocus>DAL Assessments</a>
-  <text style='color: white; position: absolute; right: 50px; top: 10px; font-size: 20px'>Hello {{name}}</text>
-  <text style='color: white; position: absolute; right: 50px; top: 35px'>Logged in as {{username}}</text>
+  <a style='color: white; font-size: 30px; left: 47%; text-decoration: none' href='/'>DAL Assessments</a>
 </div>
 </center>
 <style>
@@ -184,13 +142,13 @@
 .wrap {
   display: flex;
   flex-wrap: wrap;
-  flex: 1 20px;
+  flex: 1 40px;
 }
 .box {
 font-size: 1em;
 padding: 10px;
-width: 200px;
-height: 150px;
+width: 180px;
+height: 160px;
 border: 2px solid darkslategray;
 border-radius: 10px;
 text-decoration: none;
@@ -228,7 +186,7 @@ display:flex;
 }
 .tabs .tab-header > div {
 position:relative;
-width:25%;
+width: 100%;
 text-align:center;
 padding:10px;
 z-index:2;
@@ -238,15 +196,15 @@ cursor:pointer;
 transition:all 300ms ease-in-out;
 }
 .tabs .tab-header > div.active {
+  width: 100%;
 color:#387be2;
 }
 .tabs .tab-indicator {
 position:absolute;
-width:calc(25% - 5px);
-height:40px;
-background:#d9e5f9;
+height:45px;
+width: 47%;
+background:#e8effa;
 top:10px;
-left:10px;
 border-radius:20px;
 transition:all 300ms ease-in-out;
 }
@@ -298,7 +256,7 @@ tabHeaderNodes[i].addEventListener("click",function(){
   tabHeaderNodes[i].classList.add("active");
   tabBody.querySelector(".active").classList.remove("active");
   tabBodyNodes[i].classList.add("active");
-  tabIndicator.style.left = `calc(calc(calc(25% - 5px) * ${i}) + 10px)`;
+  tabIndicator.style.left = `calc(calc(calc(40% + 10px) * ${i}) + 10px + 1%)`;
 });
 }
 if (localStorage.getItem('home_selected_section') == null){
@@ -308,8 +266,8 @@ tabHeader.querySelector(".active").classList.remove("active");
 tabHeaderNodes[localStorage.getItem('home_selected_section')].classList.add("active");
 tabBody.querySelector(".active").classList.remove("active");
 tabBodyNodes[localStorage.getItem('home_selected_section')].classList.add("active");
-tabIndicator.style.left = `calc(calc(calc(25% - 5px) * ${localStorage.getItem('home_selected_section')}) + 10px)`;
+tabIndicator.style.left = `calc(calc(calc(40% + 10px) * ${localStorage.getItem('home_selected_section')}) + 10px + 1%)`;
 </script>
-{% include "footer.html" %}
+{% include "mobile/footer.html" %}
   </body>
 </html>
