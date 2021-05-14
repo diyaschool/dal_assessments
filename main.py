@@ -1810,39 +1810,6 @@ def tg_auth(loc):
             return flask.redirect('/login')
     return dict(flask.request.args)
 
-#################### Other Function Endpoints ####################
-
-@app.route('/functions/enc_pass', methods=["POST"])
-def enc_pass():
-    try:
-        data = flask.request.json
-        password = data['password']
-        try:
-            return encrypt(str(data['data']), password)
-        except ValueError:
-            return 'ERROR DURING ENCRYPTION'
-    except KeyError:
-        return '400 BAD REQUEST', 400
-    except TypeError:
-        return '400 BAD REQUEST', 400
-
-@app.route('/functions/dec_pass', methods=["POST"])
-def dec_pass():
-    try:
-        data = flask.request.json
-        password = data['password']
-        try:
-            dec = decrypt(str(data['data']), password)
-            if dec == '':
-                return 'ERROR DURING DECRYPTION'
-            return dec
-        except ValueError:
-            return 'ERROR DURING DECRYPTION'
-    except KeyError:
-        return '400 BAD REQUEST', 400
-    except TypeError:
-        return '400 BAD REQUEST', 400
-
 #################### Error Handlers ####################
 
 @app.errorhandler(404)
