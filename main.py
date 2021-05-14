@@ -963,7 +963,10 @@ def t_view(code):
         flask.session.modified = True
         save_test_response(flask.session['username'], code)
         delete_score(flask.session['username'], code)
-        return flask.render_template('t_completed.html', test_name=question_data['test_name'], score=score, name=user_data['name'], username=flask.session['username'], code=code)
+        if desktop:
+            return flask.render_template('t_completed.html', test_name=question_data['test_name'], score=score, name=user_data['name'], username=flask.session['username'], code=code)
+        else:
+            return flask.render_template('mobile/t_completed.html', test_name=question_data['test_name'], score=score, name=user_data['name'], username=flask.session['username'], code=code)
     else:
         if question_data['question_count'] == parse_dict(flask.session['t']['q'])-1:
             score = flask.session['t']['score']
@@ -981,7 +984,10 @@ def t_view(code):
                     f.write(json.dumps(user_data))
             save_test_response(flask.session['username'], code)
             delete_score(flask.session['username'], code)
-            return flask.render_template('t_completed.html', test_name=question_data['test_name'], score=score, name=user_data['name'], username=flask.session['username'], code=code)
+            if desktop:
+                return flask.render_template('t_completed.html', test_name=question_data['test_name'], score=score, name=user_data['name'], username=flask.session['username'], code=code)
+            else:
+                return flask.render_template('mobile/t_completed.html', test_name=question_data['test_name'], score=score, name=user_data['name'], username=flask.session['username'], code=code)
     if flask.session['t']['q'] == '0':
         q_n = question_data['question_count']
         flask.session['t']['verified'] = True
