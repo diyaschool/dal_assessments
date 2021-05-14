@@ -991,6 +991,11 @@ def t_view(code):
             if flask.session['t'].get('verified') == True:
                 flask.session['t']['time'] = time.time()
                 question = get_question(flask.session['t']['c_q'][1], question_data['questions']['medium'])
+                if question == "QUESTIONS_COMPLETED":
+                    question = get_question(flask.session['t']['c_q'][0], question_data['questions']['easy'])
+                    if question == "QUESTIONS_COMPLETED":
+                        question = get_question(flask.session['t']['c_q'][2], question_data['questions']['hard'])
+                print(question)
                 flask.session['t']['q_id'] = question['id']
                 if question == 'QUESTIONS_COMPLETED':
                     return flask.render_template('500.html'), 500
