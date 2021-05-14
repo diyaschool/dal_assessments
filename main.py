@@ -856,8 +856,8 @@ def home():
 
 @app.route('/logout')
 def logout():
-    for var in flask.session:
-        flask.session.pop(var)
+    flask.session.pop('username')
+    flask.session.pop('perm_auth_key')
     flask.session.modified = True
     return flask.redirect('/login')
 
