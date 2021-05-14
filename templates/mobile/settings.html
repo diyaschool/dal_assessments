@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Settings | DAL Assessments</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js" ></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <style>
+      .noselect {
+        -webkit-touch-callout: none; /* iOS Safari */
+        -webkit-user-select: none; /* Safari */
+        -khtml-user-select: none; /* Konqueror HTML */
+        -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+        user-select: none; /* Non-prefixed version, currently supported by Chrome, Edge, Opera and Firefox */
+      }
+    </style>
+  </head>
+  <body style='background-size: cover; background-image: url("/background.png");  background-repeat: no-repeat; background-position: center; background-attachment: fixed;overflow:auto'>
+    <br><br><br>
+        <br><br>
+        <div style='background-color: white; border-radius: 20px; opacity: 1; height: auto; width: 100%; margin:auto;'>
+          <div style='height: auto; width: 100%; '><br>
+            <script>
+            function google_signout(){
+              if (confirm("You have already linked your Google Account. DO YOU WANT TO UNLINK IT? You will lose access from new creating tests.")){
+                window.location.href = '/sheets_api_authorize/delete/'
+              }
+            }
+            function github_signout(){
+              if (confirm("You have already linked your GitHub Account. DO YOU WANT TO UNLINK IT? You will not be able to sign in with your GitHub account.")){
+                window.location.href = '/github_auth/delete/'
+              }
+            }
+            function telegram_signout(){
+              if (confirm("You have already linked your Telegram Account. DO YOU WANT TO UNLINK IT? You will lose access to SSO and the Telegram Assistant Bot.")){
+                window.location.href = '/tg_auth/delete/'
+              }
+            }
+            </script>
+            <center><text style='font-size: 30px; font-weight: bold;'>Linked Accounts</text><br><br></center>
+            <center><div class='noselect' data-toggle="tooltip" title="{%if google_auth == False%}Link your Google Account to create tests{%else%}You have already linked your Google Account{%endif%}" style='width: 250px; height: 100px; cursor: pointer; border: 1px solid lightgray; border-radius: 20px' onclick='{%if google_auth == False%}window.location.href = "/sheets_api_authorize"{%else%}google_signout(){%endif%}'>
+              <button type="button" style='width: inherit; height: inherit; position: relative; left:-1px; top: -1px; border-radius: 20px; border: 0px solid black;background-color: {%if google_auth == True%}#fbfcfc{%else%}#e5e7e9{%endif%} ;'>
+              <img src="/google_logo.png" alt="Google Logo" style='width: 70px; height: 70px'>&nbsp;&nbsp;<text style='font-size: 25px'>Google</text><br>
+            </div>
+            <br>
+            <div class='noselect' data-toggle="tooltip" title="{%if github_auth == False%}Link your GitHub Account to enable SSO{%else%}You have already linked your GitHub Account{%endif%}" style='width: 250px; height: 100px; cursor: pointer; border: 1px solid lightgray; border-radius: 20px' onclick='{%if github_auth == False%}window.location.href = "https://github.com/login/oauth/authorize?client_id={{client_id}}&redirect_uri={{url_root()}}github_sign_in/auth/"{%else%}github_signout(){%endif%}'>
+              <button type="button" style='width: inherit; height: inherit; position: relative; left:-1px; top: -1px; border-radius: 20px; border: 0px solid black;background-color: {%if github_auth == True%}#fbfcfc{%else%}#e5e7e9{%endif%} ;'>
+              <img src="/github_logo.png" alt="GitHub Logo" style='width: 70px; height: 70px'>&nbsp;&nbsp;<text style='font-size: 25px'>GitHub</text><br>
+            </button></div>
+          <br>
+          <div class='noselect container' data-toggle="tooltip" title="{%if telegram_auth == False%}Link your Telegram Account to enable SSO and access the Telegram Assistant{%else%}You have already linked your GitHub Account{%endif%}" style='width: 250px; height: 100px; cursor: pointer;border: 1px solid lightgray; border-radius: 20px' onclick='{%if telegram_auth == True%}telegram_signout(){%endif%}'>
+            <button type="button" {%if telegram_auth == False%}data-toggle="modal" data-target="#exampleModal"{%endif%} style='width: inherit; height: inherit; position: relative; left:-16px; top: -1px; border-radius: 20px; border: 0px solid black;background-color: {%if telegram_auth == True%}#fbfcfc{%else%}#e5e7e9{%endif%} ;'>
+            <br><img src="/telegram_logo.webp" alt="Telegram Logo" style='width: 70px; height: 70px'>&nbsp;&nbsp;<text style='font-size: 25px'>Telegram</text><br>
+        <br></button>
+      </div><br><br>
+      </
+    </center>
+    </div>
+          <center><div style='height: auto; width: 100%; border-top: 3px solid lightgray;'><br>
+            <text style='font-size: 30px; font-weight: bold'>Change Password</text><br><br>
+            <form action="/settings/?change_password" method="post">
+              <input type='hidden' name='username' value='{{username}}'>
+              <label for="current_password" style="font-size: 20px">Current password</label><br><input style='width: 350px' type='password' name='current_password' placeholder="Enter current password" id='current_password' required><br><br>
+              <label style="font-size: 20px">New password</label><br><input style='width: 350px' type='password' name='new_password' placeholder="Enter new password" required>
+              <br><input style='width: 350px; position: relative; top: 10px' type='password' name='conf_password' placeholder="Confirm password" required>
+              <br><br><input type="submit" value="Change password"><br><br>
+            </form>
+          </div></center>
+          {%if telegram_auth == True%}<div style='height: auto; width: 100%; border-top: 3px solid lightgray;'><br>
+            <center><text style='font-size: 30px; font-weight: bold'>Telegram Assistant</text><br><br></center>
+            <section style='margin-left: 20%; font-size: 15px'>
+              <form action="/settings/?tg_bot" method="post" class='noselect'>
+                <label><input type='checkbox' name='on_login' value='True' {%if tg_bot_settings.get("on_login") == True %}checked{%endif%} >&nbsp;&nbsp;Send alert on new login</label><br>
+                <label><input type='checkbox' name='on_linked_accounts' value='True' {%if tg_bot_settings.get("on_linked_accounts") == True %}checked{%endif%}>&nbsp;&nbsp;Send alert on add/remove linked accounts</label><br>
+                <label><input type='checkbox' name='on_password_change' value='True' {%if tg_bot_settings.get("on_password_change") == True %}checked{%endif%}>&nbsp;&nbsp;Send alert when password change detected</label><br>
+            </section>
+            <center><br><input type="submit" value="Apply Changes"><br><br></center>
+          </form>
+          </div>{%endif%}
+        </div>
+        <!-- Modal -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Link Telegram Account</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <script async src="https://telegram.org/js/telegram-widget.js?14" data-telegram-login="{{tg_bot_username}}" data-size="large" data-auth-url="{{url_root()}}tg_auth/auth/" data-request-access="write"></script>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      <style>
+      body {
+        overflow: hidden;
+      }
+      #preloader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #fff;
+        z-index: 99;
+      }
+      #status {
+        width: 200px;
+        height: 200px;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        background-image: url(/loading.gif);
+        background-repeat: no-repeat;
+        background-position: center;
+        margin: -100px 0 0 -100px;
+      }
+      input[type=text], select {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+input[type=submit] {
+  background-color: #4CAF50;
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+input[type=submit]:hover {
+  background-color: #45a049;
+}
+
+      </style>
+      <style>
+#snackbar {
+  visibility: hidden;
+  min-width: 250px;
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  border-radius: 2px;
+  padding: 16px;
+  position: fixed;
+  z-index: 1;
+  left: 35%;
+  bottom: 30px;
+  font-size: 17px;
+}
+
+#snackbar.show {
+  visibility: visible;
+  -webkit-animation: fadein 0.5s, fadeout 0.5s 6.5s;
+  animation: fadein 0.5s, fadeout 0.5s 6.5s;
+}
+
+@-webkit-keyframes fadein {
+  from {bottom: 0; opacity: 0;}
+  to {bottom: 30px; opacity: 1;}
+}
+
+@keyframes fadein {
+  from {bottom: 0; opacity: 0;}
+  to {bottom: 30px; opacity: 1;}
+}
+
+@-webkit-keyframes fadeout {
+  from {bottom: 30px; opacity: 1;}
+  to {bottom: 0; opacity: 0;}
+}
+
+@keyframes fadeout {
+  from {bottom: 30px; opacity: 1;}
+  to {bottom: 0; opacity: 0;}
+}
+</style>
+<center>
+  <div style='width: 100%; position: fixed; background-color: black; padding: 10px; top: 0px; left:0px; opacity: 1'>
+    <a style='color: white; font-size: 40px; left: 47%; text-decoration: none' href='/'>DAL Assessments</a>
+  </div>
+</center>
+    {%if error != None%}
+    <script>
+      alert("{{error}}");
+    </script>
+    {%endif%}
+{% include "footer.html" %}
+<div id="snackbar">{{alert}}&nbsp;&nbsp;&nbsp;&nbsp;<img src='/close_icon.png' style='width: 20px; height: 20px; position:absolute; right: 10px; top: 16px; cursor:pointer;' onclick="hide_snackbar()"></div>
+<script>
+function show_snackbar() {
+  var x = document.getElementById("snackbar");
+  x.className = "show";
+  setTimeout(function(){ x.className = x.className.replace("show", ""); }, 7000);
+}
+function hide_snackbar() {
+  var x = document.getElementById("snackbar");
+  x.className = x.className.replace("show", "");
+
+}
+{%if alert != 'none'%}show_snackbar();{%endif%}
+</script>
+<style>
+body {
+  overflow: hidden;
+}
+#preloader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #fff;
+  z-index: 99;
+}
+#status {
+  width: 200px;
+  height: 200px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  background-position: center;
+  background-image: url(/loading.gif);
+  background-repeat: no-repeat;
+  margin: -100px 0 0 -100px;
+}
+</style>
+<script>
+$(window).on('load', function() { // makes sure the whole site is loaded
+  $('#status').fadeOut(); // will first fade out the loading animation
+  {%if image_url%}
+    $('#preloader').delay(100).fadeOut('slow'); // will fade out the white DIV that covers the website.
+    $('body').delay(1000).css({'overflow':'visible'});
+  {%else%}
+    $('#preloader').delay(100).fadeOut('slow'); // will fade out the white DIV that covers the website.
+    $('body').delay(725).css({'overflow':'visible'});
+  {%endif%}
+})
+</script>
+<div id="preloader">
+  <div id="status">&nbsp;</div>
+</div>
+  </body>
+</html>
