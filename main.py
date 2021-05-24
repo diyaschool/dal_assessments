@@ -1,4 +1,5 @@
 import textwrap
+import httpagentparser
 from os import listdir
 from os.path import isfile, join
 import threading
@@ -54,7 +55,7 @@ with open('../data/auth_domains') as f:
 DOMAIN = DOMAINS[0]
 
 anonymous_urls = ['/favicon.ico', '/clear_test_cookies', '/logo.png', '/background.png', '/loading.gif', '/update_server',
-                '/github_sign_in/signin/', '/github_logo.png', '/telegram_logo.webp', '/tg_auth/signin/', '/functions/enc_pass', '/functions/dec_pass']
+                '/github_sign_in/signin/', '/github_logo.png', '/telegram_logo.webp', '/tg_auth/signin/']
 mobile_agents = ['Android', 'iPhone', 'iPod touch']
 
 user_credentials = {}
@@ -63,6 +64,34 @@ from_zone = tz.tzlocal()
 to_zone = tz.gettz('Asia/Kolkata')
 
 #################### Utility Functions ####################
+
+def curr_dt():
+    dt = datetime.datetime.now()
+    dt.replace(tzinfo=from_zone)
+    dt = dt.astimezone(to_zone)
+    return dt
+
+def log_data(username, data):
+    if os.path.isdir(f"../data/user_data/{username}/logs") == False:
+        os.mkdir(f"../data/user_data/{username}/logs")
+    dt = curr_dt()
+    log = {}
+    if data['type'] == 'login':
+        path = f"../data/user_data/{username}/logs/auth.log"
+        log['action'] = "login"
+    elif data['type'] == 'logout':
+        path = f"../data/user_data/{username}/logs/auth.log"
+        log['action'] = "logout"
+    elif data['type'] == 'passwd_change':
+        path = f"../data/user_data/{username}/logs/passwd_change.log"
+    elif data['linked_acc_change']:
+        path = f"../data/user_data/{username}/logs/linked_acc_change.log"
+    log['date'] = str(dt.date())
+    log['time'] = str(dt.time())
+    log['utime'] = str(time.time())
+    log.update(data)
+    with open(path, 'a') as f:
+        f.write("\n"+json.dumps(log))
 
 def list_to_csv(data):
     output_data = ""
@@ -258,9 +287,7 @@ def save_test_response(username, test_id):
     data['average_time'] = round(sum(times)/len(times), 2)
     with open('../data/user_data/'+username+'/test_data/'+test_id+'.json') as f:
         data['question_stream'] = parse_dict(f.read())['question_stream']
-    now = datetime.datetime.now()
-    now.replace(tzinfo=from_zone)
-    now = now.astimezone(to_zone)
+    now = curr_dt()
     if now.hour > 12:
         c_m = 'PM'
         hour = now.hour-12
@@ -362,9 +389,7 @@ def update_score(username, test_id, ans_res, difficulty, question_id, answer_ind
         print(answer_index)
         print(test_data)
         ans_given_text = test_data['questions'][difficulty][question_id]['answers'][answer_index]
-    now = datetime.datetime.now()
-    now.replace(tzinfo=from_zone)
-    now = now.astimezone(to_zone)
+    now = curr_dt()
     if now.hour >= 12:
         c_m = 'PM'
         hour = now.hour-12
@@ -470,9 +495,7 @@ def convert(sheet, teacher=False):
         return "ERROR"
 
 def create_new_test_sheet(owner, creds):
-    dt = datetime.datetime.now()
-    dt.replace(tzinfo=from_zone)
-    dt = dt.astimezone(to_zone)
+    dt = curr_dt()
     c_time = str(dt.hour)+':'+str(dt.minute)+':'+str(dt.second)
     c_date = str(dt.year)+'-'+str(dt.month)+'-'+str(dt.day)
     test_list = [f for f in os.listdir('../data/test_data') if os.path.isdir(os.path.join('../data/test_data', f))]
@@ -1166,7 +1189,12 @@ def login():
                 user_data = get_user_data(flask.session['username'])
                 flask.session['perm_auth_key'] = hashlib.sha256(user_data['password'].encode()).hexdigest()
                 user_data = get_user_data(flask.session['username'])
-                send_telegram_message(flask.session['username'], f'Dear *{user_data["name"]}*,\nThere is a *new login* with your *password* at DAL Assessments.\n\n_If this wasn\'t you, please login quickly and change your password_', 'on_login')
+                ip = flask.request.headers.get('X-Real-IP')
+                if ip == None:
+                    ip = flask.request.remote_addr
+                ua = flask.request.headers.get('User-Agent')
+                ua = httpagentparser.detect(ua)
+                send_telegram_message(flask.session['username'], f'Dear *{user_data["name"]}*,\nWe have detected a *new login* with your *password* at DAL Assessments.\nIP: `{ip}`\nDetails: `{ua["browser"]["name"]}`\n\n_If this wasn\'t you, please login quickly and change your password_', 'on_login')
                 if user_data.get('has_changed_password') != None and flask.request.path != '/change_password':
                     return flask.redirect('/change_password')
                 try:
@@ -1270,9 +1298,7 @@ def test_edit(code):
                 with open('../data/test_data/'+code+'/config.json', 'w') as f:
                     f.write(json.dumps(n_test_data))
                 with open('../data/test_metadata/'+code+'.json', 'w') as f:
-                    dt = datetime.datetime.now()
-                    dt.replace(tzinfo=from_zone)
-                    dt = dt.astimezone(to_zone)
+                    dt = curr_dt()
                     c_time = str(dt.hour)+':'+str(dt.minute)+':'+str(dt.second)
                     c_date = str(dt.year)+'-'+str(dt.month)+'-'+str(dt.day)
                     metadata['last_time'] = c_time
@@ -1854,6 +1880,10 @@ def robots_txt():
     User-agent: *
     Allow: /
     '''
+
+@app.route('/privacy-policy')
+def privacy_policy():
+    return flask.render_template('privacy-policy.html')
 
 @app.route('/update_server', methods=['post'])
 def update_server():
