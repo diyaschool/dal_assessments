@@ -14,7 +14,7 @@
           <br><br><br><br>
           <text style='font-size: 35px'>Google Account Authentication</text><br><br>
           <text style='font-size: 15px'>Opening Google OAuth page... If experiencing trouble, click <a onclick='window.open("{{url | safe}}")' style='color: blue; cursor: pointer;'>here.</a></text><br><br>
-          <script>setTimeout(function () {window.open("{{url | safe}}")}, 3000)</script>
+          <script>setTimeout(function () {window.open("{{url | safe}}")}, 2000)</script>
           <form action='/sheets_api_authorize/' method='POST'>
             <input type='text' name='code' placeholder='Please enter the code here' autofocus style='width: 450px'><br>
             <input type='submit' value='Authenticate Google Account'>

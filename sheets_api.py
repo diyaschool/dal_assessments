@@ -5,13 +5,14 @@ from google_auth_oauthlib.flow import Flow
 
 class authorize:
     def get_url(self):
-        self.flow = Flow.from_client_secrets_file('../data/credentials.json', scopes=['https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/spreadsheets', 'openid'], redirect_uri='urn:ietf:wg:oauth:2.0:oob')
+        self.flow = Flow.from_client_secrets_file('../data/credentials.json', scopes=['https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/drive.file', 'openid'], redirect_uri='urn:ietf:wg:oauth:2.0:oob')
         self.auth_url, _ = self.flow.authorization_url(prompt='consent')
         return self.auth_url
     def verify_code(self, code):
         try:
             self.flow.fetch_token(code=code)
             creds = self.flow.credentials
+            self.verify_token(creds)
             return creds
         except Exception as e:
             return False
@@ -30,9 +31,7 @@ class authorize:
             return None
     def verify_token(self, creds):
         try:
-            service = build('sheets', 'v4', credentials=creds, cache_discovery=False)
-            sheet = service.spreadsheets()
-            sheet.values().get(spreadsheetId='1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms', range='A1:C').execute()
+            # sheet_id = create_sheet("DAL Assessments Temporary Verification Sheet", creds)
             return True
         except Exception as e:
             return False

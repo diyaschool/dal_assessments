@@ -1253,7 +1253,7 @@ def test_edit(code):
         if sync_arg == '':
             gauth = sheets_api.authorize()
             creds = gauth.load_credentials(flask.session['username'])
-            if gauth.verify_token(creds) == False:
+            if creds == None:
                 return flask.redirect('/sheets_api_authorize')
             n_test_data = sheets_api.get_values(sheet_id, creds)
             if 'teacher'in user_data['tags'] or 'team' in user_data['tags'] or 'admin' in user_data['tags']:
@@ -1647,12 +1647,8 @@ def sheets_api_authorize():
         creds = gauth.load_credentials(flask.session['username'])
         user_credentials[flask.session['username']] = gauth
         if creds:
-            if gauth.verify_token(creds):
-                flask.session['settings_alert'] = 'You have already linked your Google Account'
-                return flask.redirect('/settings')
-            else:
-                url = gauth.get_url()
-                return flask.render_template('sheets_code.html', url=url, username=flask.session['username'], name=user_data['name'])
+            flask.session['settings_alert'] = 'You have already linked your Google Account'
+            return flask.redirect('/settings')
         else:
             url = gauth.get_url()
             return flask.render_template('sheets_code.html', url=url, username=flask.session['username'], name=user_data['name'])
