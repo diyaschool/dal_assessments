@@ -55,7 +55,7 @@ with open('../data/auth_domains') as f:
 DOMAIN = DOMAINS[0]
 
 anonymous_urls = ['/favicon.ico', '/clear_test_cookies', '/logo.png', '/background.png', '/loading.gif', '/update_server',
-                '/github_sign_in/signin/', '/github_logo.png', '/telegram_logo.webp', '/tg_auth/signin/']
+                '/github_sign_in/signin/', '/github_logo.png', '/telegram_logo.webp', '/tg_auth/signin/', '/privacy-policy']
 mobile_agents = ['Android', 'iPhone', 'iPod touch']
 
 user_credentials = {}
