@@ -29,34 +29,13 @@
                 window.location.href = '/sheets_api_authorize/delete/'
               }
             }
-            function github_signout(){
-              if (confirm("You have already linked your GitHub Account. DO YOU WANT TO UNLINK IT? You will not be able to sign in with your GitHub account.")){
-                window.location.href = '/github_auth/delete/'
-              }
-            }
-            function telegram_signout(){
-              if (confirm("You have already linked your Telegram Account. DO YOU WANT TO UNLINK IT? You will lose access to SSO and the Telegram Assistant Bot.")){
-                window.location.href = '/tg_auth/delete/'
-              }
-            }
             </script>
             <center><text style='font-size: 30px; font-weight: bold;'>Linked Accounts</text><br><br></center>
             <center><div class='noselect' data-toggle="tooltip" title="{%if google_auth == False%}Link your Google Account to create tests{%else%}You have already linked your Google Account{%endif%}" style='width: 250px; height: 100px; cursor: pointer; border: 1px solid lightgray; border-radius: 20px' onclick='{%if google_auth == False%}window.location.href = "/sheets_api_authorize"{%else%}google_signout(){%endif%}'>
               <button type="button" style='width: inherit; height: inherit; position: relative; left:-1px; top: -1px; border-radius: 20px; border: 0px solid black;background-color: {%if google_auth == True%}#fbfcfc{%else%}#e5e7e9{%endif%} ;'>
               <img src="/google_logo.png" alt="Google Logo" style='width: 70px; height: 70px'>&nbsp;&nbsp;<text style='font-size: 25px'>Google</text><br>
             </div>
-            <br>
-            <div class='noselect' data-toggle="tooltip" title="{%if github_auth == False%}Link your GitHub Account to enable SSO{%else%}You have already linked your GitHub Account{%endif%}" style='width: 250px; height: 100px; cursor: pointer; border: 1px solid lightgray; border-radius: 20px' onclick='{%if github_auth == False%}window.location.href = "https://github.com/login/oauth/authorize?client_id={{client_id}}&redirect_uri={{url_root()}}github_sign_in/auth/"{%else%}github_signout(){%endif%}'>
-              <button type="button" style='width: inherit; height: inherit; position: relative; left:-1px; top: -1px; border-radius: 20px; border: 0px solid black;background-color: {%if github_auth == True%}#fbfcfc{%else%}#e5e7e9{%endif%} ;'>
-              <img src="/github_logo.png" alt="GitHub Logo" style='width: 70px; height: 70px'>&nbsp;&nbsp;<text style='font-size: 25px'>GitHub</text><br>
-            </button></div>
-          <br>
-          <div class='noselect container' data-toggle="tooltip" title="{%if telegram_auth == False%}Link your Telegram Account to enable SSO and access the Telegram Assistant{%else%}You have already linked your GitHub Account{%endif%}" style='width: 250px; height: 100px; cursor: pointer;border: 1px solid lightgray; border-radius: 20px' onclick='{%if telegram_auth == True%}telegram_signout(){%endif%}'>
-            <button type="button" {%if telegram_auth == False%}data-toggle="modal" data-target="#exampleModal"{%endif%} style='width: inherit; height: inherit; position: relative; left:-16px; top: -1px; border-radius: 20px; border: 0px solid black;background-color: {%if telegram_auth == True%}#fbfcfc{%else%}#e5e7e9{%endif%} ;'>
-            <br><img src="/telegram_logo.webp" alt="Telegram Logo" style='width: 70px; height: 70px'>&nbsp;&nbsp;<text style='font-size: 25px'>Telegram</text><br>
-        <br></button>
-      </div><br><br>
-      </
+            <br><br>
     </center>
     </div>
           <center><div style='height: auto; width: 100%; border-top: 3px solid lightgray;'><br>
@@ -69,38 +48,6 @@
               <br><br><input type="submit" value="Change password"><br><br>
             </form>
           </div></center>
-          {%if telegram_auth == True%}<div style='height: auto; width: 100%; border-top: 3px solid lightgray;'><br>
-            <center><text style='font-size: 30px; font-weight: bold'>Telegram Assistant</text><br><br></center>
-            <section style='margin-left: 20%; font-size: 15px'>
-              <form action="/settings/?tg_bot" method="post" class='noselect'>
-                <label><input type='checkbox' name='on_login' value='True' {%if tg_bot_settings.get("on_login") == True %}checked{%endif%} >&nbsp;&nbsp;Send alert on new login</label><br>
-                <label><input type='checkbox' name='on_linked_accounts' value='True' {%if tg_bot_settings.get("on_linked_accounts") == True %}checked{%endif%}>&nbsp;&nbsp;Send alert on add/remove linked accounts</label><br>
-                <label><input type='checkbox' name='on_password_change' value='True' {%if tg_bot_settings.get("on_password_change") == True %}checked{%endif%}>&nbsp;&nbsp;Send alert when password change detected</label><br>
-            </section>
-            <center><br><input type="submit" value="Apply Changes"><br><br></center>
-          </form>
-          </div>{%endif%}
-        </div>
-        <!-- Modal -->
-        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-          <div class="modal-dialog" role="document">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Link Telegram Account</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <div class="modal-body">
-                <script async src="https://telegram.org/js/telegram-widget.js?14" data-telegram-login="{{tg_bot_username}}" data-size="large" data-auth-url="{{url_root()}}tg_auth/auth/" data-request-access="write"></script>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
       <style>
       body {
         overflow: hidden;
