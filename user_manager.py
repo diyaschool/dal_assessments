@@ -13,7 +13,7 @@ def parse_dict(str_data):
     except json.decoder.JSONDecodeError:
         return ast.literal_eval(str_data)
 
-def create(username, password, name, tags):
+def create(username, password, name, tags, email=""):
     if os.path.isfile('../data/user_metadata/'+username):
         return False
     with open('../data/user_metadata/'+username, 'w') as f:
@@ -21,6 +21,11 @@ def create(username, password, name, tags):
     os.mkdir('../data/user_data/'+username)
     os.mkdir('../data/user_data/'+username+'/test_data')
     os.mkdir('../data/user_data/'+username+'/created_tests')
+    if email != "":
+        with open('../data/google_sso/'+email, 'w') as f:
+            f.write(username)
+        with open('../data/google_username_sso/'+username, 'w') as f:
+            f.write(email)
     return True
 
 def fix(username):
@@ -34,10 +39,10 @@ def delete(username):
     except FileNotFoundError:
         pass
     try:
-        with open('../data/github_username_credentials/'+username) as f:
-            gprofile = f.read()
-            os.remove('../data/github_username_credentials/'+username)
-            os.remove('../data/github_credentials/'+gprofile)
+        with open('../data/google_username_sso/'+username) as f:
+            email = f.read().strip()
+        os.remove('../data/google_username_sso/'+username)
+        os.remove('../data/google_sso/'+email)
     except FileNotFoundError:
         pass
 
@@ -49,10 +54,13 @@ def modify(username, password, name, tags):
     with open('../data/user_metadata/'+username, 'w') as f:
         f.write(json.dumps({"name": name, "password": hashlib.sha224(password.encode()).hexdigest(), "tags": tags}))
 
-def change_password(username, password):
+def change_password(username, password, reset=False):
     data = get(username)
     with open('../data/user_metadata/'+username, 'w') as f:
-        f.write(json.dumps({"name": data['name'], "password": hashlib.sha224(password.encode()).hexdigest(), "tags": data['tags']}))
+        if reset == False:
+            f.write(json.dumps({"name": data['name'], "password": hashlib.sha224(password.encode()).hexdigest(), "tags": data['tags']}))
+        elif reset == True:
+            f.write(json.dumps({"name": data['name'], "password": hashlib.sha224(password.encode()).hexdigest(), "tags": data['tags'], "has_changed_password": False}))
 
 def change_test_owner(file_name, new_owner):
     with open('../data/test_metadata/'+file_name) as f:
@@ -69,12 +77,11 @@ def migrate_data(current_username, new_username):
         change_test_owner(test, new_username)
     shutil.rmtree('../data/user_data/'+new_username+'/test_data')
     os.mkdir('../data/user_data/'+new_username+'/test_data')
-    with open('../data/github_username_credentials/'+current_username) as f:
-        gprofile = f.read()
-    os.rename('../data/github_username_credentials/'+current_username, '../data/github_username_credentials/'+new_username)
-    with open('../data/github_credentials/'+gprofile, 'w') as f:
-        f.write(new_username)
     os.rename('../data/credentials/'+current_username+'.pickle', '../data/credentials/'+new_username+'.pickle')
+    try:
+        os.rename('../data/google_username_sso/'+current_username, '../data/google_username_sso/'+new_username)
+    except FileNotFoundError:
+        pass
 
 def are_you_sure():
     while 1:
@@ -89,14 +96,15 @@ def are_you_sure():
 
 if __name__ == '__main__':
     while 1:
-        mode = input('Mode? [create/delete/change_password/migrate]: ')
+        mode = input('Mode? [create/delete/change_password/migrate/reset_password]: ')
         if mode == 'create':
             username = input('Username: ')
             password = input('Password: ')
             name = input('Name: ')
             tags = input("Tags: ")
             tags = tags.replace(' ', '').split(',')
-            create(username, password, name, tags)
+            email = input("Email: ").strip()
+            create(username, password, name, tags, email)
             print('Done.')
         elif mode == 'delete':
             username = input('Username: ')
@@ -109,6 +117,14 @@ if __name__ == '__main__':
             new_password = input('New password: ')
             if are_you_sure():
                 change_password(username, new_password)
+                print('Done.')
+            else:
+                print('Not modified.')
+        elif mode == 'reset_password':
+            username = input('Username: ')
+            new_password = input('New password: ')
+            if are_you_sure():
+                change_password(username, new_password, reset=True)
                 print('Done.')
             else:
                 print('Not modified.')

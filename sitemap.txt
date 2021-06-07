@@ -21,5 +21,6 @@ Any URL request on this server without logging in will be returned with a redire
 /t/<code>/upload/                  - [HTML] upload.html
 /t/<code>/upload/delete/<file_id>/ - [REDIRECT] /t/<code>/upload/
 /t/<code>/static/<file_code>/      - [FILE] corresponding file
-
+/privacy-policy                    - [HTML] privacy-policy.html
+/gauthtoken                        - [PROCESSING] Google SSO
 /robots.txt                        - [TEXT] some random stuff

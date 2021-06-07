@@ -1,17 +1,20 @@
 import pickle
+from google.oauth2 import id_token
+from google.auth.transport import requests
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from google_auth_oauthlib.flow import Flow
 
 class authorize:
     def get_url(self):
-        self.flow = Flow.from_client_secrets_file('../data/credentials.json', scopes=['https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/spreadsheets', 'openid'], redirect_uri='urn:ietf:wg:oauth:2.0:oob')
+        self.flow = Flow.from_client_secrets_file('../data/credentials.json', scopes=['https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/drive.file', 'openid'], redirect_uri='urn:ietf:wg:oauth:2.0:oob')
         self.auth_url, _ = self.flow.authorization_url(prompt='consent')
         return self.auth_url
     def verify_code(self, code):
         try:
             self.flow.fetch_token(code=code)
             creds = self.flow.credentials
+            self.verify_token(creds)
             return creds
         except Exception as e:
             return False
@@ -30,9 +33,7 @@ class authorize:
             return None
     def verify_token(self, creds):
         try:
-            service = build('sheets', 'v4', credentials=creds, cache_discovery=False)
-            sheet = service.spreadsheets()
-            sheet.values().get(spreadsheetId='1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms', range='A1:C').execute()
+            # sheet_id = create_sheet("DAL Assessments Temporary Verification Sheet", creds)
             return True
         except Exception as e:
             return False
@@ -80,3 +81,10 @@ def tamper_with_format(sheet_id, credentials):
     tamper_data = ['Name, Subject, Total questions', 'Student Tags', 'Easy Questions', 'Options', 'Correct Option', 'Image', 'Medium Questions', 'Options', 'Correct Option', 'Image', 'Hard Questions', 'Options', 'Correct Option', 'Image']
     req = sheet.values().update(spreadsheetId=sheet_id, range="A1:Z", valueInputOption="USER_ENTERED", body={"range": "A1:Z", "majorDimension": "ROWS", "values": [tamper_data]})
     req.execute()
+
+def verify_idtoken(idtoken):
+    try:
+        idinfo = id_token.verify_oauth2_token(idtoken, requests.Request(), "901009864862-aaecugd6kdpdgfj56gemtjnh8b3emqe9.apps.googleusercontent.com")
+        return idinfo
+    except ValueError as e:
+        return False

@@ -8,7 +8,9 @@
    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css">
    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js" ></script>
+   <script src="https://apis.google.com/js/platform.js" async defer></script>
    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+   <meta name="google-signin-client_id" content="901009864862-aaecugd6kdpdgfj56gemtjnh8b3emqe9.apps.googleusercontent.com">
    {% include "meta.html" %}
 </head>
 <style>
@@ -275,39 +277,46 @@
     <div id="fromContent">
         <form action='/login' method='post'>
             <div class="input-container">
-              <i class="fa fa-user icon fadeIn second"></i>
-          <input type="text" id="login" class="fadeIn second" name="username" placeholder="Username" required autofocus>
+              <i class="fa fa-user icon fadeIn first"></i>
+          <input type="text" id="login" class="fadeIn first" name="username" placeholder="Username" required autofocus>
         </div><br/><br/>
         <div class="input-container">
-          <i class="fa fa-key icon fadeIn third"></i>
-          <input type="password" id="password" class="fadeIn third" name="password" placeholder="Password" required>
+          <i class="fa fa-key icon fadeIn first"></i>
+          <input type="password" id="password" class="fadeIn first" name="password" placeholder="Password" required>
         </div><br/>
-            <input type="checkbox" class="fadeIn fourth" onclick="myFunction()" id='showPassword'><label class="fadeIn fourth" for='showPassword' style='color: white'>&nbsp;Show Password</label><br/><br/>
-          <input type="submit" class="fadeIn fourth" value="Log In" autofocus></form>
-          <button class="fadeIn fourth" style=' position: relative; top: 15px; height: 60px; width: 150px' onclick='window.location.href = "https://github.com/login/oauth/authorize?client_id={{client_id}}&redirect_uri={{url_root()}}github_sign_in/signin/"'><img src="/github_logo.png" alt="GitHub Sign In" style='width: 40px; height: 40px;'></button>
-          <button data-toggle="modal" data-target="#exampleModal" class="fadeIn fourth" style=' position: relative; top: 15px; height: 60px; width: 150px'><img src="/telegram_logo.webp" alt="GitHub Sign In" style='width: 40px; height: 40px;'></button>
+            <input type="checkbox" class="fadeIn first" onclick="myFunction()" id='showPassword'><label class="fadeIn first" for='showPassword' style='color: white'>&nbsp;Show Password</label><br/><br/>
+          <input type="submit" class="fadeIn first" value="Log In" autofocus></form>
+          <div class="g-signin2 fadeIn first" data-onsuccess="onSignIn"></div>
     </div>
   </div>
+  <script>
+  function onSignIn(googleUser) {
+  var id_token = googleUser.getAuthResponse().id_token;
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', '/gauthtoken');
+  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+  xhr.onload = function() {
+    if (xhr.responseText == "AUTHORIZED"){
+      window.location.replace("/");
+    } else if (xhr.responseText == "BAD_ACCOUNT"){
+      var auth2 = gapi.auth2.getAuthInstance();
+      auth2.signOut().then(function () {
+        snackbar("2")
+      });
+    } else if (xhr.responseText == "NEEDS_PASSWORD"){
+      var auth2 = gapi.auth2.getAuthInstance();
+      auth2.signOut().then(function () {
+        snackbar("3")
+      });
+    } else {
+      var auth2 = gapi.auth2.getAuthInstance();
+      auth2.signOut().then(function () {
+        snackbar("1")
+      });
+    }
+  };xhr.send('idtoken='+id_token);}
+  </script>
   </center>
-  <!-- Modal -->
-  <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Log in with your Telegram Account</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <script async src="https://telegram.org/js/telegram-widget.js?14" data-telegram-login="{{tg_bot_username}}" data-size="large" data-auth-url="{{url_root()}}tg_auth/signin/" data-request-access="write"></script>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
-        </div>
-      </div>
-    </div>
-  </div>
   <script>
 function myFunction() {
   var x = document.getElementById("password");
@@ -318,6 +327,113 @@ function myFunction() {
   }
 }
 </script>
+<style>
+#snackbar1 {
+visibility: hidden; /* Hidden by default. Visible on click */
+min-width: 250px; /* Set a default minimum width */
+margin-left: -125px; /* Divide value of min-width by 2 */
+background-color: #333; /* Black background color */
+color: #fff; /* White text color */
+text-align: center; /* Centered text */
+border-radius: 2px; /* Rounded borders */
+padding: 16px; /* Padding */
+position: fixed; /* Sit on top of the screen */
+z-index: 1; /* Add a z-index if needed */
+left: 50%; /* Center the snackbar */
+bottom: 30px; /* 30px from the bottom */
+}
+
+/* Show the snackbar when clicking on a button (class added with JavaScript) */
+#snackbar1.show {
+visibility: visible; /* Show the snackbar */
+/* Add animation: Take 0.5 seconds to fade in and out the snackbar.
+However, delay the fade out process for 2.5 seconds */
+-webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+animation: fadein 0.5s, fadeout 0.5s 2.5s;
+}
+
+#snackbar2 {
+visibility: hidden; /* Hidden by default. Visible on click */
+min-width: 250px; /* Set a default minimum width */
+margin-left: -125px; /* Divide value of min-width by 2 */
+background-color: #333; /* Black background color */
+color: #fff; /* White text color */
+text-align: center; /* Centered text */
+border-radius: 2px; /* Rounded borders */
+padding: 16px; /* Padding */
+position: fixed; /* Sit on top of the screen */
+z-index: 1; /* Add a z-index if needed */
+left: 50%; /* Center the snackbar */
+bottom: 30px; /* 30px from the bottom */
+}
+
+/* Show the snackbar when clicking on a button (class added with JavaScript) */
+#snackbar2.show {
+visibility: visible; /* Show the snackbar */
+/* Add animation: Take 0.5 seconds to fade in and out the snackbar.
+However, delay the fade out process for 2.5 seconds */
+-webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+animation: fadein 0.5s, fadeout 0.5s 2.5s;
+}
+#snackbar3 {
+visibility: hidden; /* Hidden by default. Visible on click */
+min-width: 250px; /* Set a default minimum width */
+margin-left: -125px; /* Divide value of min-width by 2 */
+background-color: #333; /* Black background color */
+color: #fff; /* White text color */
+text-align: center; /* Centered text */
+border-radius: 2px; /* Rounded borders */
+padding: 16px; /* Padding */
+position: fixed; /* Sit on top of the screen */
+z-index: 1; /* Add a z-index if needed */
+left: 50%; /* Center the snackbar */
+bottom: 30px; /* 30px from the bottom */
+}
+
+/* Show the snackbar when clicking on a button (class added with JavaScript) */
+#snackbar3.show {
+visibility: visible; /* Show the snackbar */
+/* Add animation: Take 0.5 seconds to fade in and out the snackbar.
+However, delay the fade out process for 2.5 seconds */
+-webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+animation: fadein 0.5s, fadeout 0.5s 2.5s;
+}
+
+/* Animations to fade the snackbar in and out */
+@-webkit-keyframes fadein {
+from {bottom: 0; opacity: 0;}
+to {bottom: 30px; opacity: 1;}
+}
+
+@keyframes fadein {
+from {bottom: 0; opacity: 0;}
+to {bottom: 30px; opacity: 1;}
+}
+
+@-webkit-keyframes fadeout {
+from {bottom: 30px; opacity: 1;}
+to {bottom: 0; opacity: 0;}
+}
+
+@keyframes fadeout {
+from {bottom: 30px; opacity: 1;}
+to {bottom: 0; opacity: 0;}
+}
+</style>
+<script>
+function snackbar(snackbar) {
+  if (snackbar == "1"){
+    var x = document.getElementById("snackbar1");
+  } else if (snackbar == "2"){
+    var x = document.getElementById("snackbar2");
+  }else if (snackbar == "3"){
+    var x = document.getElementById("snackbar3");
+  }
+x.className = "show";setTimeout(function(){ x.className = x.className.replace("show", ""); }, 7000);}
+</script>
+<div id="snackbar1">Error while signing in with Google</div>
+<div id="snackbar2">Unrecognized Google account, please use an authorized one</div>
+<div id="snackbar3">Please login with your password once before using your Google Account</div>
 {%if error != None%}
 <script type="text/javascript">alert("{{error}}")</script>
 {%endif%}
