@@ -58,6 +58,11 @@
       auth2.signOut().then(function () {
         snackbar("2")
       });
+    } else if (xhr.responseText == "NEEDS_PASSWORD"){
+      var auth2 = gapi.auth2.getAuthInstance();
+      auth2.signOut().then(function () {
+        snackbar("3")
+      });
     } else {
       var auth2 = gapi.auth2.getAuthInstance();
       auth2.signOut().then(function () {
@@ -143,11 +148,14 @@
       var x = document.getElementById("snackbar1");
     } else if (snackbar == "2"){
       var x = document.getElementById("snackbar2");
+    }else if (snackbar == "3"){
+      var x = document.getElementById("snackbar3");
     }
-  x.className = "show";setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);}
+  x.className = "show";setTimeout(function(){ x.className = x.className.replace("show", ""); }, 7000);}
   </script>
   <div id="snackbar1">Error while signing in with Google</div>
   <div id="snackbar2">Unrecognized Google account, please use an authorized one</div>
+  <div id="snackbar3">Please login with your password once before using your Google Account</div>
   </center>
   {%if error != None%}
     <script>alert("{{error}}");</script>
