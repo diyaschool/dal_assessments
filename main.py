@@ -3,7 +3,6 @@ import httpagentparser
 from os import listdir
 from os.path import isfile, join
 import threading
-import telebot
 import requests
 import csv
 import json
