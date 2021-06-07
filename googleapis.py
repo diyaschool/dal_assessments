@@ -1,4 +1,6 @@
 import pickle
+from google.oauth2 import id_token
+from google.auth.transport import requests
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from google_auth_oauthlib.flow import Flow
@@ -79,3 +81,10 @@ def tamper_with_format(sheet_id, credentials):
     tamper_data = ['Name, Subject, Total questions', 'Student Tags', 'Easy Questions', 'Options', 'Correct Option', 'Image', 'Medium Questions', 'Options', 'Correct Option', 'Image', 'Hard Questions', 'Options', 'Correct Option', 'Image']
     req = sheet.values().update(spreadsheetId=sheet_id, range="A1:Z", valueInputOption="USER_ENTERED", body={"range": "A1:Z", "majorDimension": "ROWS", "values": [tamper_data]})
     req.execute()
+
+def verify_idtoken(idtoken):
+    try:
+        idinfo = id_token.verify_oauth2_token(idtoken, requests.Request(), "901009864862-aaecugd6kdpdgfj56gemtjnh8b3emqe9.apps.googleusercontent.com")
+        return idinfo
+    except ValueError as e:
+        return False

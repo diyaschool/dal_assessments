@@ -12,7 +12,7 @@ import datetime
 import ast
 import user_manager
 import hashlib
-import sheets_api
+import googleapis
 import flask
 import time
 import os
@@ -55,7 +55,7 @@ with open('../data/auth_domains') as f:
 DOMAIN = DOMAINS[0]
 
 anonymous_urls = ['/favicon.ico', '/clear_test_cookies', '/logo.png', '/background.png', '/loading.gif', '/update_server',
-                '/github_sign_in/signin/', '/github_logo.png', '/telegram_logo.webp', '/tg_auth/signin/', '/privacy-policy']
+                '/github_sign_in/signin/', '/github_logo.png', '/telegram_logo.webp', '/tg_auth/signin/', '/privacy-policy', '/gauthtoken']
 mobile_agents = ['Android', 'iPhone', 'iPod touch']
 
 user_credentials = {}
@@ -506,7 +506,7 @@ def create_new_test_sheet(owner, creds):
         else:
             break
     test_id = r_id
-    sheet_id = sheets_api.create_sheet(test_id, creds)
+    sheet_id = googleapis.create_sheet(test_id, creds)
     os.mkdir('../data/test_data/'+test_id)
     os.mkdir('../data/test_data/'+test_id+'/files')
     with open('../data/test_data/'+test_id+'/config.json', 'w') as f:
@@ -1215,7 +1215,7 @@ def new_test():
     if flask.request.method == 'GET':
         return flask.render_template('new_test.html', username=flask.session['username'], name=user_data['name'])
     else:
-        gauth = sheets_api.authorize()
+        gauth = googleapis.authorize()
         creds = gauth.load_credentials(flask.session['username'])
         if creds == None:
             flask.session['settings_alert'] = 'Please link your Google account before creating a test'
@@ -1224,6 +1224,29 @@ def new_test():
         test_id, _ = test_data
         send_telegram_message(flask.session['username'], f'You have just created a new test at *DAL Assessments*. Here is the link to it: {flask.request.url_root}/t/{test_id}/edit', 'test_attend', False)
         return flask.redirect('/t/'+test_id+'/edit')
+
+@app.route('/t/<code>/edit/editor/', methods=['GET', 'POST'])
+def test_edit_editor(code):
+    user_data = get_user_data(flask.session['username'])
+    try:
+        with open('../data/test_metadata/'+code+'.json') as f:
+            data = parse_dict(f.read())
+    except:
+        return flask.render_template('404.html'), 404
+    with open('../data/test_data/'+code+'/config.json') as f:
+        try:
+            test_data = parse_dict(f.read())
+            title = test_data['test_name']
+        except SyntaxError:
+            test_data = {}
+            test_data['tags'] = []
+            title = 'Untitled'
+    sheet_id = data.get('sheet_id')
+    if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags'] or check_sharing_perms(data, flask.session['username'])['edit'] == True:
+        pass
+    else:
+        return flask.redirect('/t/'+code)
+    return flask.render_template('editor.html', code=code, data=data, test_data=test_data, sheet_id=sheet_id, title=title, username=flask.session['username'], name=user_data['name'])
 
 @app.route('/t/<code>/edit/', methods=['GET', 'POST', 'PUT'])
 def test_edit(code):
@@ -1251,11 +1274,11 @@ def test_edit(code):
     if flask.request.method == 'GET':
         sync_arg = flask.request.args.get('sync')
         if sync_arg == '':
-            gauth = sheets_api.authorize()
+            gauth = googleapis.authorize()
             creds = gauth.load_credentials(flask.session['username'])
             if creds == None:
                 return flask.redirect('/sheets_api_authorize')
-            n_test_data = sheets_api.get_values(sheet_id, creds)
+            n_test_data = googleapis.get_values(sheet_id, creds)
             if 'teacher'in user_data['tags'] or 'team' in user_data['tags'] or 'admin' in user_data['tags']:
                 n_test_data = convert(n_test_data, True)
             else:
@@ -1432,26 +1455,26 @@ def test_analytics_download(code, mode):
         except FileNotFoundError:
             gdata = {}
         if gdata.get(code) == None:
-            gauth = sheets_api.authorize()
+            gauth = googleapis.authorize()
             creds = gauth.load_credentials(flask.session['username'])
             if creds == None:
                 flask.session['settings_alert'] = 'Please link your Google account before creating a test'
                 return flask.redirect('/settings')
-            sheet_id = sheets_api.create_data_sheet(f"{title} - Analytics", creds, csv_data)
+            sheet_id = googleapis.create_data_sheet(f"{title} - Analytics", creds, csv_data)
             gdata[code] = sheet_id
             with open('../data/user_data/'+flask.session['username']+'/google_sheets_analytics_records', 'w') as f:
                 f.write(json.dumps(gdata))
             flask.session['analytics_alert'] = "Generated Google Sheet"
         else:
-            gauth = sheets_api.authorize()
+            gauth = googleapis.authorize()
             creds = gauth.load_credentials(flask.session['username'])
             if creds == None:
                 flask.session['settings_alert'] = 'Please link your Google account before creating a test'
                 return flask.redirect('/settings')
-            sheet_id = sheets_api.update_sheet(gdata[code], creds, csv_data)
+            sheet_id = googleapis.update_sheet(gdata[code], creds, csv_data)
             flask.session['analytics_alert'] = "Generated Google Sheet"
             if sheet_id == False:
-                sheet_id = sheets_api.create_data_sheet(f"{title} - Analytics", creds, csv_data)
+                sheet_id = googleapis.create_data_sheet(f"{title} - Analytics", creds, csv_data)
                 gdata[code] = sheet_id
                 with open('../data/user_data/'+flask.session['username']+'/google_sheets_analytics_records', 'w') as f:
                     f.write(json.dumps(gdata))
@@ -1573,7 +1596,7 @@ def settings():
                     github_auth = True
         except FileNotFoundError:
             pass
-        gauth = sheets_api.authorize()
+        gauth = googleapis.authorize()
         creds = gauth.load_credentials(flask.session['username'])
         if creds != None:
             google_auth = True
@@ -1643,7 +1666,7 @@ def sheets_api_authorize():
             user_credentials.pop(flask.session['username'])
         except KeyError:
             pass
-        gauth = sheets_api.authorize()
+        gauth = googleapis.authorize()
         creds = gauth.load_credentials(flask.session['username'])
         user_credentials[flask.session['username']] = gauth
         if creds:
@@ -1869,6 +1892,25 @@ def e_500(e):
     return flask.render_template('500.html'), 500
 
 #################### Other Endpoints ####################
+
+@app.route('/gauthtoken', methods=["POST"])
+def gauthtoken():
+    data = flask.request.form
+    id_token = data['idtoken']
+    user_data = googleapis.verify_idtoken(id_token)
+    if user_data == False:
+        return "UNAUTHORIZED"
+    try:
+        with open("../data/google_sso/"+user_data['email']) as f:
+            username = f.read().strip()
+        username_user_data = get_user_data(username)
+        if username_user_data == False:
+            return "BAD_ACCOUNT"
+        flask.session['username'] = username
+        flask.session['perm_auth_key'] = hashlib.sha256(username_user_data['password'].encode()).hexdigest()
+        return 'AUTHORIZED'
+    except FileNotFoundError:
+        return "BAD_ACCOUNT"
 
 @app.route('/robots.txt')
 def robots_txt():
