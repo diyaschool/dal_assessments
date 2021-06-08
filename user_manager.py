@@ -24,10 +24,16 @@ def create(username, password, name, tags, email=""):
     os.mkdir('../data/user_data/'+username)
     os.mkdir('../data/user_data/'+username+'/test_data')
     os.mkdir('../data/user_data/'+username+'/created_tests')
-    if email != "":
+    if email != "" or email != None:
         with open('../data/google_sso/'+email, 'w') as f:
             f.write(username)
     return True
+
+def change_email(current_email, new_email):
+    with open('../data/google_sso/'+current_email) as f:
+        username = f.read()
+    os.rename('../data/google_sso/'+current_email, '../data/google_sso/'+new_email)
+    user_data = []
 
 def fix(username):
     os.mkdir('../data/user_data/'+username+'/created_tests')
@@ -35,7 +41,7 @@ def fix(username):
 def delete(username):
     user_data = get(username)
     shutil.rmtree('../data/user_data/'+username)
-    email = user_data.get(username)
+    email = user_data.get('email')
     os.remove('../data/user_metadata/'+username)
     try:
         os.remove('../data/credentials/'+username+'.pickle')
@@ -131,6 +137,14 @@ if __name__ == '__main__':
             new_username = input('New username: ')
             if are_you_sure():
                 migrate_data(username, new_username)
+                print('Done.')
+            else:
+                print('Not modified.')
+        elif mode == 'migrate_email':
+            current_email = input('Email: ')
+            new_email = input('New email: ')
+            if are_you_sure():
+                migrate_data(current_email, new_email)
                 print('Done.')
             else:
                 print('Not modified.')
