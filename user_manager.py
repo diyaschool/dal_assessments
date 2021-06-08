@@ -35,7 +35,10 @@ def change_email(current_email, new_email):
     with open('../data/google_sso/'+current_email) as f:
         username = f.read()
     os.rename('../data/google_sso/'+current_email, '../data/google_sso/'+new_email)
-    user_data = []
+    user_data = get(username)
+    user_data['email'] = new_email
+    with open('../data/user_metadata/'+username, 'w') as f:
+        f.write(json.dumps(user_data))
 
 def fix(username):
     os.mkdir('../data/user_data/'+username+'/created_tests')
