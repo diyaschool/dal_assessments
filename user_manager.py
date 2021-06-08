@@ -35,7 +35,7 @@ def fix(username):
 def delete(username):
     shutil.rmtree('../data/user_data/'+username)
     user_data = get(username)
-    email = user_data.get(email)
+    email = user_data.get(username)
     os.remove('../data/user_metadata/'+username)
     try:
         os.remove('../data/credentials/'+username+'.pickle')
