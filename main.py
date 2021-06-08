@@ -1674,7 +1674,6 @@ def gauthtoken():
         with open("../data/google_sso/"+user_data['email']) as f:
             username = f.read().strip()
         username_user_data = get_user_data(username)
-        print(username_user_data)
         if username_user_data.get('has_changed_password') == False:
             return "NEEDS_PASSWORD"
         if username_user_data == False:
