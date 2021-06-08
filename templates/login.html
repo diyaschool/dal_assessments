@@ -1,17 +1,18 @@
 <html lang="en" dir="ltr">
+
 <head>
   <meta charset="utf-8">
   <title>LOGIN | DAL Assessments</title>
-   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-   <link rel="icon" href="logo.png" type="image/icon type">
-   <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css">
-   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js" ></script>
-   <script src="https://apis.google.com/js/platform.js" async defer></script>
-   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-   <meta name="google-signin-client_id" content="901009864862-aaecugd6kdpdgfj56gemtjnh8b3emqe9.apps.googleusercontent.com">
-   {% include "meta.html" %}
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="icon" href="logo.png" type="image/icon type">
+  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://apis.google.com/js/platform.js?onload=renderButton" async defer></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <meta name="google-signin-client_id" content="901009864862-aaecugd6kdpdgfj56gemtjnh8b3emqe9.apps.googleusercontent.com">
+  {% include "meta.html" %}
 </head>
 <style>
   .wrapper {
@@ -25,13 +26,14 @@
     -webkit-border-radius: 10px 10px 10px 10px;
     border-radius: 10px 10px 10px 10px;
     background: #fff;
-    padding: 30px;/* TEMP:  */
+    padding: 30px;
+    /* TEMP:  */
     width: 90%;
     max-width: 450px;
     position: relative;
     padding: 0px;
-    -webkit-box-shadow: 0 30px 60px 0 rgba(0,0,0,0.3);
-    box-shadow: 0 30px 60px 0 rgba(0,0,0,0.3);
+    -webkit-box-shadow: 0 30px 60px 0 rgba(0, 0, 0, 0.3);
+    box-shadow: 0 30px 60px 0 rgba(0, 0, 0, 0.3);
     text-align: center;
   }
 
@@ -44,7 +46,9 @@
     border-radius: 0 0 10px 10px;
   }
 
-  input[type=button], input[type=submit], input[type=reset]  {
+  input[type=button],
+  input[type=submit],
+  input[type=reset] {
     background-color: #56baed;
     border: none;
     color: white;
@@ -55,8 +59,8 @@
     text-transform: uppercase;
     font-size: 13px;
     height: 60px;
-    -webkit-box-shadow: 0 10px 30px 0 rgba(95,186,233,0.4);
-    box-shadow: 0 10px 30px 0 rgba(95,186,233,0.4);
+    -webkit-box-shadow: 0 10px 30px 0 rgba(95, 186, 233, 0.4);
+    box-shadow: 0 10px 30px 0 rgba(95, 186, 233, 0.4);
     -webkit-border-radius: 5px 5px 5px 5px;
     border-radius: 5px 5px 5px 5px;
     margin: 5px 20px 15px 20px;
@@ -67,11 +71,15 @@
     transition: all 0.3s ease-in-out;
   }
 
-  input[type=button]:hover, input[type=submit]:hover, input[type=reset]:hover  {
+  input[type=button]:hover,
+  input[type=submit]:hover,
+  input[type=reset]:hover {
     background-color: #39ace7;
   }
 
-  input[type=button]:active, input[type=submit]:active, input[type=reset]:active  {
+  input[type=button]:active,
+  input[type=submit]:active,
+  input[type=reset]:active {
     -moz-transform: scale(0.95);
     -webkit-transform: scale(0.95);
     -o-transform: scale(0.95);
@@ -144,6 +152,7 @@
   input[type=password]:placeholder {
     color: #cccccc;
   }
+
   .fadeInDown {
     -webkit-animation-name: fadeInDown;
     animation-name: fadeInDown;
@@ -159,6 +168,7 @@
       -webkit-transform: translate3d(0, -100%, 0);
       transform: translate3d(0, -100%, 0);
     }
+
     100% {
       opacity: 1;
       -webkit-transform: none;
@@ -172,6 +182,7 @@
       -webkit-transform: translate3d(0, -100%, 0);
       transform: translate3d(0, -100%, 0);
     }
+
     100% {
       opacity: 1;
       -webkit-transform: none;
@@ -180,23 +191,49 @@
   }
 
   /* Simple CSS3 Fade-in Animation */
-  @-webkit-keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
-  @-moz-keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
-  @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+  @-webkit-keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+
+  @-moz-keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
 
   .fadeIn {
-    opacity:0;
-    -webkit-animation:fadeIn ease-in 1;
-    -moz-animation:fadeIn ease-in 1;
-    animation:fadeIn ease-in 1;
+    opacity: 0;
+    -webkit-animation: fadeIn ease-in 1;
+    -moz-animation: fadeIn ease-in 1;
+    animation: fadeIn ease-in 1;
 
-    -webkit-animation-fill-mode:forwards;
-    -moz-animation-fill-mode:forwards;
-    animation-fill-mode:forwards;
+    -webkit-animation-fill-mode: forwards;
+    -moz-animation-fill-mode: forwards;
+    animation-fill-mode: forwards;
 
-    -webkit-animation-duration:1s;
-    -moz-animation-duration:1s;
-    animation-duration:1s;
+    -webkit-animation-duration: 1s;
+    -moz-animation-duration: 1s;
+    animation-duration: 1s;
   }
 
   .fadeIn.first {
@@ -239,7 +276,7 @@
     color: #0d0d0d;
   }
 
-  .underlineHover:hover:after{
+  .underlineHover:hover:after {
     width: 100%;
   }
 
@@ -248,195 +285,286 @@
   /* OTHERS */
 
   *:focus {
-      outline: none;
+    outline: none;
   }
-  .input-container {
-  display: -ms-flexbox; /* IE10 */
-  display: flex;
-  width: 100%;
-  margin-bottom: 20px;
-}
 
-.icon {
-  padding: 23px;
-  background: dodgerblue;
-  color: white;
-  min-width: 5px;
-  text-align: center;
-  border-radius: 8px;
-  height: 60px;
-  position: relative;
-  top: 3px
-}
+  .input-container {
+    display: -ms-flexbox;
+    /* IE10 */
+    display: flex;
+    width: 100%;
+    margin-bottom: 20px;
+  }
+
+  .icon {
+    padding: 23px;
+    background: dodgerblue;
+    color: white;
+    min-width: 5px;
+    text-align: center;
+    border-radius: 8px;
+    height: 60px;
+    position: relative;
+    top: 3px
+  }
 </style>
+
 <body style='background-size: cover; background-image: url("background.png");  background-repeat: no-repeat; background-position: center; background-attachment: fixed;'>
   <center>
     <br><text style="font-family:Arial, Helvetica, sans-serif; font-size: 40px; font-weight: bold; color: white">DAL Assessments</text><br>
     <br><img src='logo.png' style="height: 230px;" id='logo' /><br><br><br><br>
-  <div class="wrapper fadeInDown">
-    <div id="fromContent">
+    <div class="wrapper fadeInDown">
+      <div id="fromContent">
         <form action='/login' method='post'>
-            <div class="input-container">
-              <i class="fa fa-user icon fadeIn first"></i>
-          <input type="text" id="login" class="fadeIn first" name="username" placeholder="Username" required autofocus>
-        </div><br/><br/>
-        <div class="input-container">
-          <i class="fa fa-key icon fadeIn first"></i>
-          <input type="password" id="password" class="fadeIn first" name="password" placeholder="Password" required>
-        </div><br/>
-            <input type="checkbox" class="fadeIn first" onclick="myFunction()" id='showPassword'><label class="fadeIn first" for='showPassword' style='color: white'>&nbsp;Show Password</label><br/><br/>
-          <input type="submit" class="fadeIn first" value="Log In" autofocus></form>
-          <div class="g-signin2 fadeIn first" data-onsuccess="onSignIn"></div>
+          <div class="input-container">
+            <i class="fa fa-user icon fadeIn first"></i>
+            <input type="text" id="login" class="fadeIn first" name="username" placeholder="Username" required autofocus>
+          </div><br /><br />
+          <div class="input-container">
+            <i class="fa fa-key icon fadeIn first"></i>
+            <input type="password" id="password" class="fadeIn first" name="password" placeholder="Password" required>
+          </div><br />
+          <input type="checkbox" class="fadeIn first" onclick="myFunction()" id='showPassword'><label class="fadeIn first" for='showPassword' style='color: white'>&nbsp;Show Password</label><br /><br />
+          <input type="submit" class="fadeIn first" value="Log In" autofocus>
+        </form>
+        <div class="g-signin2 fadeIn first google-signin" data-onsuccess="onSignIn" data-width="210" data-height="50" data-longtitle="true"></div>
+        <!-- <script>
+        function renderButton() {
+          gapi.signin2.render('g-signin2', {
+            'width': 240,
+            'height': 50,
+            'longtitle': true,
+            'theme': 'dark'
+          });
+        }
+        </script> -->
+      </div>
     </div>
-  </div>
-  <script>
-  function onSignIn(googleUser) {
-  var id_token = googleUser.getAuthResponse().id_token;
-  var xhr = new XMLHttpRequest();
-  xhr.open('POST', '/gauthtoken');
-  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-  xhr.onload = function() {
-    if (xhr.responseText == "AUTHORIZED"){
-      window.location.replace("/");
-    } else if (xhr.responseText == "BAD_ACCOUNT"){
-      var auth2 = gapi.auth2.getAuthInstance();
-      auth2.signOut().then(function () {
-        snackbar("2")
-      });
-    } else if (xhr.responseText == "NEEDS_PASSWORD"){
-      var auth2 = gapi.auth2.getAuthInstance();
-      auth2.signOut().then(function () {
-        snackbar("3")
-      });
-    } else {
-      var auth2 = gapi.auth2.getAuthInstance();
-      auth2.signOut().then(function () {
-        snackbar("1")
-      });
-    }
-  };xhr.send('idtoken='+id_token);}
-  </script>
+    <script>
+      function onSignIn(googleUser) {
+        var id_token = googleUser.getAuthResponse().id_token;
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/gauthtoken');
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.onload = function() {
+          if (xhr.responseText == "AUTHORIZED") {
+            window.location.replace("/");
+          } else if (xhr.responseText == "BAD_ACCOUNT") {
+            var auth2 = gapi.auth2.getAuthInstance();
+            auth2.signOut().then(function() {
+              snackbar("2")
+            });
+          } else if (xhr.responseText == "NEEDS_PASSWORD") {
+            var auth2 = gapi.auth2.getAuthInstance();
+            auth2.signOut().then(function() {
+              snackbar("3")
+            });
+          } else {
+            var auth2 = gapi.auth2.getAuthInstance();
+            auth2.signOut().then(function() {
+              snackbar("1")
+            });
+          }
+        };
+        xhr.send('idtoken=' + id_token);
+      }
+    </script>
   </center>
   <script>
-function myFunction() {
-  var x = document.getElementById("password");
-  if (x.type === "password") {
-    x.type = "text";
-  } else {
-    x.type = "password";
-  }
-}
-</script>
-<style>
-#snackbar1 {
-visibility: hidden; /* Hidden by default. Visible on click */
-min-width: 250px; /* Set a default minimum width */
-margin-left: -125px; /* Divide value of min-width by 2 */
-background-color: #333; /* Black background color */
-color: #fff; /* White text color */
-text-align: center; /* Centered text */
-border-radius: 2px; /* Rounded borders */
-padding: 16px; /* Padding */
-position: fixed; /* Sit on top of the screen */
-z-index: 1; /* Add a z-index if needed */
-left: 50%; /* Center the snackbar */
-bottom: 30px; /* 30px from the bottom */
-}
+    function myFunction() {
+      var x = document.getElementById("password");
+      if (x.type === "password") {
+        x.type = "text";
+      } else {
+        x.type = "password";
+      }
+    }
+  </script>
+  <style>
+    #snackbar1 {
+      visibility: hidden;
+      /* Hidden by default. Visible on click */
+      min-width: 250px;
+      /* Set a default minimum width */
+      margin-left: -125px;
+      /* Divide value of min-width by 2 */
+      background-color: #333;
+      /* Black background color */
+      color: #fff;
+      /* White text color */
+      text-align: center;
+      /* Centered text */
+      border-radius: 2px;
+      /* Rounded borders */
+      padding: 16px;
+      /* Padding */
+      position: fixed;
+      /* Sit on top of the screen */
+      z-index: 1;
+      /* Add a z-index if needed */
+      left: 50%;
+      /* Center the snackbar */
+      bottom: 30px;
+      /* 30px from the bottom */
+    }
 
-/* Show the snackbar when clicking on a button (class added with JavaScript) */
-#snackbar1.show {
-visibility: visible; /* Show the snackbar */
-/* Add animation: Take 0.5 seconds to fade in and out the snackbar.
+    /* Show the snackbar when clicking on a button (class added with JavaScript) */
+    #snackbar1.show {
+      visibility: visible;
+      /* Show the snackbar */
+      /* Add animation: Take 0.5 seconds to fade in and out the snackbar.
 However, delay the fade out process for 2.5 seconds */
--webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
-animation: fadein 0.5s, fadeout 0.5s 2.5s;
-}
+      -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+      animation: fadein 0.5s, fadeout 0.5s 2.5s;
+    }
 
-#snackbar2 {
-visibility: hidden; /* Hidden by default. Visible on click */
-min-width: 250px; /* Set a default minimum width */
-margin-left: -125px; /* Divide value of min-width by 2 */
-background-color: #333; /* Black background color */
-color: #fff; /* White text color */
-text-align: center; /* Centered text */
-border-radius: 2px; /* Rounded borders */
-padding: 16px; /* Padding */
-position: fixed; /* Sit on top of the screen */
-z-index: 1; /* Add a z-index if needed */
-left: 50%; /* Center the snackbar */
-bottom: 30px; /* 30px from the bottom */
-}
+    #snackbar2 {
+      visibility: hidden;
+      /* Hidden by default. Visible on click */
+      min-width: 250px;
+      /* Set a default minimum width */
+      margin-left: -125px;
+      /* Divide value of min-width by 2 */
+      background-color: #333;
+      /* Black background color */
+      color: #fff;
+      /* White text color */
+      text-align: center;
+      /* Centered text */
+      border-radius: 2px;
+      /* Rounded borders */
+      padding: 16px;
+      /* Padding */
+      position: fixed;
+      /* Sit on top of the screen */
+      z-index: 1;
+      /* Add a z-index if needed */
+      left: 50%;
+      /* Center the snackbar */
+      bottom: 30px;
+      /* 30px from the bottom */
+    }
 
-/* Show the snackbar when clicking on a button (class added with JavaScript) */
-#snackbar2.show {
-visibility: visible; /* Show the snackbar */
-/* Add animation: Take 0.5 seconds to fade in and out the snackbar.
+    /* Show the snackbar when clicking on a button (class added with JavaScript) */
+    #snackbar2.show {
+      visibility: visible;
+      /* Show the snackbar */
+      /* Add animation: Take 0.5 seconds to fade in and out the snackbar.
 However, delay the fade out process for 2.5 seconds */
--webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
-animation: fadein 0.5s, fadeout 0.5s 2.5s;
-}
-#snackbar3 {
-visibility: hidden; /* Hidden by default. Visible on click */
-min-width: 250px; /* Set a default minimum width */
-margin-left: -125px; /* Divide value of min-width by 2 */
-background-color: #333; /* Black background color */
-color: #fff; /* White text color */
-text-align: center; /* Centered text */
-border-radius: 2px; /* Rounded borders */
-padding: 16px; /* Padding */
-position: fixed; /* Sit on top of the screen */
-z-index: 1; /* Add a z-index if needed */
-left: 50%; /* Center the snackbar */
-bottom: 30px; /* 30px from the bottom */
-}
+      -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+      animation: fadein 0.5s, fadeout 0.5s 2.5s;
+    }
 
-/* Show the snackbar when clicking on a button (class added with JavaScript) */
-#snackbar3.show {
-visibility: visible; /* Show the snackbar */
-/* Add animation: Take 0.5 seconds to fade in and out the snackbar.
+    #snackbar3 {
+      visibility: hidden;
+      /* Hidden by default. Visible on click */
+      min-width: 250px;
+      /* Set a default minimum width */
+      margin-left: -125px;
+      /* Divide value of min-width by 2 */
+      background-color: #333;
+      /* Black background color */
+      color: #fff;
+      /* White text color */
+      text-align: center;
+      /* Centered text */
+      border-radius: 2px;
+      /* Rounded borders */
+      padding: 16px;
+      /* Padding */
+      position: fixed;
+      /* Sit on top of the screen */
+      z-index: 1;
+      /* Add a z-index if needed */
+      left: 50%;
+      /* Center the snackbar */
+      bottom: 30px;
+      /* 30px from the bottom */
+    }
+
+    /* Show the snackbar when clicking on a button (class added with JavaScript) */
+    #snackbar3.show {
+      visibility: visible;
+      /* Show the snackbar */
+      /* Add animation: Take 0.5 seconds to fade in and out the snackbar.
 However, delay the fade out process for 2.5 seconds */
--webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
-animation: fadein 0.5s, fadeout 0.5s 2.5s;
-}
+      -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+      animation: fadein 0.5s, fadeout 0.5s 2.5s;
+    }
 
-/* Animations to fade the snackbar in and out */
-@-webkit-keyframes fadein {
-from {bottom: 0; opacity: 0;}
-to {bottom: 30px; opacity: 1;}
-}
+    /* Animations to fade the snackbar in and out */
+    @-webkit-keyframes fadein {
+      from {
+        bottom: 0;
+        opacity: 0;
+      }
 
-@keyframes fadein {
-from {bottom: 0; opacity: 0;}
-to {bottom: 30px; opacity: 1;}
-}
+      to {
+        bottom: 30px;
+        opacity: 1;
+      }
+    }
 
-@-webkit-keyframes fadeout {
-from {bottom: 30px; opacity: 1;}
-to {bottom: 0; opacity: 0;}
-}
+    @keyframes fadein {
+      from {
+        bottom: 0;
+        opacity: 0;
+      }
 
-@keyframes fadeout {
-from {bottom: 30px; opacity: 1;}
-to {bottom: 0; opacity: 0;}
-}
-</style>
-<script>
-function snackbar(snackbar) {
-  if (snackbar == "1"){
-    var x = document.getElementById("snackbar1");
-  } else if (snackbar == "2"){
-    var x = document.getElementById("snackbar2");
-  }else if (snackbar == "3"){
-    var x = document.getElementById("snackbar3");
-  }
-x.className = "show";setTimeout(function(){ x.className = x.className.replace("show", ""); }, 7000);}
-</script>
-<div id="snackbar1">Error while signing in with Google</div>
-<div id="snackbar2">Unrecognized Google account, please use an authorized one</div>
-<div id="snackbar3">Please login with your password once before using your Google Account</div>
-{%if error != None%}
-<script type="text/javascript">alert("{{error}}")</script>
-{%endif%}
-{% include "footer.html" %}
+      to {
+        bottom: 30px;
+        opacity: 1;
+      }
+    }
+
+    @-webkit-keyframes fadeout {
+      from {
+        bottom: 30px;
+        opacity: 1;
+      }
+
+      to {
+        bottom: 0;
+        opacity: 0;
+      }
+    }
+
+    @keyframes fadeout {
+      from {
+        bottom: 30px;
+        opacity: 1;
+      }
+
+      to {
+        bottom: 0;
+        opacity: 0;
+      }
+    }
+  </style>
+  <script>
+    function snackbar(snackbar) {
+      if (snackbar == "1") {
+        var x = document.getElementById("snackbar1");
+      } else if (snackbar == "2") {
+        var x = document.getElementById("snackbar2");
+      } else if (snackbar == "3") {
+        var x = document.getElementById("snackbar3");
+      }
+      x.className = "show";
+      setTimeout(function() {
+        x.className = x.className.replace("show", "");
+      }, 7000);
+    }
+  </script>
+  <div id="snackbar1">Error while signing in with Google</div>
+  <div id="snackbar2">Unrecognized Google account, please use an authorized one</div>
+  <div id="snackbar3">Please login with your password once before using your Google Account</div>
+  {%if error != None%}
+  <script type="text/javascript">
+    alert("{{error}}")
+  </script>
+  {%endif%}
+  {% include "footer.html" %}
 </body>
+
 </html>
