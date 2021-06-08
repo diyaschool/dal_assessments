@@ -13,14 +13,16 @@ def parse_dict(str_data):
     except json.decoder.JSONDecodeError:
         return ast.literal_eval(str_data)
 
-def create(username, password, name, tags, email=""):
+def create(username, password, name, tags, email="", skip_passwd_hash=False):
+    if skip_passwd_hash == False:
+        password = hashlib.sha224(password.encode()).hexdigest()
     if os.path.isfile('../data/user_metadata/'+username):
         return False
     with open('../data/user_metadata/'+username, 'w') as f:
         if email != "":
-            f.write(json.dumps({"name": name, "password": hashlib.sha224(password.encode()).hexdigest(), "tags": tags, "has_changed_password": False, "email": email}))
+            f.write(json.dumps({"name": name, "password": password, "tags": tags, "has_changed_password": False, "email": email}))
         else:
-            f.write(json.dumps({"name": name, "password": hashlib.sha224(password.encode()).hexdigest(), "tags": tags, "has_changed_password": False}))
+            f.write(json.dumps({"name": name, "password": password, "tags": tags, "has_changed_password": False}))
     os.mkdir('../data/user_data/'+username)
     os.mkdir('../data/user_data/'+username+'/test_data')
     os.mkdir('../data/user_data/'+username+'/created_tests')
