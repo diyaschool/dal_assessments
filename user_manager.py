@@ -17,15 +17,16 @@ def create(username, password, name, tags, email=""):
     if os.path.isfile('../data/user_metadata/'+username):
         return False
     with open('../data/user_metadata/'+username, 'w') as f:
-        f.write(json.dumps({"name": name, "password": hashlib.sha224(password.encode()).hexdigest(), "tags": tags, "has_changed_password": False}))
+        if email != "":
+            f.write(json.dumps({"name": name, "password": hashlib.sha224(password.encode()).hexdigest(), "tags": tags, "has_changed_password": False, "email": email}))
+        else:
+            f.write(json.dumps({"name": name, "password": hashlib.sha224(password.encode()).hexdigest(), "tags": tags, "has_changed_password": False}))
     os.mkdir('../data/user_data/'+username)
     os.mkdir('../data/user_data/'+username+'/test_data')
     os.mkdir('../data/user_data/'+username+'/created_tests')
     if email != "":
         with open('../data/google_sso/'+email, 'w') as f:
             f.write(username)
-        with open('../data/google_username_sso/'+username, 'w') as f:
-            f.write(email)
     return True
 
 def fix(username):
@@ -33,18 +34,15 @@ def fix(username):
 
 def delete(username):
     shutil.rmtree('../data/user_data/'+username)
+    user_data = get(username)
+    email = user_data.get(email)
     os.remove('../data/user_metadata/'+username)
     try:
         os.remove('../data/credentials/'+username+'.pickle')
     except FileNotFoundError:
         pass
-    try:
-        with open('../data/google_username_sso/'+username) as f:
-            email = f.read().strip()
-        os.remove('../data/google_username_sso/'+username)
+    if email != None:
         os.remove('../data/google_sso/'+email)
-    except FileNotFoundError:
-        pass
 
 def get(username):
     with open('../data/user_metadata/'+username) as f:
@@ -70,6 +68,7 @@ def change_test_owner(file_name, new_owner):
         f.write(json.dumps(data))
 
 def migrate_data(current_username, new_username):
+    user_data = get(current_username)
     os.rename('../data/user_metadata/'+current_username, '../data/user_metadata/'+new_username)
     os.rename('../data/user_data/'+current_username, '../data/user_data/'+new_username)
     created_tests = [f for f in listdir('../data/user_data/'+new_username+'/created_tests/') if isfile(join('../data/user_data/'+new_username+'/created_tests/', f))]
@@ -78,10 +77,9 @@ def migrate_data(current_username, new_username):
     shutil.rmtree('../data/user_data/'+new_username+'/test_data')
     os.mkdir('../data/user_data/'+new_username+'/test_data')
     os.rename('../data/credentials/'+current_username+'.pickle', '../data/credentials/'+new_username+'.pickle')
-    try:
-        os.rename('../data/google_username_sso/'+current_username, '../data/google_username_sso/'+new_username)
-    except FileNotFoundError:
-        pass
+    if user_data.get('email') != None:
+        with open('../data/google_sso/'+user_data['email']) as f:
+            f.write(new_username)
 
 def are_you_sure():
     while 1:

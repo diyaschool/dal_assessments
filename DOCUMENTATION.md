@@ -18,7 +18,6 @@
     ├── credentials/
     ├── global_test_records/
     ├── google_sso/
-    ├── google_username_sso/
     ├── response_data/
     ├── test_data/
     ├── test_metadata/
