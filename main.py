@@ -93,7 +93,7 @@ def list_to_csv(data):
 
 def convert_analytics_to_csv(data):
     output_data = []
-    output_data.append(['#', 'Username', 'Name', 'Score', 'Average Time', 'Total Time', 'Time Stamp', 'Total Scores by Difficulty', 'Total Percentage by Difficulty'])
+    output_data.append(['#', 'Username', 'Name', 'Total Score', 'Average Time', 'Total Time', 'Time Stamp', 'Score (EZ)', 'Score (MID)', 'Score (HARD)', 'Percentage (EZ)', 'Percentage (MID)', 'Percentage (HARD)', 'Attempts'])
     for response in data:
         total_diff_scores_list = []
         for diff in response['difficulty_fraction']:
@@ -110,7 +110,9 @@ def convert_analytics_to_csv(data):
             attempts = f'Attempts 1'
         else:
             attempts = f'Attempts {response.get("attempts")}'
-        row_var = [response['index'], response['username'], response['name'], response['score'], response['average_time'], response['total_time'], response['long_time_stamp'], total_diff_scores, total_diff_percentage, attempts]
+        total_diff_scores = total_diff_scores.replace(' ', '').split('|')
+        total_diff_percentage = total_diff_percentage.replace(' ', '').split('|')
+        row_var = [response['index'], response['username'], response['name'], response['score'], response['average_time'], response['total_time'], response['long_time_stamp'], total_diff_scores[0], total_diff_scores[1], total_diff_scores[2], total_diff_percentage[0], total_diff_percentage[1], total_diff_percentage[2], attempts]
         output_data.append(row_var)
     return output_data
 
@@ -327,10 +329,6 @@ def update_score(username, test_id, ans_res, difficulty, question_id, answer_ind
         answer_index = -1
         ans_given_text = 'Skipped'
     else:
-        print(difficulty)
-        print(question_id)
-        print(answer_index)
-        print(test_data)
         ans_given_text = test_data['questions'][difficulty][question_id]['answers'][answer_index]
     now = curr_dt()
     if now.hour >= 12:
@@ -976,7 +974,6 @@ def t_view(code):
                         flask.session['t']['difficulty'] = 0
                 else:
                     flask.session['t']['difficulty'] = 1
-                print(question)
                 flask.session['t']['q_id'] = question['id']
                 if question == 'QUESTIONS_COMPLETED':
                     return flask.render_template('500.html'), 500
@@ -1416,8 +1413,9 @@ def test_analytics_download(code, mode):
                 with open('../data/user_data/'+flask.session['username']+'/google_sheets_analytics_records', 'w') as f:
                     f.write(json.dumps(gdata))
                 flask.session['analytics_alert'] = "Re-generated Google Sheet"
-        flask.session['analytics_redirect'] = 'https://docs.google.com/spreadsheets/d/'+sheet_id
-        return flask.redirect('/t/'+code+'/analytics/')
+        # flask.session['analytics_redirect'] = 'https://docs.google.com/spreadsheets/d/'+sheet_id
+        # return flask.redirect('/t/'+code+'/analytics/')
+        return 'https://docs.google.com/spreadsheets/d/'+sheet_id
 
 
 @app.route('/t/<code>/analytics/<username>/')

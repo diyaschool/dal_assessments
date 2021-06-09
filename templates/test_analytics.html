@@ -111,11 +111,23 @@ searchfunc()
       </div>
       <div class="modal-body">
         <button type="button" class="btn btn-info" style='margin-bottom: 10px' onclick='window.location.href = "/t/{{code}}/analytics_download/csv"'>Download CSV</button><br>
-        <button type="button" class="btn btn-info" style='margin-bottom: 10px' onclick='window.location.href = "/t/{{code}}/analytics_download/google_sheets"'>Generate Google Sheet</button><br>
+        <script>
+        function get_sheet_id(){
+          var xhttp = new XMLHttpRequest();
+          xhttp.open("GET", "/t/{{code}}/analytics_download/google_sheets", true);
+          xhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+              window.open(this.responseText)
+            }
+          };
+          xhttp.send();
+          return "test";
+        }
+        </script>
+        <button type="button" class="btn btn-info" style='margin-bottom: 10px' onclick='get_sheet_id();'>Open Google Sheet</button><br>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
       </div>
     </div>
   </div>
@@ -131,10 +143,8 @@ $(window).on('hidden.bs.modal', function() {
 
 function refresh_modal(){
   if (localStorage.getItem("analytics-modal") == "false" || localStorage.getItem("analytics-modal") == null){
-    console.log('ok')
     $('#exampleModal').modal('hide');
   } else{
-    console.log('kk')
     $('#exampleModal').modal('show');
   }
 }

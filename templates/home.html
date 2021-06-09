@@ -292,7 +292,6 @@ let tabBodyNodes = tabs.querySelectorAll(".tab-body > div");
 
 for(let i=0;i<tabHeaderNodes.length;i++){
 tabHeaderNodes[i].addEventListener("click",function(){
-  console.log(i)
   localStorage.setItem('home_selected_section', i)
   tabHeader.querySelector(".active").classList.remove("active");
   tabHeaderNodes[i].classList.add("active");
