@@ -1516,6 +1516,7 @@ def settings():
             flask.session.pop('settings_error')
         except KeyError:
             pass
+        google_auth = False
         gauth = googleapis.authorize()
         creds = gauth.load_credentials(flask.session['username'])
         if creds != None:
