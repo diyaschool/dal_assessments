@@ -4,6 +4,9 @@
     <meta charset="utf-8">
     <title>{{title}} | DAL Assessments</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js" ></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" crossorigin="anonymous"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script>
   function resizeIframe(obj) {
     obj.style.height = obj.contentWindow.document.documentElement.scrollHeight + 'px';
@@ -44,15 +47,11 @@ box-shadow: 0 6px #999;
     <br><br><br><br><br><div style='background-color: white; height: auto; width: 900px; border-radius: 20px; opacity: 0.9'>
       <br><br><br>
       <text style='font-size: 40px; font-weight: bold'>Edit Test</text><br><br><br><br>
-      <input type="button" onclick="window.open('/t/{{code}}/')" value='Open Test' autofocus>&nbsp;<input type="text" readonly value='{{base_uri}}t/{{code}}/' style='border: 2px black solid; border-radius 10px; width: 400px' id='view_url'>&nbsp;<input type="button" onclick="copy_to_clipboard()" value='Copy to Clipboard'><br><br>
+      <input type="button" onclick="window.open('/t/{{code}}/')" value='Open Test' autofocus>&nbsp;<input type="text" readonly value='{{base_uri}}t/{{code}}/' style='border: 2px black solid; border-radius 10px; width: 400px' id='view_url'>&nbsp;<input type="button" onclick="copy_to_clipboard()" value='Copy to Clipboard'><span class="material-icons" data-toggle="modal" data-target="#exampleModal" style='position: relative; left: 120px;bottom: 190px'>delete_forever</span><br><br>
       <input type="button" onclick="window.open('/t/{{code}}/analytics/')" value='Open Analytics'>&nbsp;<input type="text" readonly value='{{base_uri}}t/{{code}}/analytics/' style='border: 2px black solid; border-radius 10px; width: 400px'><br><br>
       <input type="button" onclick="window.open('https://docs.google.com/spreadsheets/d/{{sheet_id}}/')" value='Open Google Sheet'>&nbsp;<input type="button" onclick="window.location.href = '?sync'" value='Sync with Google Sheets'>&nbsp;<input type="text" readonly value='https://docs.google.com/spreadsheets/d/{{sheet_id}}/' style='border: 2px black solid; border-radius 10px; width: 400px'><br><br><br>
       <text style='font-size: 25px; font-weight: bold'>Images</text><br>
       <iframe src="/upload_file/{{code}}" frameborder="0" scrolling="no" onload="resizeIframe(this)" width="900px"></iframe><br><br>
-      <!-- <form action="/t/{{code}}/edit/" method="post" id='main_form'>
-        <textarea name="test_data" rows="12" cols="80" style='border: 3px black solid; border-radius: 10px; resize: none;' form='main_form' required>{{test_data}}</textarea><br><br>
-        <input type="submit" value='Validate and Save'>
-      </form> -->
       <br><br>
   </div><br><br>
 {% include "header.html" %}
@@ -110,5 +109,31 @@ $(window).on('load', function() { // makes sure the whole site is loaded
 <div id="preloader">
   <div id="status">&nbsp;</div>
 </div>
+<div class="modal" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Delete Test</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        Deleting the test will remove all records in the website and makes it unaccessible permanently.<br>
+        This includes the questions, responses, analytics, etc.<br>
+        This will however not delete the Google Sheet
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+        <button type="button" onclick="window.location.href = '/t/{{code}}/edit/delete'" class="btn btn-secondary">Delete Test</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+$('#myModal').on('shown.bs.modal', function () {
+$('#myInput').trigger('focus')
+})
+</script>
   </body>
 </html>

@@ -688,6 +688,49 @@ def get_question(completed_questions, questions):
             break
     return q
 
+def delete_test(test_id):
+    with open('../data/test_metadata/'+test_id+'.json') as f:
+        metadata = parse_dict(f.read())
+    owner = metadata['owner']
+    os.remove('../data/user_data/'+owner+'/created_tests/'+test_id+'.json')
+    try:
+        os.remove('../data/user_data/'+owner+'/response_data/'+test_id+'.json')
+    except FileNotFoundError:
+        pass
+    try:
+        with open('../data/user_data/'+owner+'/google_sheets_analytics_records') as f:
+            g_sheets_records = parse_dict(f.read())
+        try:
+            g_sheets_records.pop(test_id)
+        except KeyError:
+            pass
+        with open('../data/user_data/'+owner+'/google_sheets_analytics_records', 'w') as f:
+            f.write(json.dumps(g_sheets_records))
+    except FileNotFoundError:
+        pass
+    os.remove('../data/test_metadata/'+test_id+'.json')
+    with open('../data/test_data/'+test_id+'/config.json') as f:
+        try:
+            test_data = parse_dict(f.read())
+        except SyntaxError:
+            test_data = False
+    if test_data != False:
+        tags = test_data['tags']
+        for tag in tags:
+            try:
+                with open('../data/global_test_records/'+tag) as f:
+                    test_record = parse_dict(f.read())
+                test_record.pop(test_id)
+                with open('../data/global_test_records/'+tag, 'w') as f:
+                    f.write(json.dumps(test_record))
+            except FileNotFoundError:
+                pass
+    try:
+        os.remove('../data/response_data/'+test_id+'.json')
+    except FileNotFoundError:
+        pass
+    shutil.rmtree('../data/test_data/'+test_id)
+
 def get_created_tests_list(username):
     created_test_list = [f for f in os.listdir('../data/user_data/'+username+'/created_tests') if os.path.isfile(os.path.join('../data/user_data/'+username+'/created_tests', f))]
     created_tests = []
@@ -1181,6 +1224,21 @@ def test_edit_editor(code):
     else:
         return flask.redirect('/t/'+code)
     return flask.render_template('editor.html', code=code, data=data, test_data=test_data, sheet_id=sheet_id, title=title, username=flask.session['username'], name=user_data['name'])
+
+@app.route('/t/<code>/edit/delete/', methods=['GET'])
+def test_edit_delete(code):
+    try:
+        with open('../data/test_metadata/'+code+'.json') as f:
+            data = parse_dict(f.read())
+    except:
+        return flask.render_template('404.html'), 404
+    user_data = get_user_data(flask.session['username'])
+    if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags'] or check_sharing_perms(data, flask.session['username'])['edit'] == True:
+        pass
+    else:
+        return flask.redirect('/t/'+code)
+    delete_test(code)
+    return flask.redirect('/')
 
 @app.route('/t/<code>/edit/', methods=['GET', 'POST', 'PUT'])
 def test_edit(code):
