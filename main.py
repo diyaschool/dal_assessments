@@ -717,6 +717,8 @@ def delete_test(test_id):
     if test_data != False:
         tags = test_data['tags']
         for tag in tags:
+            if tag == '':
+                continue
             try:
                 with open('../data/global_test_records/'+tag) as f:
                     test_record = parse_dict(f.read())
