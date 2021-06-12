@@ -692,7 +692,10 @@ def delete_test(test_id):
     with open('../data/test_metadata/'+test_id+'.json') as f:
         metadata = parse_dict(f.read())
     owner = metadata['owner']
-    os.remove('../data/user_data/'+owner+'/created_tests/'+test_id+'.json')
+    try:
+        os.remove('../data/user_data/'+owner+'/created_tests/'+test_id+'.json')
+    except FileNotFoundError:
+        pass
     try:
         os.remove('../data/user_data/'+owner+'/response_data/'+test_id+'.json')
     except FileNotFoundError:
