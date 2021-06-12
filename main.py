@@ -720,9 +720,12 @@ def delete_test(test_id):
             try:
                 with open('../data/global_test_records/'+tag) as f:
                     test_record = parse_dict(f.read())
-                test_record.pop(test_id)
-                with open('../data/global_test_records/'+tag, 'w') as f:
-                    f.write(json.dumps(test_record))
+                try:
+                    test_record.pop(test_id)
+                    with open('../data/global_test_records/'+tag, 'w') as f:
+                        f.write(json.dumps(test_record))
+                except KeyError:
+                    pass
             except FileNotFoundError:
                 pass
     try:
