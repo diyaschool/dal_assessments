@@ -2,9 +2,6 @@ import textwrap
 import httpagentparser
 from os import listdir
 from os.path import isfile, join
-import threading
-import requests
-import csv
 import json
 import shutil
 import datetime
@@ -20,11 +17,9 @@ import random
 import uuid
 import ipaddress
 from dateutil import tz
-import hmac
 import base64
 from Crypto import Random
 from Crypto.Cipher import AES
-from Crypto.Util.Padding import pad, unpad
 from collections import OrderedDict
 
 #################### Initialize ####################
@@ -157,8 +152,8 @@ def get_data_check_string(data):
 def parse_access_token_str(token_str):
     if token_str[:5] == 'error':
         return False
-    vars = str(token_str).split('&')
-    access_token = vars[0].split('=')[1]
+    _vars = str(token_str).split('&')
+    access_token = _vars[0].split('=')[1]
     return access_token
 
 def encrypt(text, password):
@@ -433,6 +428,7 @@ def convert(sheet, teacher=False):
             output['question_count'] = q_n
         return output
     except Exception as e:
+        print(e)
         return "ERROR"
 
 def create_new_test_sheet(owner, creds):
@@ -1654,7 +1650,6 @@ def sheets_api_authorize():
 
 @app.route('/sheets_api_authorize/delete/')
 def sheets_api_authorize_delete():
-    user_data = get_user_data(flask.session['username'])
     try:
         os.remove('../data/credentials/'+flask.session['username']+'.pickle')
         flask.session['settings_alert'] = 'Your Google account has been successfully unlinked'
