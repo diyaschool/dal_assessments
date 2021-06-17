@@ -1490,12 +1490,12 @@ def test_analytics_user(code, username):
     user_data = get_user_data(flask.session['username'])
     try:
         with open('../data/test_metadata/'+code+'.json') as f:
-            test_metadata = parse_dict(f.read())
+            data = parse_dict(f.read())
     except:
         return flask.render_template('404.html'), 404
     if data['owner'] != flask.session['username']:
         if username != flask.session['username']:
-            if check_sharing_perms(test_metadata, flask.session['username'])['individual-analytics'] != True:
+            if check_sharing_perms(data, flask.session['username'])['individual-analytics'] != True:
                 if 'teacher' in user_data['tags']:
                     return flask.render_template('401.html'), 401
                 else:
