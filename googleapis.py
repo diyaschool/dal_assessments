@@ -17,6 +17,7 @@ class authorize:
             self.verify_token(creds)
             return creds
         except Exception as e:
+            print(e)
             return False
     def save_credentials(self, creds, file='credentials'):
         file = '../data/credentials/'+file+'.pickle'
@@ -87,4 +88,5 @@ def verify_idtoken(idtoken):
         idinfo = id_token.verify_oauth2_token(idtoken, requests.Request(), "901009864862-aaecugd6kdpdgfj56gemtjnh8b3emqe9.apps.googleusercontent.com")
         return idinfo
     except ValueError as e:
+        print(e)
         return False
