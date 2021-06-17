@@ -37,6 +37,7 @@ class authorize:
             # sheet_id = create_sheet("DAL Assessments Temporary Verification Sheet", creds)
             return True
         except Exception as e:
+            print(e)
             return False
 
 def get_values(sheet_id, credentials, sheet_range='A1:Z'):

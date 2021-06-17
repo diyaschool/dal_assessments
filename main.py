@@ -249,7 +249,7 @@ def save_test_response(username, test_id):
         os.makedirs('../data/user_data/'+username+'/response_data/')
     with open('../data/user_data/'+username+'/response_data/'+test_id+'.json', 'w') as f:
         with open('../data/test_data/'+test_id+'/config.json') as g:
-            n_test_data = parse_dict(g.read())
+            _ = parse_dict(g.read())
         f.write(json.dumps({"time_stamp": data['time_stamp'], "long_time_stamp": data['long_time_stamp'], 'score': data['score'], "id": test_id}))
     response_id = get_user_response(username, test_id)
     if response_id != False:
@@ -1651,9 +1651,9 @@ def sheets_api_authorize():
 @app.route('/sheets_api_authorize/delete/')
 def sheets_api_authorize_delete():
     try:
+        _ = get_user_data(flask.session['username'])
         os.remove('../data/credentials/'+flask.session['username']+'.pickle')
         flask.session['settings_alert'] = 'Your Google account has been successfully unlinked'
-        user_data = get_user_data(flask.session['username'])
         return flask.redirect('/settings')
     except FileNotFoundError:
         flask.session['settings_error'] = 'There was a problem unlinking your Google account'
