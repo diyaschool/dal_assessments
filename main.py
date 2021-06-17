@@ -1490,7 +1490,7 @@ def test_analytics_user(code, username):
     user_data = get_user_data(flask.session['username'])
     try:
         with open('../data/test_metadata/'+code+'.json') as f:
-            data = parse_dict(f.read())
+            test_metadata = parse_dict(f.read())
     except:
         return flask.render_template('404.html'), 404
     if data['owner'] != flask.session['username']:
