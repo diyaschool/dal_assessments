@@ -1206,29 +1206,6 @@ def new_test():
         test_id, _ = test_data
         return flask.redirect('/t/'+test_id+'/edit')
 
-@app.route('/t/<code>/edit/editor/', methods=['GET', 'POST'])
-def test_edit_editor(code):
-    user_data = get_user_data(flask.session['username'])
-    try:
-        with open('../data/test_metadata/'+code+'.json') as f:
-            data = parse_dict(f.read())
-    except:
-        return flask.render_template('404.html'), 404
-    with open('../data/test_data/'+code+'/config.json') as f:
-        try:
-            test_data = parse_dict(f.read())
-            title = test_data['test_name']
-        except SyntaxError:
-            test_data = {}
-            test_data['tags'] = []
-            title = 'Untitled'
-    sheet_id = data.get('sheet_id')
-    if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags'] or check_sharing_perms(data, flask.session['username'])['edit'] == True:
-        pass
-    else:
-        return flask.redirect('/t/'+code)
-    return flask.render_template('editor.html', code=code, data=data, test_data=test_data, sheet_id=sheet_id, title=title, username=flask.session['username'], name=user_data['name'])
-
 @app.route('/t/<code>/edit/delete/', methods=['GET'])
 def test_edit_delete(code):
     try:
@@ -1709,6 +1686,150 @@ def upload_delete(code, file_id):
 @app.route('/t/<code>/static/<file_code>/')
 def t_static(code, file_code):
     return flask.send_file('../data/test_data/'+code+'/files/'+file_code+'/'+[f for f in os.listdir('../data/test_data/'+code+'/files/'+file_code) if os.path.isfile(os.path.join('../data/test_data/'+code+'/files/'+file_code, f))][0])
+
+@app.route('/t/<code>/edit/editor/', methods=['GET', 'POST'])
+def test_edit_editor(code):
+    user_data = get_user_data(flask.session['username'])
+    try:
+        with open('../data/test_metadata/'+code+'.json') as f:
+            data = parse_dict(f.read())
+    except:
+        return flask.render_template('404.html'), 404
+    if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags'] or check_sharing_perms(data, flask.session['username'])['edit'] == True:
+        pass
+    else:
+        return flask.redirect('/t/'+code)
+    try:
+        with open('../data/test_metadata/'+code+'.json') as f:
+            data = parse_dict(f.read())
+    except:
+        return flask.render_template('404.html'), 404
+    with open('../data/test_data/'+code+'/config.json') as f:
+        try:
+            test_data = parse_dict(f.read())
+            title = test_data['test_name']
+        except SyntaxError:
+            test_data = {}
+            test_data['tags'] = []
+            title = 'Untitled'
+    sheet_id = data.get('sheet_id')
+    if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags'] or check_sharing_perms(data, flask.session['username'])['edit'] == True:
+        pass
+    else:
+        return flask.redirect('/t/'+code)
+    return flask.render_template('editor.html', code=code, data=data, test_data=test_data, sheet_id=sheet_id, title=title, username=flask.session['username'], name=user_data['name'])
+
+#################### API Endpoints ####################
+
+@app.route('/t/<code>/edit/editor/add_que', methods=['POST'])
+def test_editor_add_que(code):
+    user_data = get_user_data(flask.session['username'])
+    try:
+        with open('../data/test_metadata/'+code+'.json') as f:
+            data = parse_dict(f.read())
+    except:
+        return flask.render_template('404.html'), 404
+    if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags'] or check_sharing_perms(data, flask.session['username'])['edit'] == True:
+        pass
+    else:
+        return flask.redirect('/t/'+code)
+    data = flask.request.json
+    try:
+        with open('../data/t_editor_data/'+code+'.json') as f:
+            fdata = parse_dict(f.read())
+    except FileNotFoundError:
+        fdata = {}
+    difficulty = data['difficulty']
+    question = data['question']
+    options = data['options']
+    c_a_i = data['c_a_i']
+    while 1:
+        div_id = id_generator(5)
+        if div_id not in fdata.keys():
+            break
+    fdata[div_id] = {"difficulty": difficulty, "question": question, "options": options, "c_a_i": c_a_i}
+    with open('../data/t_editor_data/'+code+'.json', 'w') as f:
+        f.write(json.dumps(fdata))
+    return {"div_id": div_id, "difficulty": difficulty, "question": question, "options": options, "c_a_i": c_a_i}
+
+@app.route('/t/<code>/edit/editor/update_que', methods=['POST'])
+def test_editor_update_que(code):
+    user_data = get_user_data(flask.session['username'])
+    try:
+        with open('../data/test_metadata/'+code+'.json') as f:
+            data = parse_dict(f.read())
+    except:
+        return flask.render_template('404.html'), 404
+    if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags'] or check_sharing_perms(data, flask.session['username'])['edit'] == True:
+        pass
+    else:
+        return flask.redirect('/t/'+code)
+    data = flask.request.json
+    try:
+        with open('../data/t_editor_data/'+code+'.json') as f:
+            fdata = parse_dict(f.read())
+    except FileNotFoundError:
+        fdata = {}
+    div_id = data['div_id']
+    question = data['q']
+    options = data['options']
+    c_a_i = data['c_a_i']
+    try:
+        fdata[div_id]
+    except KeyError:
+        fdata[div_id] = {"difficulty": "easy"}
+    fdata[div_id]['question'] = question
+    fdata[div_id]['options'] = options
+    fdata[div_id]['c_a_i'] = c_a_i
+    with open('../data/t_editor_data/'+code+'.json', 'w') as f:
+        f.write(json.dumps(fdata))
+    return {"div_id": div_id, "question": question, "options": options, "c_a_i": c_a_i}
+
+@app.route('/t/<code>/edit/editor/delete_que', methods=['POST'])
+def test_editor_delete_que(code):
+    user_data = get_user_data(flask.session['username'])
+    try:
+        with open('../data/test_metadata/'+code+'.json') as f:
+            data = parse_dict(f.read())
+    except:
+        return flask.render_template('404.html'), 404
+    if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags'] or check_sharing_perms(data, flask.session['username'])['edit'] == True:
+        pass
+    else:
+        return flask.redirect('/t/'+code)
+    data = flask.request.json
+    try:
+        with open('../data/t_editor_data/'+code+'.json') as f:
+            fdata = parse_dict(f.read())
+    except FileNotFoundError:
+        fdata = {}
+    div_id = data['div_id']
+    fdata.pop(div_id)
+    with open('../data/t_editor_data/'+code+'.json', 'w') as f:
+        f.write(json.dumps(fdata))
+    return {"div_id": div_id}
+
+@app.route('/t/<code>/edit/editor/load_data')
+def test_editor_load_data(code):
+    user_data = get_user_data(flask.session['username'])
+    try:
+        with open('../data/test_metadata/'+code+'.json') as f:
+            data = parse_dict(f.read())
+    except:
+        return flask.render_template('404.html'), 404
+    if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags'] or check_sharing_perms(data, flask.session['username'])['edit'] == True:
+        pass
+    else:
+        return flask.redirect('/t/'+code)
+    try:
+        with open('../data/t_editor_data/'+code+'.json') as f:
+            fdata = parse_dict(f.read())
+    except FileNotFoundError:
+        fdata = {}
+    output = {"easy": [], "mid": [], "hard": []}
+    for div in fdata:
+        output[fdata[div]['difficulty']].append({'q': fdata[div]['question'], 'options': fdata[div]['options'], 'c_a_i': fdata[div]['c_a_i'], 'div_id': div})
+    return output
 
 #################### Error Handlers ####################
 
