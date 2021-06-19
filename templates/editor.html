@@ -9,7 +9,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js" ></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   </head>
-  <body style='background-color: #ddffbc;'>
+  <body>
       <style>
       body {
         overflow: hidden;
@@ -47,8 +47,18 @@
         <div id="status">&nbsp;</div>
       </div>
 <style>
+  .noselect {
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+    -khtml-user-select: none; /* Konqueror HTML */
+    -moz-user-select: none; /* Old versions of Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none; /* Non-prefixed version, currently supported by Chrome, Edge, Opera and Firefox */
+  }
+</style>
+<style>
 .button {
-  padding: 15px 25px;
+  padding: 5px 25px 10px;
   font-size: 24px;
   text-align: center;
   cursor: pointer;
@@ -56,8 +66,10 @@
   color: #fff;
   background-color: #4CAF50;
   border: none;
-  border-radius: 15px;
+  border-radius: 5px;
   box-shadow: 0 9px #999;
+  margin-bottom: 10px;
+  height: 40px;
 }
 .button:hover {background-color: #3e8e41}
 .button:active {
@@ -66,39 +78,260 @@
   transform: translateY(4px);
 }
 .section {
-  border: 3px white solid;
+  border: 5px white solid;
   padding: 0 !important;
   border-right: 0px;
   border-radius: 10px;
+  height: 100%;
+  background-color: #ddffbc;
+}
+
+html, body {
+  height: calc(100% - 35px);
+  overflow: hidden;
 }
 
 .text {
     background-color: green;
 }
 .column {
+  overflow-y: scroll;
   padding: 10px 0 0 10px;
-}
-.button {
-  height: 50px;
+  height: 100%;
 }
 </style>
+<div id="options_example" hidden=true style='margin-left: 10px;'>
+  <input required type="radio" name="c_a_i" value="1"  tabindex="-1" style='width: 25px'>&nbsp;<input type="text" value="" placeholder="Option" style="border-radius: 5px; width: 70%;" onchange="update_question(this.parentNode.parentNode.parentNode.id)" required>&nbsp;<span class="material-icons" style='cursor:pointer; font-size: 20px;' onclick="delete_option(this.parentNode.parentNode, this.parentNode.children[0].value)">delete_outline</span><br>
+</div>
+<div id="example_que_div" class="noselect" hidden=true style='border: 5px black solid; border-radius: 10px; margin-bottom: 10px; background-color: #DEEFCC'>
+  <input required type="text" name="question" value="" onchange="update_question(this.parentNode.id)" style='margin: 10px; width: 85%; border-radius: 3px;' placeholder="Question?">
+  <span class="material-icons" style='cursor:pointer; position: relative;' onclick="delete_question(this.parentNode.id)">delete_outline</span>
+  <form></form>
+  <button type="button" onclick="add_option(this.parentNode.children[2])" class='button' style='font-size: 15px; box-shadow: 0 6px #999; padding: 5px 10px 5px; height: 30px;margin: 15px;'><span class="material-icons" style='position:relative; top: 3px; font-size: 20px;'>add</span> Add Option</button>
+</div>
+<script type="text/javascript">
 
-<div class="row">
-  <div class="col-lg-4 section">
-    <div class='column'>
-      <button type="button" class="button"><span class="material-icons">add</span></button>
+function delete_option(form_div, c_a_i){
+  form_div.children[c_a_i].remove()
+  for (let i = 0; i < form_div.length/2; i++) {
+    form_div.children[i].children[0].value = i
+  }
+  update_question(form_div.parentNode.id)
+}
+
+function load_data(){
+  $.ajax({url: "/t/{{code}}/edit/editor/load_data", type: "GET", success: function(data){
+    for (let i = 0; i < data['easy'].length; i++) {
+      q = data['easy'][i]
+      render_new_div(q['div_id'], "easy", q['q'], q['options'], q['c_a_i'])
+    }
+    for (let i = 0; i < data['mid'].length; i++) {
+      q = data['mid'][i]
+      render_new_div(q['div_id'], "mid", q['q'], q['options'], q['c_a_i'])
+    }
+    for (let i = 0; i < data['hard'].length; i++) {
+      q = data['hard'][i]
+      render_new_div(q['div_id'], "hard", q['q'], q['options'], q['c_a_i'])
+    }
+  }, error: function(error){console.log("Error:");console.log(error);}});
+}
+load_data()
+
+function add_option(form_div, text=""){
+  var ediv = document.getElementById('options_example').cloneNode(true);
+  ediv = form_div.appendChild(ediv);
+  ediv.hidden = false
+  ediv.children[1].value = text
+  if (ediv.parentNode.c_a_i.length == undefined){
+    ediv.children[0].value = 0
+  } else {
+    ediv.children[0].value = ediv.parentNode.c_a_i.length-1
+  }
+  ediv.children[0].setAttribute("onchange", "update_question(this.parentNode.parentNode.parentNode.id)")
+}
+
+function update_question(div_id){
+  div = document.getElementById(div_id)
+  q = div.children[0].value
+  options_div = div.children[2]
+  options = []
+  for (let i = 0; i < options_div.length/2; i++) {
+    options.push(options_div.children[i].children[1].value)
+  }
+  c_a_i = parseInt(options_div.c_a_i.value)
+  $.ajax({url: "/t/{{code}}/edit/editor/update_que", type: "POST", data: JSON.stringify({"div_id": div_id, "q": q, "options": options, "c_a_i": c_a_i}), dataType: "json", processData: false, 'contentType': 'application/json', success: function(data){
+    snackbar("Changes saved")
+  }, error: function(error){alert("Error, please check console!");console.log("Error:");console.log(error);}});
+}
+
+function render_new_div(div_id, difficulty, question, options, c_a_i, ignore_options=false){
+  var div = document.getElementById('example_que_div').cloneNode(true);
+  div = document.getElementById(difficulty+"_div").appendChild(div);
+  div.hidden = false;
+  div.id = div_id
+  var q_box = div.children[0]
+  q_box.value = question
+  if (ignore_options==false){
+    for (let i = 0; i < options.length; i++) {
+      console.log(c_a_i==i);
+      add_option(document.getElementById(div_id).children[2], options[i])
+    }
+    document.getElementById(div_id).children[2].c_a_i.value = c_a_i
+  }
+}
+
+function delete_question(div_id){
+  $.ajax({url: "/t/{{code}}/edit/editor/delete_que", type: "POST", data: JSON.stringify({"div_id": div_id}), dataType: "json", processData: false, 'contentType': 'application/json', success: function(data){
+    document.getElementById(div_id).remove()
+  }, error: function(error){alert("Error, please check console!");console.log("Error:");console.log(error);}});
+}
+
+function add_easy_temp(){
+  $.ajax({url: "/t/{{code}}/edit/editor/add_que", type: "POST", data: JSON.stringify({"difficulty": "easy", "question": "", "options": ['', ''], "c_a_i": 0}), dataType: "json", processData: false, 'contentType': 'application/json', success: function(data){
+    render_new_div(data['div_id'], data['difficulty'], data['question'], data['options'], data['c_a_i'], true)
+    document.getElementById(data['div_id']).children[0].focus()
+    add_option(document.getElementById(data['div_id']).children[2], "", true)
+    add_option(document.getElementById(data['div_id']).children[2])
+    document.getElementById(data['div_id']).children[2].c_a_i.value = data['c_a_i']
+    document.getElementById("easy_div_main").scrollTo(0,document.body.scrollHeight);
+  }, error: function(error){alert("Error, please check console!");console.log("Error:");console.log(error);}});
+}
+function add_mid_temp(){
+  $.ajax({url: "/t/{{code}}/edit/editor/add_que", type: "POST", data: JSON.stringify({"difficulty": "mid", "question": "", "options": ['', ''], "c_a_i": 0}), dataType: "json", processData: false, 'contentType': 'application/json', success: function(data){
+    render_new_div(data['div_id'], data['difficulty'], data['question'], data['options'], data['c_a_i'], true)
+    document.getElementById(data['div_id']).children[0].focus()
+    add_option(document.getElementById(data['div_id']).children[2], "", true)
+    add_option(document.getElementById(data['div_id']).children[2])
+    document.getElementById(data['div_id']).children[2].c_a_i.value = data['c_a_i']
+    document.getElementById("mid_div_main").scrollTo(0,document.body.scrollHeight);
+  }, error: function(error){alert("Error, please check console!");console.log("Error:");console.log(error);}});
+}
+function add_hard_temp(){
+  $.ajax({url: "/t/{{code}}/edit/editor/add_que", type: "POST", data: JSON.stringify({"difficulty": "hard", "question": "", "options": ['', ''], "c_a_i": 0}), dataType: "json", processData: false, 'contentType': 'application/json', success: function(data){
+    render_new_div(data['div_id'], data['difficulty'], data['question'], data['options'], data['c_a_i'], true)
+    document.getElementById(data['div_id']).children[0].focus()
+    add_option(document.getElementById(data['div_id']).children[2], "", true)
+    add_option(document.getElementById(data['div_id']).children[2])
+    document.getElementById(data['div_id']).children[2].c_a_i.value = data['c_a_i']
+    document.getElementById("hard_div_main").scrollTo(0,document.body.scrollHeight);
+  }, error: function(error){alert("Error, please check console!");console.log("Error:");console.log(error);}});
+}
+
+function remove_all_frontend_only(){
+  ez = document.getElementById("easy_div").childElementCount
+  mid = document.getElementById("mid_div").childElementCount
+  hard = document.getElementById("hard_div").childElementCount
+  for (let i = 0; i < ez; i++) {
+    console.log(i);
+    document.getElementById("easy_div").children[0].remove()
+  }
+  for (let i = 0; i < mid; i++) {
+    document.getElementById("mid_div").children[0].remove()
+  }
+  for (let i = 0; i < hard; i++) {
+    document.getElementById("hard_div").children[0].remove()
+  }
+}
+</script>
+<center>
+  <div style='width: 100%; position: fixed; background-color: black; padding: 10px; top: 0px; left:0px; opacity: 1; height: 80px;'>
+    <span class="material-icons noselect" style='color: white; position:absolute; left: 15px; top: 23px; font-size: 30px; cursor: pointer' onclick='window.history.back()'>arrow_back</span>
+    <a style='color: white; font-size: 40px; left: 47%; text-decoration: none' href='/'>DAL Assessments</a>
+    <text style='color: white; position: absolute; right: 50px; top: 10px; font-size: 20px'>Hello {{name}}</text>
+    <text style='color: white; position: absolute; right: 50px; top: 35px'>Logged in as {{username}}</text>
+  </div>
+</center>
+<br><br><br>
+<div class="row" style="height: 100%;">
+  <div class="col-lg-4 section column" id='easy_div_main'>
+    <div style='margin-left: 20px; margin-top: 20px; margin-right: 20px;'>
+      <div style="border-bottom: 4px snow solid; margin-bottom: 20px;">
+        <center>
+          <text style='font-size: 30px;'>1 Markers</text><br><br>
+        </center>
+      </div>
+      <div id='easy_div' class='quesions_div'></div>
+      <button type="button" onclick="add_easy_temp()" class="button"><span class="material-icons" style='position:relative; top: 3px;'>add</span> Add Question</button>
     </div>
   </div>
-  <div class="col-lg-4 section">
-    <!-- <h1 class="text">
-    Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
-    </h1> -->
+  <div class="col-lg-4 section column" id='mid_div_main'>
+    <div style='margin-left: 20px; margin-top: 20px; margin-right: 20px;'>
+      <div style="border-bottom: 4px snow solid; margin-bottom: 20px;">
+        <center>
+          <text style='font-size: 30px;'>3 Markers</text><br><br>
+        </center>
+      </div>
+      <div id='mid_div' class='quesions_div'></div>
+      <button type="button" onclick="add_mid_temp()" class="button"><span class="material-icons" style='position:relative; top: 3px;'>add</span> Add Question</button>
+    </div>
   </div>
-  <div class="col-lg-4 section">
-    <!-- <h1 class="text">
-    Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
-    </h1> -->
+  <div class="col-lg-4 section column" id='hard_div_main'>
+    <div style='margin-left: 20px; margin-top: 20px; margin-right: 20px;'>
+      <div style="border-bottom: 4px snow solid; margin-bottom: 20px;">
+        <center>
+          <text style='font-size: 30px;'>5 Markers</text><br><br>
+        </center>
+      </div>
+      <div id='hard_div' class='quesions_div'></div>
+      <button type="button" onclick="add_hard_temp()" class="button"><span class="material-icons" style='position:relative; top: 3px;'>add</span> Add Question</button>
+    </div>
   </div>
 </div>
+<style>
+/* The snackbar - position it at the bottom and in the middle of the screen */
+#snackbar {
+visibility: hidden; /* Hidden by default. Visible on click */
+min-width: 250px; /* Set a default minimum width */
+margin-left: -125px; /* Divide value of min-width by 2 */
+background-color: #333; /* Black background color */
+color: #fff; /* White text color */
+text-align: center; /* Centered text */
+border-radius: 2px; /* Rounded borders */
+padding: 16px; /* Padding */
+position: fixed; /* Sit on top of the screen */
+z-index: 1; /* Add a z-index if needed */
+left: 50%; /* Center the snackbar */
+bottom: 30px; /* 30px from the bottom */
+}
+
+/* Show the snackbar when clicking on a button (class added with JavaScript) */
+#snackbar.show {
+visibility: visible; /* Show the snackbar */
+/* Add animation: Take 0.5 seconds to fade in and out the snackbar.
+However, delay the fade out process for 2.5 seconds */
+-webkit-animation: fadein 0.5s, fadeout 0.5s 1s;
+animation: fadein 0.5s, fadeout 0.5s 1s;
+}
+
+/* Animations to fade the snackbar in and out */
+@-webkit-keyframes fadein {
+from {bottom: 0; opacity: 0;}
+to {bottom: 30px; opacity: 1;}
+}
+
+@keyframes fadein {
+from {bottom: 0; opacity: 0;}
+to {bottom: 30px; opacity: 1;}
+}
+
+@-webkit-keyframes fadeout {
+from {bottom: 30px; opacity: 1;}
+to {bottom: 0; opacity: 0;}
+}
+
+@keyframes fadeout {
+from {bottom: 30px; opacity: 1;}
+to {bottom: 0; opacity: 0;}
+}
+</style>
+<div id="snackbar"></div>
+<script>
+function snackbar(text) {
+var x = document.getElementById("snackbar");
+x.className = "show";
+x.innerHTML = text
+setTimeout(function(){ x.className = x.className.replace("show", ""); }, 1500);
+}
+</script>
   </body>
 </html>

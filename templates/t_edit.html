@@ -27,6 +27,8 @@
   border: none;
   border-radius: 5px;
   box-shadow: 0 6px #999;
+  padding-left: 5px;
+  padding-right: 5px;
   }
   input[type=submit] {
 border: 1px solid #f44c0e;
@@ -41,15 +43,38 @@ border: none;
 border-radius: 5px;
 box-shadow: 0 6px #999;
 }
+  .button {
+    /* padding: 10px 25px 15px; */
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-bottom: 5px;
+    font-size: 15px;
+    text-align: center;
+    cursor: pointer;
+    outline: none;
+    color: #fff;
+    background-color: #4CAF50;
+    border: none;
+    border-radius: 5px;
+    box-shadow: 0 6px #999;
+    margin-bottom: 10px;
+  }
+  .button:hover {background-color: #3e8e41}
+  .button:active {
+    background-color: #3e8e41;
+    box-shadow: 0 5px #666;
+    transform: translateY(4px);
   }
     </style>
     <center>
     <br><br><br><br><br><div style='background-color: white; height: auto; width: 900px; border-radius: 20px; opacity: 0.9'>
       <br><br><br>
-      <text style='font-size: 40px; font-weight: bold'>Edit Test</text><br><br><br><br>
-      <input type="button" onclick="window.open('/t/{{code}}/')" value='Open Test' autofocus>&nbsp;<input type="text" readonly value='{{base_uri}}t/{{code}}/' style='border: 2px black solid; border-radius 10px; width: 400px' id='view_url'>&nbsp;<input type="button" onclick="copy_to_clipboard()" value='Copy to Clipboard'><span class="material-icons" data-toggle="modal" data-target="#exampleModal" style='position: relative; left: 120px;bottom: 190px;cursor: pointer;'>delete_forever</span><br><br>
-      <input type="button" onclick="window.open('/t/{{code}}/analytics/')" value='Open Analytics'>&nbsp;<input type="text" readonly value='{{base_uri}}t/{{code}}/analytics/' style='border: 2px black solid; border-radius 10px; width: 400px'><br><br>
-      <input type="button" onclick="window.open('https://docs.google.com/spreadsheets/d/{{sheet_id}}/')" value='Open Google Sheet'>&nbsp;<input type="button" onclick="window.location.href = '?sync'" value='Sync with Google Sheets'>&nbsp;<input type="text" readonly value='https://docs.google.com/spreadsheets/d/{{sheet_id}}/' style='border: 2px black solid; border-radius 10px; width: 400px'><br><br><br>
+      <center><span class="material-icons" data-toggle="modal" data-target="#exampleModal" style='position: relative; left: 425px;bottom: 60px;cursor: pointer;'>delete_forever</span></center>
+      <text style='font-size: 40px; font-weight: bold'>Edit Test</text><br><br>
+      <input type="button" onclick="window.open('/t/{{code}}/')" value='Open Test' autofocus>&nbsp;<input type="text" readonly value='{{base_uri}}t/{{code}}/' style='border: 2px black solid; border-radius 10px; width: 200px' id='view_url'>&nbsp;
+      <button onclick="copy_to_clipboard()" class='button'>Copy to Clipboard&nbsp;<span class="material-icons" style="position:relative; top: 5px; font-size: 20px">content_copy</span></button><br>
+      <input type="button" onclick="window.open('/t/{{code}}/analytics/')" value='Open Analytics'><br><br>
+      <input type="button" onclick="window.open('https://docs.google.com/spreadsheets/d/{{sheet_id}}/')" value='Open Google Sheet'>&nbsp;<input type="button" onclick="window.location.href = '?sync'" value='Sync with Google Sheets'><br><br>
       <text style='font-size: 25px; font-weight: bold'>Images</text><br>
       <iframe src="/upload_file/{{code}}" frameborder="0" scrolling="no" onload="resizeIframe(this)" width="900px"></iframe><br><br>
       <br><br>
