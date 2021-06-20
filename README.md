@@ -32,7 +32,5 @@ Almost everything is working fine execpt the occasional bugs.
 Please report bugs [here](https://github.com/ChaitanyaPy/dal_assessments/issues/new?assignees=&labels=&template=bug_report.md) and suggest ideas [here](https://github.com/ChaitanyaPy/dal_assessments/issues/new?assignees=&labels=&template=feature_request.md), it really helps.
 
 
-[![forthebadge](https://forthebadge.com/images/badges/built-by-codebabes.svg)](https://forthebadge.com)
-[![forthebadge](https://forthebadge.com/images/badges/mom-made-pizza-rolls.svg)](https://forthebadge.com)
 [![forthebadge](https://forthebadge.com/images/badges/check-it-out.svg)](https://diyaassessments.pythonanywhere.com/)
 [![forthebadge](https://forthebadge.com/images/badges/powered-by-electricity.svg)](https://forthebadge.com)
