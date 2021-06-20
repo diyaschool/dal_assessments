@@ -84,11 +84,14 @@
   border-radius: 10px;
   height: 100%;
   background-color: #ddffbc;
+  border-top: none;
 }
 
 html, body {
-  height: calc(100% - 35px);
+  height: 100%;
   overflow: hidden;
+  display: flex;
+  flex-flow: column;
 }
 
 .text {
@@ -258,23 +261,23 @@ function refresh_data(focus_option=false, div_id=null, option_value=null){
    }
   }, error: function(error){console.log("Error:");console.log(error);}});
 }
-const interval = setInterval(function() {
-  focus_element = document.activeElement
-  type = focus_element.type
-  placeholder = focus_element.placeholder
-  div_id = null
-  option_value = null
-  if (type=="text" && placeholder=='Option') {
-    option_value = focus_element.parentNode.children[0].value
-    div_id = focus_element.parentNode.parentNode.parentNode.id
-  } else if (type=="text" && placeholder=='Question?') {
-    div_id = focus_element.parentNode.id
-  }
-  if (div_id != null){update_question(div_id)}
-  setTimeout(function(){
-     refresh_data(true, div_id, option_value)
-   }, 10);
-}, 3000);
+// const interval = setInterval(function() {
+//   focus_element = document.activeElement
+//   type = focus_element.type
+//   placeholder = focus_element.placeholder
+//   div_id = null
+//   option_value = null
+//   if (type=="text" && placeholder=='Option') {
+//     option_value = focus_element.parentNode.children[0].value
+//     div_id = focus_element.parentNode.parentNode.parentNode.id
+//   } else if (type=="text" && placeholder=='Question?') {
+//     div_id = focus_element.parentNode.id
+//   }
+//   if (div_id != null){update_question(div_id)}
+//   setTimeout(function(){
+//      refresh_data(true, div_id, option_value)
+//    }, 10);
+// }, 3000);
 </script>
 <center>
   <div style='width: 100%; position: fixed; background-color: black; padding: 10px; top: 0px; left:0px; opacity: 1; height: 80px;'>
@@ -284,8 +287,10 @@ const interval = setInterval(function() {
     <text style='color: white; position: absolute; right: 50px; top: 35px'>Logged in as {{username}}</text>
   </div>
 </center>
-<br><br><br>
-<div class="row" style="height: 100%;">
+<div style='width: 100%; position:relative; background-color: black; padding: 10px; top: 80px; left:0px;height: 80px; width: 100%;'>
+s
+</div>
+<div class="row" style="height: 100%; margin-top: 80px;">
   <div class="col-lg-4 section column" id='easy_div_main'>
     <div style='margin-left: 20px; margin-top: 20px; margin-right: 20px;'>
       <div style="border-bottom: 4px snow solid; margin-bottom: 20px;">
