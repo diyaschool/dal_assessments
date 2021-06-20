@@ -8,6 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js" ></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined">
   </head>
   <body>
       <style>
@@ -105,6 +106,24 @@ html, body {
 .top_section {
   background-color: #ddffbc;
 }
+.spin_node {
+  animation-name: spin;
+  animation-duration: 2000ms;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+  /* transform: rotate(3deg); */
+   /* transform: rotate(0.3rad);/ */
+   /* transform: rotate(3grad); */
+   /* transform: rotate(.03turn);  */
+}
+@keyframes spin {
+    from {
+        transform:rotate(0deg);
+    }
+    to {
+        transform:rotate(360deg);
+    }
+}
 </style>
 <div id="options_example" hidden=true style='margin-left: 10px;'>
   <input required type="radio" name="c_a_i" value="1"  tabindex="-1" style='width: 25px'>&nbsp;<input type="text" value="" placeholder="Option" style="border-radius: 5px; width: 70%;" onchange="update_question(this.parentNode.parentNode.parentNode.id, true)" required>&nbsp;<span class="material-icons" style='cursor:pointer; font-size: 20px;' onclick="delete_option(this.parentNode.parentNode, this.parentNode.children[0].value)">delete_outline</span><br>
@@ -116,7 +135,6 @@ html, body {
   <button type="button" onclick="add_option(this.parentNode.children[2]); update_question(this.parentNode.id)" class='button' style='font-size: 15px; box-shadow: 0 6px #999; padding: 5px 10px 5px; height: 30px;margin: 15px;'><span class="material-icons" style='position:relative; top: 3px; font-size: 20px;'>add</span> Add Option</button>
 </div>
 <script type="text/javascript">
-
 function delete_option(form_div, c_a_i){
   form_div.children[c_a_i].remove()
   for (let i = 0; i < form_div.length/2; i++) {
@@ -239,6 +257,7 @@ function remove_all_frontend_only(){
   }
 }
 function refresh_data(focus_option=false, div_id=null, option_value=null){
+  sync_button_enable()
   $.ajax({url: "/t/{{code}}/edit/editor/load_data", type: "GET", success: function(data){
     remove_all_frontend_only()
     for (let i = 0; i < data['easy'].length; i++) {
@@ -259,36 +278,35 @@ function refresh_data(focus_option=false, div_id=null, option_value=null){
        document.getElementById(div_id).children[0].focus()
      }
    }
+   sync_button_disable()
   }, error: function(error){console.log("Error:");console.log(error);}});
 }
-// const interval = setInterval(function() {
-//   focus_element = document.activeElement
-//   type = focus_element.type
-//   placeholder = focus_element.placeholder
-//   div_id = null
-//   option_value = null
-//   if (type=="text" && placeholder=='Option') {
-//     option_value = focus_element.parentNode.children[0].value
-//     div_id = focus_element.parentNode.parentNode.parentNode.id
-//   } else if (type=="text" && placeholder=='Question?') {
-//     div_id = focus_element.parentNode.id
-//   }
-//   if (div_id != null){update_question(div_id)}
-//   setTimeout(function(){
-//      refresh_data(true, div_id, option_value)
-//    }, 10);
-// }, 3000);
+function sync_button_enable(sync_node_id="sync_button"){
+  button = document.getElementById(sync_node_id)
+  button.innerHTML = "sync"
+  button.classList.add("spin_node");
+}
+function sync_button_disable(sync_node_id="sync_button"){
+  button = document.getElementById(sync_node_id)
+  button.classList.remove("spin_node");
+}
+function sync_button_problem(sync_node_id="sync_button"){
+  button = document.getElementById(sync_node_id)
+  button.classList.remove("spin_node");
+  button.innerHTML = "sync_problem"
+}
 </script>
 <center>
   <div style='width: 100%; position: fixed; background-color: black; padding: 10px; top: 0px; left:0px; opacity: 1; height: 80px;'>
     <span class="material-icons noselect" style='color: white; position:absolute; left: 15px; top: 23px; font-size: 30px; cursor: pointer' onclick='window.history.back()'>arrow_back</span>
+    <!-- <span class="material-icons-outlined noselect" id='sync_button' onclick='refresh_data()' style='color:white; font-size: 30px; margin-left: 10px;cursor:pointer; position:absolute; left: 50px; top: 23px;'>sync</span> -->
     <a style='color: white; font-size: 40px; left: 47%; text-decoration: none' href='/'>DAL Assessments</a>
     <text style='color: white; position: absolute; right: 50px; top: 10px; font-size: 20px'>Hello {{name}}</text>
     <text style='color: white; position: absolute; right: 50px; top: 35px'>Logged in as {{username}}</text>
   </div>
 </center>
 <div style='width: 100%; position:relative; background-color: black; padding: 10px; top: 80px; left:0px;height: 80px; width: 100%;'>
-s
+<span class="material-icons-outlined noselect" id='sync_button' onclick='refresh_data()' style='color:white; font-size: 35px; margin-left: 10px;cursor:pointer;'>sync</span>
 </div>
 <div class="row" style="height: 100%; margin-top: 80px;">
   <div class="col-lg-4 section column" id='easy_div_main'>
