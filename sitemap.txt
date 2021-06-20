@@ -24,3 +24,8 @@ Any URL request on this server without logging in will be returned with a redire
 /privacy-policy                    - [HTML] privacy-policy.html
 /gauthtoken                        - [PROCESSING] Google SSO
 /robots.txt                        - [TEXT] some random stuff
+/t/<code>/edit/editor/             - [HTML] editor.html
+/t/<code>/edit/editor/add_que      - [API] adds a question to db
+/t/<code>/edit/editor/update_que   - [API] removes specific question from db
+/t/<code>/edit/editor/delete_que   - [API] update specific question in db
+/t/<code>/edit/editor/load_data    - [API] returns list of questions with attributes
