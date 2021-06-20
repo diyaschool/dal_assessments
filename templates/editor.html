@@ -104,13 +104,13 @@ html, body {
 }
 </style>
 <div id="options_example" hidden=true style='margin-left: 10px;'>
-  <input required type="radio" name="c_a_i" value="1"  tabindex="-1" style='width: 25px'>&nbsp;<input type="text" value="" placeholder="Option" style="border-radius: 5px; width: 70%;" onchange="update_question(this.parentNode.parentNode.parentNode.id)" required>&nbsp;<span class="material-icons" style='cursor:pointer; font-size: 20px;' onclick="delete_option(this.parentNode.parentNode, this.parentNode.children[0].value)">delete_outline</span><br>
+  <input required type="radio" name="c_a_i" value="1"  tabindex="-1" style='width: 25px'>&nbsp;<input type="text" value="" placeholder="Option" style="border-radius: 5px; width: 70%;" onchange="update_question(this.parentNode.parentNode.parentNode.id, true)" required>&nbsp;<span class="material-icons" style='cursor:pointer; font-size: 20px;' onclick="delete_option(this.parentNode.parentNode, this.parentNode.children[0].value)">delete_outline</span><br>
 </div>
 <div id="example_que_div" class="noselect" hidden=true style='border: 5px black solid; border-radius: 10px; margin-bottom: 10px; background-color: #DEEFCC'>
-  <input required type="text" name="question" value="" onchange="update_question(this.parentNode.id)" style='margin: 10px; width: 85%; border-radius: 3px;' placeholder="Question?">
-  <span class="material-icons" style='cursor:pointer; position: relative;' onclick="delete_question(this.parentNode.id)">delete_outline</span>
+  <input required type="text" name="question" value="" onchange="update_question(this.parentNode.id, true)" style='margin: 10px; width: 85%; border-radius: 3px;' placeholder="Question?"/>
+  <span class="material-icons" style='cursor:pointer; position: relative; right: 10px; top: 5px;' onclick="delete_question(this.parentNode.id)">delete_outline</span>
   <form></form>
-  <button type="button" onclick="add_option(this.parentNode.children[2])" class='button' style='font-size: 15px; box-shadow: 0 6px #999; padding: 5px 10px 5px; height: 30px;margin: 15px;'><span class="material-icons" style='position:relative; top: 3px; font-size: 20px;'>add</span> Add Option</button>
+  <button type="button" onclick="add_option(this.parentNode.children[2]); update_question(this.parentNode.id)" class='button' style='font-size: 15px; box-shadow: 0 6px #999; padding: 5px 10px 5px; height: 30px;margin: 15px;'><span class="material-icons" style='position:relative; top: 3px; font-size: 20px;'>add</span> Add Option</button>
 </div>
 <script type="text/javascript">
 
@@ -153,7 +153,7 @@ function add_option(form_div, text=""){
   ediv.children[0].setAttribute("onchange", "update_question(this.parentNode.parentNode.parentNode.id)")
 }
 
-function update_question(div_id){
+function update_question(div_id, notify=false){
   div = document.getElementById(div_id)
   q = div.children[0].value
   options_div = div.children[2]
@@ -163,7 +163,9 @@ function update_question(div_id){
   }
   c_a_i = parseInt(options_div.c_a_i.value)
   $.ajax({url: "/t/{{code}}/edit/editor/update_que", type: "POST", data: JSON.stringify({"div_id": div_id, "q": q, "options": options, "c_a_i": c_a_i}), dataType: "json", processData: false, 'contentType': 'application/json', success: function(data){
-    snackbar("Changes saved")
+    if (notify){
+      snackbar("Changes saved")
+    }
   }, error: function(error){alert("Error, please check console!");console.log("Error:");console.log(error);}});
 }
 
@@ -176,7 +178,6 @@ function render_new_div(div_id, difficulty, question, options, c_a_i, ignore_opt
   q_box.value = question
   if (ignore_options==false){
     for (let i = 0; i < options.length; i++) {
-      console.log(c_a_i==i);
       add_option(document.getElementById(div_id).children[2], options[i])
     }
     document.getElementById(div_id).children[2].c_a_i.value = c_a_i
@@ -225,7 +226,6 @@ function remove_all_frontend_only(){
   mid = document.getElementById("mid_div").childElementCount
   hard = document.getElementById("hard_div").childElementCount
   for (let i = 0; i < ez; i++) {
-    console.log(i);
     document.getElementById("easy_div").children[0].remove()
   }
   for (let i = 0; i < mid; i++) {
@@ -235,6 +235,46 @@ function remove_all_frontend_only(){
     document.getElementById("hard_div").children[0].remove()
   }
 }
+function refresh_data(focus_option=false, div_id=null, option_value=null){
+  $.ajax({url: "/t/{{code}}/edit/editor/load_data", type: "GET", success: function(data){
+    remove_all_frontend_only()
+    for (let i = 0; i < data['easy'].length; i++) {
+      q = data['easy'][i]
+      render_new_div(q['div_id'], "easy", q['q'], q['options'], q['c_a_i'])
+    }
+    for (let i = 0; i < data['mid'].length; i++) {
+      q = data['mid'][i]
+      render_new_div(q['div_id'], "mid", q['q'], q['options'], q['c_a_i'])
+    }
+    for (let i = 0; i < data['hard'].length; i++) {
+      q = data['hard'][i]
+      render_new_div(q['div_id'], "hard", q['q'], q['options'], q['c_a_i'])
+    }
+     if (focus_option && div_id != null){if(option_value!=null){
+       document.getElementById(div_id).children[2].children[option_value].children[1].focus()
+     } else{
+       document.getElementById(div_id).children[0].focus()
+     }
+   }
+  }, error: function(error){console.log("Error:");console.log(error);}});
+}
+const interval = setInterval(function() {
+  focus_element = document.activeElement
+  type = focus_element.type
+  placeholder = focus_element.placeholder
+  div_id = null
+  option_value = null
+  if (type=="text" && placeholder=='Option') {
+    option_value = focus_element.parentNode.children[0].value
+    div_id = focus_element.parentNode.parentNode.parentNode.id
+  } else if (type=="text" && placeholder=='Question?') {
+    div_id = focus_element.parentNode.id
+  }
+  if (div_id != null){update_question(div_id)}
+  setTimeout(function(){
+     refresh_data(true, div_id, option_value)
+   }, 10);
+}, 3000);
 </script>
 <center>
   <div style='width: 100%; position: fixed; background-color: black; padding: 10px; top: 0px; left:0px; opacity: 1; height: 80px;'>
