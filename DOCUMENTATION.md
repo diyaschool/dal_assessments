@@ -19,6 +19,7 @@
     ├── global_test_records/
     ├── google_sso/
     ├── response_data/
+    ├── t_editor_data/
     ├── test_data/
     ├── test_metadata/
     ├── user_data/
