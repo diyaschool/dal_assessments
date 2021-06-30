@@ -897,14 +897,15 @@ def t_verify(code):
         flask.session['t']['prev_q_res'] = False
     if flask.session['t']['prev_q_res'] == True:
         if flask.session['t']['difficulty'] == 0:
-            ans_score = 10
+            ans_score = 1
         elif flask.session['t']['difficulty'] == 1:
-            ans_score = 15
+            ans_score = 3
         elif flask.session['t']['difficulty'] == 2:
-            ans_score = 20
+            ans_score = 5
         flask.session['t']['score'] = str(parse_dict(flask.session['t']['score'])+ans_score)
     else:
         ans_score = 0
+    print(data['alt'])
     flask.session['t']['verified'] = True
     time_taken = time.time()-flask.session['t']['time']
     update_score(flask.session['username'], code, flask.session['t']['prev_q_res'], flask.session['t']['difficulty'], flask.session['t']['q_id'], parse_dict(data['answer']), flask.session['t']['score'], ans_score, time_taken)
@@ -1059,7 +1060,15 @@ def t_view(code):
                 counter += 1
             random.shuffle(o_answers)
             if desktop:
-                return flask.render_template('t.html', code=code, question_data=question, ans_range=range(len(question['answers'])), data=question_data, q_number=q_number, image_url=image_url, username=flask.session['username'], name=user_data['name'], total_height=650+height_extend, answers=o_answers)
+                whitelisted = False
+                try:
+                    with open('../data/whitelist_protection.txt') as f:
+                        whitelisted_users = f.read().split('\n')
+                except FileNotFoundError:
+                    whitelisted_users = []
+                if flask.session['username'] in whitelisted_users:
+                    whitelisted = True
+                return flask.render_template('t.html', code=code, question_data=question, ans_range=range(len(question['answers'])), data=question_data, q_number=q_number, image_url=image_url, username=flask.session['username'], name=user_data['name'], total_height=650+height_extend, answers=o_answers, whitelisted=whitelisted)
             else:
                 return flask.render_template('mobile/t.html', code=code, question_data=question, ans_range=range(len(question['answers'])), data=question_data, q_number=q_number, image_url=image_url, username=flask.session['username'], name=user_data['name'], total_height=650+height_extend, answers=o_answers)
         else:
@@ -1134,7 +1143,15 @@ def t_view(code):
                 counter += 1
             random.shuffle(o_answers)
             if desktop:
-                return flask.render_template('t.html', code=code, question_data=question, ans_range=range(len(question['answers'])), data=question_data, q_number=q_number, image_url=image_url, username=flask.session['username'], name=user_data['name'], total_height=650+height_extend, answers=o_answers)
+                whitelisted = False
+                try:
+                    with open('../data/whitelist_protection.txt') as f:
+                        whitelisted_users = f.read().split('\n')
+                except FileNotFoundError:
+                    whitelisted_users = []
+                if flask.session['username'] in whitelisted_users:
+                    whitelisted = True
+                return flask.render_template('t.html', code=code, question_data=question, ans_range=range(len(question['answers'])), data=question_data, q_number=q_number, image_url=image_url, username=flask.session['username'], name=user_data['name'], total_height=650+height_extend, answers=o_answers, whitelisted=whitelisted)
             else:
                 return flask.render_template('mobile/t.html', code=code, question_data=question, ans_range=range(len(question['answers'])), data=question_data, q_number=q_number, image_url=image_url, username=flask.session['username'], name=user_data['name'], total_height=650+height_extend, answers=o_answers)
 
