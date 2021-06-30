@@ -103,7 +103,7 @@ $(window).on('load', function() { // makes sure the whole site is loaded
   <body style='background-size: cover; background-image: url("/background.png");  background-repeat: no-repeat; background-position: center; background-attachment: fixed;'>
     <center>
     <br><br><br><br><br><div class="noselect" style='background-color: white; height: {%if image_url%}{{total_height}}{%else%}{{total_height-300}}{%endif%}px; width: 1050px; border-radius: 20px; opacity: 1'>
-      <form method='POST' action='/t/{{code}}/verify'>
+      <form method='POST' action='/t/{{code}}/verify' onsubmit="warn_on_leave=false;">
       <div style='text-align: left; position: relative; left: 70px; top: 40px'>
       <text style='font-size: 30px'>{{q_number}}: {%for chunk in question_data['question']%}{{chunk}}<br>{%endfor%}</text><br>
       {%set counter = 0%}
@@ -117,7 +117,8 @@ $(window).on('load', function() { // makes sure the whole site is loaded
         {%if image_url%}
           <br><img src='{{image_url}}' height='350px'>
         {%endif%}
-          <button class="button" type='submit' style='position: absolute; top: -20px; width: 120px;  left: 800px; height: 70px' onclick="setClean();" id='next_button'>
+        <input type="hidden" name="alt" value="0" id='alt_input'>
+          <button class="button" type='submit' style='position: absolute; top: -20px; width: 120px;  left: 800px; height: 70px' id='next_button'>
             <span>Next</span>
           </button>
         </div>
@@ -177,10 +178,24 @@ $(window).on('load', function() { // makes sure the whole site is loaded
     <span class="close" style="position:relative; top: -10px">&times;</span>
     <center>
       <text>Are you sure you want to leave the test?</text><br>
-      <input onclick='exit_test();' type='button' value="Exit test" style='position: relative; top: 15px' id='exit_button_modal'>
+      <input onclick='warn_on_leave=false;exit_test();' type='button' value="Exit test" style='position: relative; top: 15px' id='exit_button_modal'>
     </center>
   </div>
 </div>
+{%if whitelisted==False%}
+<script>
+$(window).blur(function() {
+  if (alerting_on_leave==false){
+    document.getElementById('overlay_window').hidden = false
+    alert("Please do not switch tabs!")
+    document.getElementById('overlay_window').hidden = true
+    document.getElementById('alt_input').value = parseInt(c_v = document.getElementById('alt_input').value)+1
+  } else {
+    alerting_on_leave = false;
+  }
+});
+</script>
+{%endif%}
 <script>
 var modal = document.getElementById("myModal");
 var btn = document.getElementById("myBtn");
@@ -200,6 +215,28 @@ window.onclick = function(event) {
     modal.style.display = "none";
   }
 }
+{%if whitelisted==False%}
+warn_on_leave=true;
+alerting_on_leave = false;
+window.onbeforeunload = function() {
+  if (warn_on_leave){
+    alerting_on_leave = true;
+    return 'Do you really want to leave this page?';
+  }
+};
+{%endif%}
 </script>
+<style media="screen">
+  .overlay_window {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: white;
+    z-index: 99;
+  }
+</style>
+<div id='overlay_window' class='overlay_window' hidden=true></div>
   </body>
 </html>
