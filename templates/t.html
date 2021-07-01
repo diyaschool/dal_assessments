@@ -186,9 +186,8 @@ $(window).on('load', function() { // makes sure the whole site is loaded
 <script>
 $(window).blur(function() {
   if (alerting_on_leave==false){
-    document.getElementById('overlay_window').hidden = false
-    alert("Please do not switch tabs!")
-    document.getElementById('overlay_window').hidden = true
+    // document.getElementById('overlay_window').hidden = false
+    // document.getElementById('overlay_window').hidden = true
     document.getElementById('alt_input').value = parseInt(c_v = document.getElementById('alt_input').value)+1
   } else {
     alerting_on_leave = false;
