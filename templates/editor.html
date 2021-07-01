@@ -307,20 +307,46 @@ function apply_changes(){
     }
   }, error: function(error){alert("Error, please check console!");console.log("Error:");console.log(error);}});
 }
-
 </script>
 <center>
   <div style='width: 100%; position: fixed; background-color: black; padding: 10px; top: 0px; left:0px; opacity: 1; height: 80px;'>
-    <span class="material-icons noselect" style='color: white; position:absolute; left: 15px; top: 23px; font-size: 30px; cursor: pointer' onclick='window.history.back()'>arrow_back</span>
-    <!-- <span class="material-icons-outlined noselect" id='sync_button' onclick='refresh_data()' style='color:white; font-size: 30px; margin-left: 10px;cursor:pointer; position:absolute; left: 50px; top: 23px;'>sync</span> -->
+    <span class="material-icons noselect" style='color: white; position:absolute; left: 15px; top: 23px; font-size: 30px; cursor: pointer' onclick='window.location.href = "/t/{{code}}/edit"'>arrow_back</span>
     <a style='color: white; font-size: 40px; left: 47%; text-decoration: none' href='/'>DAL Assessments</a>
     <text style='color: white; position: absolute; right: 50px; top: 10px; font-size: 20px'>Hello {{name}}</text>
     <text style='color: white; position: absolute; right: 50px; top: 35px'>Logged in as {{username}}</text>
   </div>
 </center>
 <div style='width: 100%; position:relative; background-color: black; padding: 10px; top: 80px; left:0px;height: 80px; width: 100%;'>
-<span class="material-icons-outlined noselect" id='sync_button' onclick='refresh_data()' style='color:white; font-size: 35px; margin-left: 10px;cursor:pointer;'>sync</span>
-<button type="button" data-toggle="modal" data-target="#apply_changes_modal" class='button' style='position:relative; top:-10px; margin-left: 50px; height: 50px;'><span class="material-icons" style='position: relative; top: 3px; margin-right: 10px;'>done</span>Apply Changes</button>
+<span class="material-icons-outlined noselect" id='sync_button' onclick='refresh_data()' style='color:white; font-size: 35px; margin-left: 10px;cursor:pointer; position:relative; top:5px;'>sync</span>
+<input type="text" placeholder="Test Title" style='margin-left: 30px;width: 200px; height: 35px;position:relative; top:-5px;'>
+<input type="text" placeholder="Subject Name" style='margin-left: 30px;width: 200px; height: 35px;position:relative; top:-5px;'>
+<input type="text" placeholder="Student Tags - 5a,7c,9a" style='margin-left: 30px;width: 200px; height: 35px;position:relative; top:-5px;' pattern="[a-zA-Z0-9]{0,5}" id="student_tags_input">
+<input type="text" style='margin-left: 30px;width: 50px; height: 35px;position:relative; top:-5px;' id='total_number_input' placeholder="0">
+<script>
+function setInputFilter(textbox, inputFilter) {
+  ["input", "keydown", "keyup", "mousedown", "mouseup", "select", "contextmenu", "drop"].forEach(function(event) {
+    textbox.addEventListener(event, function() {
+      if (inputFilter(this.value)) {
+        this.oldValue = this.value;
+        this.oldSelectionStart = this.selectionStart;
+        this.oldSelectionEnd = this.selectionEnd;
+      } else if (this.hasOwnProperty("oldValue")) {
+        this.value = this.oldValue;
+        this.setSelectionRange(this.oldSelectionStart, this.oldSelectionEnd);
+      } else {
+        this.value = "";
+      }
+    });
+  });
+}
+setInputFilter(document.getElementById("total_number_input"), function(value) {
+  return /^\d*\.?\d*$/.test(value);
+});
+setInputFilter(document.getElementById("student_tags_input"), function(value) {
+  return /^[a-zA-Z0-9,]*$/.test(value);
+});
+</script>
+<button type="button" data-toggle="modal" data-target="#apply_changes_modal" class='button' style='position:relative; top:-10px; margin-left: 50px; height: 40px;'><span class="material-icons" style='position: relative; top: 3px; margin-right: 10px;'>done</span>Apply Changes</button>
 </div>
 
 <!-- Modal -->
