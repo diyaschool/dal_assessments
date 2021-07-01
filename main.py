@@ -1173,7 +1173,8 @@ def login():
         else:
             return flask.render_template('mobile/login.html', error=error, username='')
     elif flask.request.method == 'POST':
-        form_data = flask.request.form
+        form_data = flask.request.form.copy()
+        form_data['username'] = form_data['username'].lower()
         try:
             with open('../data/user_metadata/'+form_data['username'].lower()) as f:
                 fdata = f.read()
@@ -1473,7 +1474,6 @@ def test_analytics_download(code, mode):
         # return flask.redirect('/t/'+code+'/analytics/')
         return 'https://docs.google.com/spreadsheets/d/'+sheet_id
 
-
 @app.route('/t/<code>/analytics/<username>/')
 def test_analytics_user(code, username):
     auserdata = get_user_data(username)
@@ -1483,13 +1483,13 @@ def test_analytics_user(code, username):
             data = parse_dict(f.read())
     except:
         return flask.render_template('404.html'), 404
-    if data['owner'] != flask.session['username']:
-        if username != flask.session['username']:
-            if check_sharing_perms(data, flask.session['username'])['individual-analytics'] != True:
-                if 'teacher' in user_data['tags']:
-                    return flask.render_template('401.html'), 401
-                else:
-                    return flask.redirect('/t/'+code)
+    if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags'] or check_sharing_perms(data, flask.session['username'])['overview-analytics'] == True or username == flask.session['username']:
+        pass
+    else:
+        if 'teacher' in user_data['tags']:
+            return flask.render_template('401.html'), 401
+        else:
+            return flask.redirect('/t/'+code)
     with open('../data/test_data/'+code+'/config.json') as f:
         test_data = f.read()
     try:
@@ -1737,6 +1737,82 @@ def test_edit_editor(code):
     return flask.render_template('editor.html', code=code, data=data, test_data=test_data, sheet_id=sheet_id, title=title, username=flask.session['username'], name=user_data['name'])
 
 #################### API Endpoints ####################
+
+@app.route('/t/<code>/edit/api/title', methods=['GET', 'POST'])
+def t_edit_api_title(code):
+    user_data = get_user_data(flask.session['username'])
+    try:
+        with open('../data/test_metadata/'+code+'.json') as f:
+            data = parse_dict(f.read())
+    except:
+        return flask.render_template('404.html'), 404
+    if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags'] or check_sharing_perms(data, flask.session['username'])['edit'] == True:
+        pass
+    else:
+        return flask.redirect('/t/'+code)
+    with open('../data/test_data/'+code+'/config.json') as f:
+        test_data = parse_dict(f.read())
+    if flask.request.method == 'GET':
+        return test_data['test_name']
+    elif flask.request.method == 'POST':
+        req_data = flask.request.json()
+        test_data['test_name'] = req_data['title']
+        with open('../data/test_data/'+code+'/config.json', 'w') as f:
+            f.write(json.dumps(test_data))
+        return 'ok'
+
+@app.route('/t/<code>/edit/api/apply_changes', methods=['POST'])
+def t_edit_api_apply_changes(code):
+    user_data = get_user_data(flask.session['username'])
+    try:
+        with open('../data/test_metadata/'+code+'.json') as f:
+            data = parse_dict(f.read())
+    except:
+        return flask.render_template('404.html'), 404
+    if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags'] or check_sharing_perms(data, flask.session['username'])['edit'] == True:
+        pass
+    else:
+        return flask.redirect('/t/'+code)
+    with open('../data/test_data/'+code+'/config.json') as f:
+        test_data = parse_dict(f.read())
+    try:
+        with open('../data/t_editor_data/'+code+'.json') as f:
+            editor_data_raw = parse_dict(f.read())
+        editor_data = {"easy": [], "medium": [], "hard": []}
+        for div in editor_data_raw:
+            question = editor_data_raw[div]
+            if question['difficulty'] == 'mid':
+                question['difficulty'] = 'medium'
+            for i, option in enumerate(question['options']):
+                question['options'][i] = option.strip()
+            editor_data[question['difficulty']].append({'question': question['question'].strip(), 'answers': question['options'], 'correct_answer_index': question['c_a_i']})
+        if len(editor_data['easy']) == 0:
+            return 'Missing 1 mark questions'
+        if len(editor_data['medium']) == 0:
+            return 'Missing 3 mark questions'
+        if len(editor_data['hard']) == 0:
+            return 'Missing 5 mark questions'
+        for q in editor_data['easy']:
+            if q['question'] == '':
+                return 'Missing question text in a 1 mark question'
+            for o in q['answers']:
+                if o == '':
+                    return 'Missing option text in a 1 mark question'
+        for q in editor_data['medium']:
+            if q['question'] == '':
+                return 'Missing question text in a 3 mark question'
+            for o in q['answers']:
+                if o == '':
+                    return 'Missing option text in a 3 mark question'
+        for q in editor_data['hard']:
+            if q['question'] == '':
+                return 'Missing question text in a 5 mark question'
+            for o in q['answers']:
+                if o == '':
+                    return 'Missing option text in a 5 mark question'
+        return 'ok'
+    except FileNotFoundError:
+        return "Missing questions. Add few questions and try again."
 
 @app.route('/t/<code>/edit/editor/add_que', methods=['POST'])
 def test_editor_add_que(code):
