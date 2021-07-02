@@ -850,7 +850,7 @@ def validate_test_data_raw(test_data):
                     return {"success": False}
         return {"success": True}
     except KeyError:
-        pass
+        return {"success": False}
 
 #################### Reqeust Handlers ####################
 
