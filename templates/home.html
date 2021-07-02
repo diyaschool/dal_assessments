@@ -136,7 +136,7 @@
     </div></center><br>
     {%if created_tests_len != 0%}
       {%for test in created_tests%}
-      <a href='/t/{{test['id']}}/edit/' style='text-decoration: none;'>
+      <a href='/t/{{test['id']}}/edit/editor/' style='text-decoration: none;'>
         <div class="box">
           <br>
           <text style='font-size: 20px;'><b>{{test['name']}}</b></text><br>
@@ -149,24 +149,6 @@
     <div style="text-align: center; width: 850px; padding-top:20px"><p style='font-size: 20px'>You have not created any tests yet...</p></div>
     {%endif%}
   <br>
-</div>
-<div>
-  <div  class="wrap">
-    <center>
-    <div class='noselect' style='border: 5px solid gray; border-style: dotted; border-radius: 10px; width: 800px; height: 80px; cursor: pointer; position: relative; left: 25px; top: -15px' onclick='window.location.href = "/new_test"'>
-      <text style='color: gray; font-size: 30px; position:relative; top: 13px; font-family: sans-serif;'>Create Test</text>
-    </div></center><br>
-    {%for test in created_tests%}
-    <a href='/t/{{test['id']}}/edit/editor/' style='text-decoration: none;'>
-      <div class="box">
-        <br>
-        <text style='font-size: 20px;'>{{test['name']}}</text><br>
-        <text style='font-size: 17px;'>Subject: {{test['subject']}}</text><br>
-        <text style='font-size: 16px;'>Responses: {{test['responses_count']}}</text>
-      </div>
-    </a>
-    {%endfor%}
-  </div><br>
 </div>
 </div>
 </div>
