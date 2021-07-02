@@ -788,7 +788,7 @@ def get_current_tests_list(username):
         temp['id'] = test
         temp['name'] = fdata['test_name']
         temp['subject'] = fdata['subject']
-        temp['total_questions'] = len(fdata['questions']['easy'])+len(fdata['questions']['medium'])+len(fdata['questions']['hard'])
+        temp['total_questions'] = fdata['question_count']
         test_data.append(temp)
     return test_data
 
