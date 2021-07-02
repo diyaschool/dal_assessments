@@ -357,20 +357,21 @@ function load_metadata(){
     document.getElementById('subject_input').value = data['subject']
     document.getElementById('student_tags_input').value = data['tags']
     document.getElementById('total_questions_input').value = data['total_questions']
+    document.getElementById("checkbox").checked = data['visibility']
   }, error: function(error){alert("Error, please check console!");console.log("Error:");console.log(error);}});
 }
 load_metadata()
 </script>
 <center>
   <div style='width: 100%; position: fixed; background-color: black; padding: 10px; top: 0px; left:0px; opacity: 1; height: 80px;'>
-    <span class="material-icons noselect" style='color: white; position:absolute; left: 15px; top: 23px; font-size: 30px; cursor: pointer' onclick='window.location.href = "/t/{{code}}/edit"'>arrow_back</span>
+    <!-- <span class="material-icons noselect" style='color: white; position:absolute; left: 15px; top: 23px; font-size: 30px; cursor: pointer' onclick='window.location.href = "/t/{{code}}/edit"'>arrow_back</span> -->
     <a style='color: white; font-size: 40px; left: 47%; text-decoration: none' href='/'>DAL Assessments</a>
     <text style='color: white; position: absolute; right: 50px; top: 10px; font-size: 20px'>Hello {{name}}</text>
     <text style='color: white; position: absolute; right: 50px; top: 35px'>Logged in as {{username}}</text>
   </div>
 </center>
 <div style='width: 100%; position:relative; background-color: black; padding: 10px; top: 80px; left:0px;height: 80px; width: 100%;'>
-<span class="material-icons-outlined noselect" id='sync_button' onclick='refresh_data()' style='color:white; font-size: 35px; margin-left: 10px;cursor:pointer; position:relative; top:5px;'>sync</span>
+<span class="material-icons-outlined noselect" id='sync_button' onclick='refresh_data(); load_metadata()' style='color:white; font-size: 35px; margin-left: 10px;cursor:pointer; position:relative; top:5px;'>sync</span>
 <input type="text" placeholder="Test Title" style='margin-left: 30px;width: 200px; height: 35px;position:relative; top:-5px;' onchange='update_title()' id='title_input'>
 <input type="text" placeholder="Subject Name" style='margin-left: 30px;width: 200px; height: 35px;position:relative; top:-5px;' onchange='update_subject()' id='subject_input'>
 <input type="text" placeholder="Student Tags - 5a,7c,9a" style='margin-left: 30px;width: 200px; height: 35px;position:relative; top:-5px;' pattern="[a-zA-Z0-9]{0,5}" id="student_tags_input" onchange='update_tags()'>
@@ -399,24 +400,54 @@ setInputFilter(document.getElementById("student_tags_input"), function(value) {
   return /^[a-zA-Z0-9,]*$/.test(value);
 });
 </script>
-<button type="button" data-toggle="modal" data-target="#apply_changes_modal" class='button' style='position:relative; top:-10px; margin-left: 50px; height: 40px;'><span class="material-icons" style='position: relative; top: 3px; margin-right: 10px;'>done</span>Apply Changes</button>
+<button type="button" data-toggle="modal" data-target="#publish_modal" class='button' style='position:relative; top:-10px; margin-left: 50px; height: 40px;'><span class="material-icons" style='position: relative; top: 3px; margin-right: 10px;'>publish</span>Publish</button>
 </div>
 
-<div class="modal fade" id="apply_changes_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="publish_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Apply Changes</h5>
+        <h5 class="modal-title" id="exampleModalLabel">Publish Changes</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        Are you sure you want to apply your changes. Doing so can cause disruption in any ongoing tests.
+        Publishing the test will make the test accessible to anyone belonging the groups specified.<br><br>
+        <input type="checkbox" value="True" id='visibility_checkbox'><label for="visibility_checkbox" style="margin-left: 10px;" checked>Visible to students?</label>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" onclick="apply_changes()" data-dismiss="modal">Apply changes</button>
+        <button type="button" class="btn btn-primary" onclick="apply_changes()" data-dismiss="modal">Confirm Publish</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade bd-example-modal-lg" id="published_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLongTitle">Publish Test</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <script>
+        function copy_to_clipboard() {
+          var copyText = document.getElementById("view_url");
+          copyText.select();
+          copyText.setSelectionRange(0, 99999)
+          document.execCommand("copy");
+          snackbar('Copied to clipboard')
+        }
+        </script>
+        <input type="text" hidden=true readonly value='{{url_root()}}t/{{code}}/' style='border: 2px black solid; border-radius 10px; width: 200px' id='view_url'>&nbsp;
+        <button onclick="copy_to_clipboard()" class='button'>Copy Link&nbsp;<span class="material-icons" style="position:relative; top: 5px; font-size: 25px">link</span></button><br>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
       </div>
     </div>
   </div>
