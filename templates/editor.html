@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js" ></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined">
@@ -295,51 +298,198 @@ function sync_button_problem(sync_node_id="sync_button"){
   button.classList.remove("spin_node");
   button.innerHTML = "sync_problem"
 }
+function apply_changes(){
+  $.ajax({url: "/t/{{code}}/edit/api/apply_changes", type: "POST", success: function(data){
+    if (data=='ok'){
+      snackbar("Successfully applied changes!")
+      $('#published_modal').modal('show');
+    } else {
+      alert("Error: "+data)
+    }
+  }, error: function(error){alert("Error, please check console!");console.log("Error:");console.log(error);}});
+}
+function update_title(){
+  input = document.getElementById('title_input')
+  if (input.value.length == 0) {
+    alert("Please enter a title")
+    return
+  }
+  $.ajax({url: "/t/{{code}}/edit/api/title", type: "POST", data: JSON.stringify({"title": input.value}), dataType: "json", processData: false, 'contentType': 'application/json', success: function(data){
+    snackbar("Updated title")
+  }, error: function(error){alert("Error, please check console!");console.log("Error:");console.log(error);}});
+}
+function update_subject(){
+  input = document.getElementById('subject_input')
+  if (input.value.length == 0) {
+    alert("Please enter a subject name")
+    return
+  }
+  $.ajax({url: "/t/{{code}}/edit/api/subject", type: "POST", data: JSON.stringify({"subject": input.value}), dataType: "json", processData: false, 'contentType': 'application/json', success: function(data){
+    snackbar("Updated subject name")
+  }, error: function(error){alert("Error, please check console!");console.log("Error:");console.log(error);}});
+}
+function update_tags(){
+  input = document.getElementById('student_tags_input')
+  if (input.value.length == 0) {
+    alert("Please enter comma-separated tags")
+    return
+  }
+  $.ajax({url: "/t/{{code}}/edit/api/tags", type: "POST", data: JSON.stringify({"tags": input.value}), dataType: "json", processData: false, 'contentType': 'application/json', success: function(data){
+    snackbar("Updated tags")
+  }, error: function(error){alert("Error, please check console!");console.log("Error:");console.log(error);}});
+}
+function update_total_questions(){
+  input = document.getElementById('total_questions_input')
+  if (input.value.length == 0) {
+    alert("Please enter a number")
+    return
+  }
+  $.ajax({url: "/t/{{code}}/edit/api/total_questions", type: "POST", data: JSON.stringify({"total_questions": input.value}), dataType: "json", processData: false, 'contentType': 'application/json', success: function(data){
+    if (data['success'] == true){
+      snackbar("Updated question limit")
+    } else {
+      alert(data['message'])
+    }
+  }, error: function(error){alert("Error, please check console!");console.log("Error:");console.log(error);}});
+}
+function update_visibility(){
+  input = document.getElementById('visibility_checkbox')
+  $.ajax({url: "/t/{{code}}/edit/api/visibility", type: "POST", data: JSON.stringify({"visibility": input.checked}), dataType: "json", processData: false, 'contentType': 'application/json', success: function(data){
+
+  }, error: function(error){alert("Error, please check console!");console.log("Error:");console.log(error);}});
+}
+function load_metadata(){
+  $.ajax({url: "/t/{{code}}/edit/api/load_metadata", type: "GET", success: function(data){
+    document.getElementById('title_input').value = data['title']
+    document.getElementById('subject_input').value = data['subject']
+    document.getElementById('student_tags_input').value = data['tags']
+    document.getElementById('total_questions_input').value = data['total_questions']
+    document.getElementById("visibility_checkbox").checked = data['visibility']
+  }, error: function(error){alert("Error, please check console!");console.log("Error:");console.log(error);}});
+}
+load_metadata()
 </script>
 <center>
   <div style='width: 100%; position: fixed; background-color: black; padding: 10px; top: 0px; left:0px; opacity: 1; height: 80px;'>
-    <span class="material-icons noselect" style='color: white; position:absolute; left: 15px; top: 23px; font-size: 30px; cursor: pointer' onclick='window.history.back()'>arrow_back</span>
-    <!-- <span class="material-icons-outlined noselect" id='sync_button' onclick='refresh_data()' style='color:white; font-size: 30px; margin-left: 10px;cursor:pointer; position:absolute; left: 50px; top: 23px;'>sync</span> -->
+    <!-- <span class="material-icons noselect" style='color: white; position:absolute; left: 15px; top: 23px; font-size: 30px; cursor: pointer' onclick='window.location.href = "/t/{{code}}/edit"'>arrow_back</span> -->
     <a style='color: white; font-size: 40px; left: 47%; text-decoration: none' href='/'>DAL Assessments</a>
     <text style='color: white; position: absolute; right: 50px; top: 10px; font-size: 20px'>Hello {{name}}</text>
     <text style='color: white; position: absolute; right: 50px; top: 35px'>Logged in as {{username}}</text>
   </div>
 </center>
 <div style='width: 100%; position:relative; background-color: black; padding: 10px; top: 80px; left:0px;height: 80px; width: 100%;'>
-<span class="material-icons-outlined noselect" id='sync_button' onclick='refresh_data()' style='color:white; font-size: 35px; margin-left: 10px;cursor:pointer;'>sync</span>
+<span class="material-icons-outlined noselect" id='sync_button' onclick='refresh_data(); load_metadata()' style='color:white; font-size: 35px; margin-left: 10px;cursor:pointer; position:relative; top:5px;'>sync</span>
+<input type="text" placeholder="Test Title" style='margin-left: 20px;width: 200px; height: 35px;position:relative; top:-5px;' onchange='update_title()' id='title_input'>
+<input type="text" placeholder="Subject Name" style='margin-left: 20px;width: 200px; height: 35px;position:relative; top:-5px;' onchange='update_subject()' id='subject_input'>
+<input type="text" placeholder="Student Tags - 5a,7c,9a" style='margin-left: 20px;width: 200px; height: 35px;position:relative; top:-5px;' pattern="[a-zA-Z0-9]{0,5}" id="student_tags_input" onchange='update_tags()'>
+<input type="text" style='margin-left: 20px;width: 50px; height: 35px;position:relative; top:-5px;' id='total_questions_input' placeholder="0" onchange='update_total_questions()'>
+<script>
+function setInputFilter(textbox, inputFilter) {
+  ["input", "keydown", "keyup", "mousedown", "mouseup", "select", "contextmenu", "drop"].forEach(function(event) {
+    textbox.addEventListener(event, function() {
+      if (inputFilter(this.value)) {
+        this.oldValue = this.value;
+        this.oldSelectionStart = this.selectionStart;
+        this.oldSelectionEnd = this.selectionEnd;
+      } else if (this.hasOwnProperty("oldValue")) {
+        this.value = this.oldValue;
+        this.setSelectionRange(this.oldSelectionStart, this.oldSelectionEnd);
+      } else {
+        this.value = "";
+      }
+    });
+  });
+}
+setInputFilter(document.getElementById("total_questions_input"), function(value) {
+  return /^\d*\.?\d*$/.test(value);
+});
+setInputFilter(document.getElementById("student_tags_input"), function(value) {
+  return /^[a-zA-Z0-9,]*$/.test(value);
+});
+</script>
+<button type="button" data-toggle="modal" data-target="#publish_modal" class='button' style='position:relative; top:-10px; margin-left: 30px; height: 40px;'><span class="material-icons" style='position: relative; top: 3px; margin-right: 10px;'>publish</span>Publish</button>
+<button type="button" class='button' style='position:relative; top:-10px; margin-left: 30px; height: 40px;' onclick='window.location.href = "/t/{{code}}/analytics/"'><span class="material-icons" style='position: relative; top: 3px; margin-right: 10px;'>assessment</span>Analytics</button>
+</div>
+
+<div class="modal fade" id="publish_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Publish Changes</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        Publishing the test will make the test accessible to anyone belonging the groups specified.<br><br>
+        <input type="checkbox" value="True" onchange="update_visibility()" id='visibility_checkbox'><label for="visibility_checkbox" style="margin-left: 10px;" checked>Visible to students?</label>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" onclick="apply_changes()" data-dismiss="modal">Confirm Publish</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="published_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLongTitle">Share Test</h5>
+      </div>
+      <div class="modal-body">
+        <script>
+        function copy_to_clipboard() {
+          var copyText = document.getElementById("view_url");
+          copyText.select();
+          copyText.setSelectionRange(0, 99999)
+          document.execCommand("copy");
+          snackbar('Copied to clipboard')
+        }
+        </script>
+        <input type="text" hidden=true readonly value='{{url_root()}}t/{{code}}/' style='border: 2px black solid; border-radius 10px; width: 200px' id='view_url'>&nbsp;
+        <button onclick="copy_to_clipboard()" class='button'><span class="material-icons" style="position:relative; top: 5px; font-size: 25px">link</span>&nbsp;Copy Link</button><br><br>
+        Share the copied link to the students.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="$('#published_modal').modal('hide');">Close</button>
+        <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
+      </div>
+    </div>
+  </div>
 </div>
 <div class="row" style="height: 100%; margin-top: 80px;">
   <div class="col-lg-4 section column" id='easy_div_main'>
     <div style='margin-left: 20px; margin-top: 20px; margin-right: 20px;'>
       <div style="border-bottom: 4px snow solid; margin-bottom: 20px;">
         <center>
-          <text style='font-size: 30px;'>1 Mark Questions</text><br><br>
+          <text style='font-size: 30px;'>Easy Questions (1M)</text><br><br>
         </center>
       </div>
       <div id='easy_div' class='quesions_div'></div>
-      <button type="button" onclick="add_easy_temp()" class="button"><span class="material-icons" style='position:relative; top: 3px;'>add</span> Add Question</button>
+      <button type="button" onclick="add_easy_temp()" class="button" style="margin-bottom: 200px;"><span class="material-icons" style='position:relative; top: 3px;'>add</span> Add Question</button>
     </div>
   </div>
   <div class="col-lg-4 section column" id='mid_div_main'>
     <div style='margin-left: 20px; margin-top: 20px; margin-right: 20px;'>
       <div style="border-bottom: 4px snow solid; margin-bottom: 20px;">
         <center>
-          <text style='font-size: 30px;'>3 Marks Questions</text><br><br>
+          <text style='font-size: 30px;'>Medium Questions (3M)</text><br><br>
         </center>
       </div>
       <div id='mid_div' class='quesions_div'></div>
-      <button type="button" onclick="add_mid_temp()" class="button"><span class="material-icons" style='position:relative; top: 3px;'>add</span> Add Question</button>
+      <button type="button" onclick="add_mid_temp()" class="button" style="margin-bottom: 200px;"><span class="material-icons" style='position:relative; top: 3px;'>add</span> Add Question</button>
     </div>
   </div>
   <div class="col-lg-4 section column" id='hard_div_main'>
     <div style='margin-left: 20px; margin-top: 20px; margin-right: 20px;'>
       <div style="border-bottom: 4px snow solid; margin-bottom: 20px;">
         <center>
-          <text style='font-size: 30px;'>5 Marks Questions</text><br><br>
+          <text style='font-size: 30px;'>Hard Questions (5M)</text><br><br>
         </center>
       </div>
       <div id='hard_div' class='quesions_div'></div>
-      <button type="button" onclick="add_hard_temp()" class="button"><span class="material-icons" style='position:relative; top: 3px;'>add</span> Add Question</button>
+      <button type="button" onclick="add_hard_temp()" class="button" style="margin-bottom: 200px;"><span class="material-icons" style='position:relative; top: 3px;'>add</span> Add Question</button>
     </div>
   </div>
 </div>
