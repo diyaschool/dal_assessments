@@ -428,7 +428,6 @@ def convert(sheet, teacher=False):
             output['question_count'] = q_n
         return output
     except Exception as e:
-        print(e)
         return "ERROR"
 
 def create_new_test_sheet(owner):
@@ -963,7 +962,6 @@ def t_verify(code):
         flask.session['t']['score'] = str(parse_dict(flask.session['t']['score'])+ans_score)
     else:
         ans_score = 0
-    print(data['alt'])
     flask.session['t']['verified'] = True
     time_taken = time.time()-flask.session['t']['time']
     update_score(flask.session['username'], code, flask.session['t']['prev_q_res'], flask.session['t']['difficulty'], flask.session['t']['q_id'], parse_dict(data['answer']), flask.session['t']['score'], ans_score, time_taken)
@@ -1810,7 +1808,6 @@ def t_edit_api_load_metadata(code):
         return flask.redirect('/t/'+code)
     with open('../data/test_data/'+code+'/config.json') as f:
         test_data = parse_dict(f.read())
-    print(test_data)
     visibility = test_data.get('visibility')
     if visibility == None:
         visibility = True
