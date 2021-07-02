@@ -8,6 +8,7 @@
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" crossorigin="anonymous"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script>
     window.setTimeout(function () {
       window.location.reload();
@@ -71,7 +72,14 @@
             </div>
             {%endif%}<br><br>
         </div>
-{% include "header.html" %}
+        <center>
+          <div style='width: 100%; position: fixed; background-color: black; padding: 10px; top: 0px; left:0px; opacity: 1'>
+            <span class="material-icons noselect" style='color: white; position:absolute; left: 15px; top: 23px; font-size: 30px; cursor: pointer' onclick='window.location.href = "/t/{{code}}/edit/editor/"'>arrow_back</span>
+            <a style='color: white; font-size: 40px; left: 47%; text-decoration: none' href='/'>DAL Assessments</a>
+            <text style='color: white; position: absolute; right: 50px; top: 10px; font-size: 20px'>Hello {{name}}</text>
+            <text style='color: white; position: absolute; right: 50px; top: 35px'>Logged in as {{username}}</text>
+          </div>
+        </center>
     </center>
 {% include "footer.html" %}
     <script>
