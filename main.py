@@ -1894,6 +1894,34 @@ def t_edit_api_tags(code):
             tag = tag.strip()
             if tag != "":
                 tags.append(tag)
+        try:
+            test_data['questions']
+        except KeyError:
+            return {"success": False}
+        if len(test_data['questions']['easy']) == 0:
+            return {"success": False}
+        if len(test_data['questions']['medium']) == 0:
+            return {"success": False}
+        if len(test_data['questions']['hard']) == 0:
+            return {"success": False}
+        for q in test_data['questions']['easy']:
+            if q['question'] == '':
+                return {"success": False}
+            for o in q['answers']:
+                if o == '':
+                    return {"success": False}
+        for q in test_data['questions']['medium']:
+            if q['question'] == '':
+                return {"success": False}
+            for o in q['answers']:
+                if o == '':
+                    return {"success": False}
+        for q in test_data['questions']['hard']:
+            if q['question'] == '':
+                return {"success": False}
+            for o in q['answers']:
+                if o == '':
+                    return {"success": False}
         if test_data.get('visible') == True or test_data.get('visible') == None:
             if 'teacher' in user_data['tags'] or 'team' in user_data['tags'] or 'admin' in user_data['tags']:
                 removal_tag_records = []
