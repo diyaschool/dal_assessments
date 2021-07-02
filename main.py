@@ -1497,8 +1497,9 @@ def test_analytics_user(code, username):
             data = parse_dict(f.read())
     except:
         return flask.render_template('404.html'), 404
+    admin = False
     if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags'] or check_sharing_perms(data, flask.session['username'])['overview-analytics'] == True or username == flask.session['username']:
-        pass
+        admin = True
     else:
         if 'teacher' in user_data['tags']:
             return flask.render_template('401.html'), 401
@@ -1539,9 +1540,9 @@ def test_analytics_user(code, username):
         if agent in flask.request.headers['User-Agent']:
             desktop = False
     if desktop:
-        return flask.render_template('test_analytics_username.html', test_name=title, username=flask.session['username'], name=user_data['name'], responses=response_data, response_count=len(response_data), code=code, auserdata=auserdata, score=score, fdata=fdata, attempts_bool=attempts)
+        return flask.render_template('test_analytics_username.html', test_name=title, username=flask.session['username'], name=user_data['name'], responses=response_data, response_count=len(response_data), code=code, auserdata=auserdata, score=score, fdata=fdata, attempts_bool=attempts, admin=admin)
     else:
-        return flask.render_template('mobile/test_analytics_username.html', test_name=title, username=flask.session['username'], name=user_data['name'], responses=response_data, response_count=len(response_data), code=code, auserdata=auserdata, score=score, fdata=fdata, attempts_bool=attempts)
+        return flask.render_template('mobile/test_analytics_username.html', test_name=title, username=flask.session['username'], name=user_data['name'], responses=response_data, response_count=len(response_data), code=code, auserdata=auserdata, score=score, fdata=fdata, attempts_bool=attempts, admin=admin)
 
 @app.route('/change_password', methods=['GET', 'POST'])
 def change_password():
@@ -1790,7 +1791,7 @@ def t_edit_api_visibility(code):
         return test_data['visibility']
     elif flask.request.method == 'POST':
         req_data = flask.request.json
-        test_data['visibility'] = req_data['visibility'].strip()
+        test_data['visibility'] = req_data['visibility']
         with open('../data/test_data/'+code+'/config.json', 'w') as f:
             f.write(json.dumps(test_data))
         return {'success': True}
