@@ -447,7 +447,7 @@ def create_new_test_sheet(owner):
     os.mkdir('../data/test_data/'+test_id)
     os.mkdir('../data/test_data/'+test_id+'/files')
     with open('../data/test_data/'+test_id+'/config.json', 'w') as f:
-        f.write(json.dumps({"test_name": "", "subject": "", "tags": [], "question_count": 0}))
+        f.write(json.dumps({"test_name": "", "subject": "", "tags": [], "question_count": 0, "visibility": True}))
     with open('../data/test_metadata/'+test_id+'.json', 'w') as f:
         f.write(json.dumps({"owner": owner, "time": c_time, "date": c_date, "last_time": c_time, "last_date": c_date}))
     with open('../data/user_data/'+owner+'/created_tests/'+test_id+'.json', 'w') as f:
@@ -869,6 +869,21 @@ def home():
     else:
         return flask.render_template('mobile/home.html', username=flask.session['username'], name=user_data['name'], created_tests=created_tests, created_tests_len=len(created_tests), current_tests=current_tests, current_tests_len=len(current_tests), completed_tests=completed_tests, completed_tests_len=len(completed_tests))
 
+@app.route('/home_beta')
+def home_beta():
+    desktop = True
+    for agent in mobile_agents:
+        if agent in flask.request.headers['User-Agent']:
+            desktop = False
+    user_data = get_user_data(flask.session['username'])
+    current_tests = get_current_tests_list(flask.session['username'])
+    completed_tests = get_completed_tests_list(flask.session['username'])
+    created_tests = get_created_tests_list(flask.session['username'])
+    if desktop:
+        return flask.render_template('home_beta.html', username=flask.session['username'], name=user_data['name'], created_tests=created_tests, created_tests_len=len(created_tests), current_tests=current_tests, current_tests_len=len(current_tests), completed_tests=completed_tests, completed_tests_len=len(completed_tests))
+    else:
+        return flask.render_template('mobile/home_beta.html', username=flask.session['username'], name=user_data['name'], created_tests=created_tests, created_tests_len=len(created_tests), current_tests=current_tests, current_tests_len=len(current_tests), completed_tests=completed_tests, completed_tests_len=len(completed_tests))
+
 @app.route('/logout')
 def logout():
     flask.session.pop('username')
@@ -1221,7 +1236,7 @@ def new_test():
         #     flask.session['settings_alert'] = 'Please link your Google account before creating a test'
         #     return flask.redirect('/settings')
         test_id = create_new_test_sheet(flask.session['username'])
-        return flask.redirect('/t/'+test_id+'/edit')
+        return flask.redirect('/t/'+test_id+'/edit/editor/')
 
 @app.route('/t/<code>/edit/delete/', methods=['GET'])
 def test_edit_delete(code):
@@ -1260,7 +1275,7 @@ def test_edit(code):
             test_data = {}
             test_data['tags'] = []
             title = 'Untitled'
-    sheet_id = data.get('sheet_id')
+    # sheet_id = data.get('sheet_id')
     if flask.request.method == 'GET':
         sync_arg = flask.request.args.get('sync')
         if sync_arg == '':
@@ -1751,7 +1766,34 @@ def t_edit_api_load_metadata(code):
         return flask.redirect('/t/'+code)
     with open('../data/test_data/'+code+'/config.json') as f:
         test_data = parse_dict(f.read())
-    return {"title": test_data['test_name'], "tags": ",".join(test_data['tags']), "subject": test_data['subject'], 'total_questions': test_data['question_count']}
+    print(test_data)
+    visibility = test_data.get('visibility')
+    if visibility == None:
+        visibility = True
+    return {"title": test_data['test_name'], "tags": ",".join(test_data['tags']), "subject": test_data['subject'], 'total_questions': test_data['question_count'], 'visibility': visibility}
+
+@app.route('/t/<code>/edit/api/visibility', methods=['GET', 'POST'])
+def t_edit_api_visibility(code):
+    user_data = get_user_data(flask.session['username'])
+    try:
+        with open('../data/test_metadata/'+code+'.json') as f:
+            data = parse_dict(f.read())
+    except FileNotFoundError:
+        return flask.render_template('404.html'), 404
+    if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags'] or check_sharing_perms(data, flask.session['username'])['edit'] == True:
+        pass
+    else:
+        return flask.redirect('/t/'+code)
+    with open('../data/test_data/'+code+'/config.json') as f:
+        test_data = parse_dict(f.read())
+    if flask.request.method == 'GET':
+        return test_data['visibility']
+    elif flask.request.method == 'POST':
+        req_data = flask.request.json
+        test_data['visibility'] = req_data['visibility'].strip()
+        with open('../data/test_data/'+code+'/config.json', 'w') as f:
+            f.write(json.dumps(test_data))
+        return {'success': True}
 
 @app.route('/t/<code>/edit/api/title', methods=['GET', 'POST'])
 def t_edit_api_title(code):
@@ -1771,6 +1813,34 @@ def t_edit_api_title(code):
         return test_data['test_name']
     elif flask.request.method == 'POST':
         req_data = flask.request.json
+        tags = []
+        removal_tag_records = []
+        for tag in test_data['tags']:
+            if tag not in tags:
+                removal_tag_records.append(tag)
+        for tag in removal_tag_records:
+            if tag.strip() == '':
+                continue
+            try:
+                with open('../data/global_test_records/'+tag) as f:
+                    fdata = parse_dict(f.read())
+                try:
+                    fdata.pop(code)
+                except KeyError:
+                    pass
+            except FileNotFoundError:
+                fdata = {}
+            with open('../data/global_test_records/'+tag, 'w') as f:
+                f.write(json.dumps(fdata))
+        for tag in tags:
+            try:
+                with open('../data/global_test_records/'+tag) as f:
+                    fdata = parse_dict(f.read())
+            except FileNotFoundError:
+                fdata = {}
+            fdata[code] = ''
+            with open('../data/global_test_records/'+tag, 'w') as f:
+                f.write(json.dumps(fdata))
         test_data['test_name'] = req_data['title'].strip()
         with open('../data/test_data/'+code+'/config.json', 'w') as f:
             f.write(json.dumps(test_data))
@@ -1823,6 +1893,35 @@ def t_edit_api_tags(code):
             tag = tag.strip()
             if tag != "":
                 tags.append(tag)
+        if test_data.get('visible') == True or test_data.get('visible') == None:
+            if 'teacher' in user_data['tags'] or 'team' in user_data['tags'] or 'admin' in user_data['tags']:
+                removal_tag_records = []
+                for tag in test_data['tags']:
+                    if tag not in tags:
+                        removal_tag_records.append(tag)
+                for tag in removal_tag_records:
+                    if tag.strip() == '':
+                        continue
+                    try:
+                        with open('../data/global_test_records/'+tag) as f:
+                            fdata = parse_dict(f.read())
+                        try:
+                            fdata.pop(code)
+                        except KeyError:
+                            pass
+                    except FileNotFoundError:
+                        fdata = {}
+                    with open('../data/global_test_records/'+tag, 'w') as f:
+                        f.write(json.dumps(fdata))
+                for tag in tags:
+                    try:
+                        with open('../data/global_test_records/'+tag) as f:
+                            fdata = parse_dict(f.read())
+                    except FileNotFoundError:
+                        fdata = {}
+                    fdata[code] = ''
+                    with open('../data/global_test_records/'+tag, 'w') as f:
+                        f.write(json.dumps(fdata))
         test_data['tags'] = tags
         with open('../data/test_data/'+code+'/config.json', 'w') as f:
             f.write(json.dumps(test_data))
@@ -1874,7 +1973,7 @@ def t_edit_api_apply_changes(code):
         with open('../data/test_data/'+code+'/config.json') as f:
             test_data = parse_dict(f.read())
     except SyntaxError:
-        test_data = {"test_name": "", "subject": "", "tags": [], "question_count": 0}
+        test_data = {"test_name": "", "subject": "", "tags": [], "question_count": 0, "visibility": True}
     try:
         with open('../data/t_editor_data/'+code+'.json') as f:
             editor_data_raw = parse_dict(f.read())
@@ -1922,6 +2021,35 @@ def t_edit_api_apply_changes(code):
         test_data['questions'] = editor_data
         with open('../data/test_data/'+code+'/config.json', 'w') as f:
             f.write(json.dumps(test_data))
+        if test_data.get('visible') == True or test_data.get('visible') == None:
+            if 'teacher' in user_data['tags'] or 'team' in user_data['tags'] or 'admin' in user_data['tags']:
+                with open('../data/test_metadata/'+code+'.json') as f:
+                    metadata = parse_dict(f.read())
+                with open('../data/test_metadata/'+code+'.json', 'w') as f:
+                    dt = curr_dt()
+                    c_time = str(dt.hour)+':'+str(dt.minute)+':'+str(dt.second)
+                    c_date = str(dt.year)+'-'+str(dt.month)+'-'+str(dt.day)
+                    metadata['last_time'] = c_time
+                    metadata['last_date'] = c_date
+                    f.write(json.dumps(metadata))
+                try:
+                    with open('../data/user_data/'+flask.session['username']+'/created_tests/'+code+'.json') as f:
+                        cr_fdata = parse_dict(f.read())
+                    try:
+                        with open('../data/response_data/'+code+'.json') as g:
+                            responses_count = len(parse_dict(g.read())['responses'])
+                    except FileNotFoundError:
+                        responses_count = 0
+                    with open('../data/user_data/'+flask.session['username']+'/created_tests/'+code+'.json', 'w') as f:
+                        cr_fdata['name'] = test_data['test_name']
+                        cr_fdata['subject'] = test_data['subject']
+                        cr_fdata['responses_count'] = responses_count
+                        cr_fdata['last_time'] = c_time
+                        cr_fdata['last_date'] = c_date
+                        f.write(json.dumps(cr_fdata))
+                except FileNotFoundError:
+                    with open('../data/user_data/'+flask.session['username']+'/created_tests/'+code+'.json', 'w') as f:
+                        f.write(json.dumps({"last_time": c_time, "last_date": c_date, "name": "Undefined", "subject": "Undefined", "responses_count": 0}))
         return 'ok'
     except FileNotFoundError:
         return "Missing questions. Add few questions and try again."
