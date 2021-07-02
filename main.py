@@ -799,14 +799,17 @@ def get_completed_tests_list(username):
         return []
     output = []
     for test in tests:
-        with open('../data/user_data/'+username+'/response_data/'+test) as f:
-            fdata = parse_dict(f.read())
-            temp = fdata.copy()
-        with open('../data/test_data/'+os.path.splitext(test)[0]+'/config.json') as f:
-            fdata = parse_dict(f.read())
-        temp['name'] = fdata['test_name']
-        temp['subject'] = fdata['subject']
-        output.append(temp)
+        try:
+            with open('../data/user_data/'+username+'/response_data/'+test) as f:
+                fdata = parse_dict(f.read())
+                temp = fdata.copy()
+            with open('../data/test_data/'+os.path.splitext(test)[0]+'/config.json') as f:
+                fdata = parse_dict(f.read())
+            temp['name'] = fdata['test_name']
+            temp['subject'] = fdata['subject']
+            output.append(temp)
+        except FileNotFoundError:
+            continue
     return output
 
 #################### Reqeust Handlers ####################
