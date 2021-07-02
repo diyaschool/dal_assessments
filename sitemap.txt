@@ -25,6 +25,13 @@ Any URL request on this server without logging in will be returned with a redire
 /gauthtoken                        - [PROCESSING] Google SSO
 /robots.txt                        - [TEXT] some random stuff
 /t/<code>/edit/editor/             - [HTML] editor.html
+/t/<code>/edit/api/load_metadata   - [API] loads metadata such as title
+/t/<code>/edit/api/visibility      - [API] view/modify visibility (teachers/admins only)
+/t/<code>/edit/api/title           - [API] view/modify title
+/t/<code>/edit/api/subject         - [API] view/modify subject
+/t/<code>/edit/api/tags            - [API] view/modify tags
+/t/<code>/edit/api/total_questions - [API] view/modify total_questions_count
+/t/<code>/edit/api/apply_changes   - [API] POST, converts editor_data to test config_file
 /t/<code>/edit/editor/add_que      - [API] adds a question to db
 /t/<code>/edit/editor/update_que   - [API] removes specific question from db
 /t/<code>/edit/editor/delete_que   - [API] update specific question in db
