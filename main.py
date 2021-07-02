@@ -812,6 +812,46 @@ def get_completed_tests_list(username):
             continue
     return output
 
+def editor_data_to_test_data(editor_data):
+    for div in editor_data_raw:
+        question = editor_data_raw[div]
+        if question['difficulty'] == 'mid':
+            question['difficulty'] = 'medium'
+        for i, option in enumerate(question['options']):
+            question['options'][i] = option.strip()
+        editor_data[question['difficulty']].append({'question': question['question'].strip(), 'answers': question['options'], 'correct_answer_index': question['c_a_i']})
+
+def validate_test_data_raw(test_data):
+    try:
+        test_data['questions']
+        if len(test_data['questions']['easy']) == 0:
+            return {"success": False}
+        if len(test_data['questions']['medium']) == 0:
+            return {"success": False}
+        if len(test_data['questions']['hard']) == 0:
+            return {"success": False}
+        for q in test_data['questions']['easy']:
+            if q['question'] == '':
+                return {"success": False}
+            for o in q['answers']:
+                if o == '':
+                    return {"success": False}
+        for q in test_data['questions']['medium']:
+            if q['question'] == '':
+                return {"success": False}
+            for o in q['answers']:
+                if o == '':
+                    return {"success": False}
+        for q in test_data['questions']['hard']:
+            if q['question'] == '':
+                return {"success": False}
+            for o in q['answers']:
+                if o == '':
+                    return {"success": False}
+        return {"success": True}
+    except KeyError:
+        pass
+
 #################### Reqeust Handlers ####################
 
 @app.before_request
@@ -1897,63 +1937,37 @@ def t_edit_api_tags(code):
             tag = tag.strip()
             if tag != "":
                 tags.append(tag)
-        try:
-            test_data['questions']
-        except KeyError:
-            return {"success": False}
-        if len(test_data['questions']['easy']) == 0:
-            return {"success": False}
-        if len(test_data['questions']['medium']) == 0:
-            return {"success": False}
-        if len(test_data['questions']['hard']) == 0:
-            return {"success": False}
-        for q in test_data['questions']['easy']:
-            if q['question'] == '':
-                return {"success": False}
-            for o in q['answers']:
-                if o == '':
-                    return {"success": False}
-        for q in test_data['questions']['medium']:
-            if q['question'] == '':
-                return {"success": False}
-            for o in q['answers']:
-                if o == '':
-                    return {"success": False}
-        for q in test_data['questions']['hard']:
-            if q['question'] == '':
-                return {"success": False}
-            for o in q['answers']:
-                if o == '':
-                    return {"success": False}
-        if test_data.get('visible') == True or test_data.get('visible') == None:
-            if 'teacher' in user_data['tags'] or 'team' in user_data['tags'] or 'admin' in user_data['tags']:
-                removal_tag_records = []
-                for tag in test_data['tags']:
-                    if tag not in tags:
-                        removal_tag_records.append(tag)
-                for tag in removal_tag_records:
-                    if tag.strip() == '':
-                        continue
-                    try:
-                        with open('../data/global_test_records/'+tag) as f:
-                            fdata = parse_dict(f.read())
+        validated_result = validate_test_data_raw(test_data)
+        if validated_result['success'] == True:
+            if test_data.get('visible') == True or test_data.get('visible') == None:
+                if 'teacher' in user_data['tags'] or 'team' in user_data['tags'] or 'admin' in user_data['tags']:
+                    removal_tag_records = []
+                    for tag in test_data['tags']:
+                        if tag not in tags:
+                            removal_tag_records.append(tag)
+                    for tag in removal_tag_records:
+                        if tag.strip() == '':
+                            continue
                         try:
-                            fdata.pop(code)
-                        except KeyError:
-                            pass
-                    except FileNotFoundError:
-                        fdata = {}
-                    with open('../data/global_test_records/'+tag, 'w') as f:
-                        f.write(json.dumps(fdata))
-                for tag in tags:
-                    try:
-                        with open('../data/global_test_records/'+tag) as f:
-                            fdata = parse_dict(f.read())
-                    except FileNotFoundError:
-                        fdata = {}
-                    fdata[code] = ''
-                    with open('../data/global_test_records/'+tag, 'w') as f:
-                        f.write(json.dumps(fdata))
+                            with open('../data/global_test_records/'+tag) as f:
+                                fdata = parse_dict(f.read())
+                            try:
+                                fdata.pop(code)
+                            except KeyError:
+                                pass
+                        except FileNotFoundError:
+                            fdata = {}
+                        with open('../data/global_test_records/'+tag, 'w') as f:
+                            f.write(json.dumps(fdata))
+                    for tag in tags:
+                        try:
+                            with open('../data/global_test_records/'+tag) as f:
+                                fdata = parse_dict(f.read())
+                        except FileNotFoundError:
+                            fdata = {}
+                        fdata[code] = ''
+                        with open('../data/global_test_records/'+tag, 'w') as f:
+                            f.write(json.dumps(fdata))
         test_data['tags'] = tags
         with open('../data/test_data/'+code+'/config.json', 'w') as f:
             f.write(json.dumps(test_data))
