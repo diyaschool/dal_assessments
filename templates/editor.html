@@ -447,7 +447,7 @@ setInputFilter(document.getElementById("student_tags_input"), function(value) {
           snackbar('Copied to clipboard')
         }
         </script>
-        <input type="text" hidden=true readonly value='{{url_root()}}t/{{code}}/' style='border: 2px black solid; border-radius 10px; width: 200px' id='view_url'>&nbsp;
+        <input type="text" readonly value='{{url_root()}}t/{{code}}/' style='border: 2px black solid; border-radius 10px; width: 200px' id='view_url'>&nbsp;
         <button onclick="copy_to_clipboard()" class='button'><span class="material-icons" style="position:relative; top: 5px; font-size: 25px">link</span>&nbsp;Copy Link</button><br><br>
         Share the copied link to the students.
       </div>
