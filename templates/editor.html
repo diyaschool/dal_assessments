@@ -307,6 +307,59 @@ function apply_changes(){
     }
   }, error: function(error){alert("Error, please check console!");console.log("Error:");console.log(error);}});
 }
+function update_title(){
+  input = document.getElementById('title_input')
+  if (input.value.length == 0) {
+    alert("Please enter a title")
+    return
+  }
+  $.ajax({url: "/t/{{code}}/edit/api/title", type: "POST", data: JSON.stringify({"title": input.value}), dataType: "json", processData: false, 'contentType': 'application/json', success: function(data){
+    snackbar("Updated title")
+  }, error: function(error){alert("Error, please check console!");console.log("Error:");console.log(error);}});
+}
+function update_subject(){
+  input = document.getElementById('subject_input')
+  if (input.value.length == 0) {
+    alert("Please enter a subject name")
+    return
+  }
+  $.ajax({url: "/t/{{code}}/edit/api/subject", type: "POST", data: JSON.stringify({"subject": input.value}), dataType: "json", processData: false, 'contentType': 'application/json', success: function(data){
+    snackbar("Updated subject name")
+  }, error: function(error){alert("Error, please check console!");console.log("Error:");console.log(error);}});
+}
+function update_tags(){
+  input = document.getElementById('student_tags_input')
+  if (input.value.length == 0) {
+    alert("Please enter comma-separated tags")
+    return
+  }
+  $.ajax({url: "/t/{{code}}/edit/api/tags", type: "POST", data: JSON.stringify({"tags": input.value}), dataType: "json", processData: false, 'contentType': 'application/json', success: function(data){
+    snackbar("Updated tags")
+  }, error: function(error){alert("Error, please check console!");console.log("Error:");console.log(error);}});
+}
+function update_total_questions(){
+  input = document.getElementById('total_questions_input')
+  if (input.value.length == 0) {
+    alert("Please enter a number")
+    return
+  }
+  $.ajax({url: "/t/{{code}}/edit/api/total_questions", type: "POST", data: JSON.stringify({"total_questions": input.value}), dataType: "json", processData: false, 'contentType': 'application/json', success: function(data){
+    if (data['success'] == true){
+      snackbar("Updated question limit")
+    } else {
+      alert(data['message'])
+    }
+  }, error: function(error){alert("Error, please check console!");console.log("Error:");console.log(error);}});
+}
+function load_metadata(){
+  $.ajax({url: "/t/{{code}}/edit/api/load_metadata", type: "GET", success: function(data){
+    document.getElementById('title_input').value = data['title']
+    document.getElementById('subject_input').value = data['subject']
+    document.getElementById('student_tags_input').value = data['tags']
+    document.getElementById('total_questions_input').value = data['total_questions']
+  }, error: function(error){alert("Error, please check console!");console.log("Error:");console.log(error);}});
+}
+load_metadata()
 </script>
 <center>
   <div style='width: 100%; position: fixed; background-color: black; padding: 10px; top: 0px; left:0px; opacity: 1; height: 80px;'>
@@ -318,10 +371,10 @@ function apply_changes(){
 </center>
 <div style='width: 100%; position:relative; background-color: black; padding: 10px; top: 80px; left:0px;height: 80px; width: 100%;'>
 <span class="material-icons-outlined noselect" id='sync_button' onclick='refresh_data()' style='color:white; font-size: 35px; margin-left: 10px;cursor:pointer; position:relative; top:5px;'>sync</span>
-<input type="text" placeholder="Test Title" style='margin-left: 30px;width: 200px; height: 35px;position:relative; top:-5px;'>
-<input type="text" placeholder="Subject Name" style='margin-left: 30px;width: 200px; height: 35px;position:relative; top:-5px;'>
-<input type="text" placeholder="Student Tags - 5a,7c,9a" style='margin-left: 30px;width: 200px; height: 35px;position:relative; top:-5px;' pattern="[a-zA-Z0-9]{0,5}" id="student_tags_input">
-<input type="text" style='margin-left: 30px;width: 50px; height: 35px;position:relative; top:-5px;' id='total_number_input' placeholder="0">
+<input type="text" placeholder="Test Title" style='margin-left: 30px;width: 200px; height: 35px;position:relative; top:-5px;' onchange='update_title()' id='title_input'>
+<input type="text" placeholder="Subject Name" style='margin-left: 30px;width: 200px; height: 35px;position:relative; top:-5px;' onchange='update_subject()' id='subject_input'>
+<input type="text" placeholder="Student Tags - 5a,7c,9a" style='margin-left: 30px;width: 200px; height: 35px;position:relative; top:-5px;' pattern="[a-zA-Z0-9]{0,5}" id="student_tags_input" onchange='update_tags()'>
+<input type="text" style='margin-left: 30px;width: 50px; height: 35px;position:relative; top:-5px;' id='total_questions_input' placeholder="0" onchange='update_total_questions()'>
 <script>
 function setInputFilter(textbox, inputFilter) {
   ["input", "keydown", "keyup", "mousedown", "mouseup", "select", "contextmenu", "drop"].forEach(function(event) {
@@ -339,7 +392,7 @@ function setInputFilter(textbox, inputFilter) {
     });
   });
 }
-setInputFilter(document.getElementById("total_number_input"), function(value) {
+setInputFilter(document.getElementById("total_questions_input"), function(value) {
   return /^\d*\.?\d*$/.test(value);
 });
 setInputFilter(document.getElementById("student_tags_input"), function(value) {
@@ -349,7 +402,6 @@ setInputFilter(document.getElementById("student_tags_input"), function(value) {
 <button type="button" data-toggle="modal" data-target="#apply_changes_modal" class='button' style='position:relative; top:-10px; margin-left: 50px; height: 40px;'><span class="material-icons" style='position: relative; top: 3px; margin-right: 10px;'>done</span>Apply Changes</button>
 </div>
 
-<!-- Modal -->
 <div class="modal fade" id="apply_changes_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
