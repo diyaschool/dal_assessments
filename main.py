@@ -2064,35 +2064,63 @@ def t_edit_api_apply_changes(code):
         test_data['questions'] = editor_data
         with open('../data/test_data/'+code+'/config.json', 'w') as f:
             f.write(json.dumps(test_data))
-        if test_data.get('visible') == True or test_data.get('visible') == None:
+        if test_data.get('visibility') == False:
             if 'teacher' in user_data['tags'] or 'team' in user_data['tags'] or 'admin' in user_data['tags']:
-                with open('../data/test_metadata/'+code+'.json') as f:
-                    metadata = parse_dict(f.read())
-                with open('../data/test_metadata/'+code+'.json', 'w') as f:
-                    dt = curr_dt()
-                    c_time = str(dt.hour)+':'+str(dt.minute)+':'+str(dt.second)
-                    c_date = str(dt.year)+'-'+str(dt.month)+'-'+str(dt.day)
-                    metadata['last_time'] = c_time
-                    metadata['last_date'] = c_date
-                    f.write(json.dumps(metadata))
-                try:
-                    with open('../data/user_data/'+flask.session['username']+'/created_tests/'+code+'.json') as f:
-                        cr_fdata = parse_dict(f.read())
+                tags = []
+                removal_tag_records = []
+                for tag in test_data['tags']:
+                    if tag not in tags:
+                        removal_tag_records.append(tag)
+                for tag in removal_tag_records:
+                    if tag.strip() == '':
+                        continue
                     try:
-                        with open('../data/response_data/'+code+'.json') as g:
-                            responses_count = len(parse_dict(g.read())['responses'])
+                        with open('../data/global_test_records/'+tag) as f:
+                            fdata = parse_dict(f.read())
+                        try:
+                            fdata.pop(code)
+                        except KeyError:
+                            pass
                     except FileNotFoundError:
-                        responses_count = 0
-                    with open('../data/user_data/'+flask.session['username']+'/created_tests/'+code+'.json', 'w') as f:
-                        cr_fdata['name'] = test_data['test_name']
-                        cr_fdata['subject'] = test_data['subject']
-                        cr_fdata['responses_count'] = responses_count
-                        cr_fdata['last_time'] = c_time
-                        cr_fdata['last_date'] = c_date
-                        f.write(json.dumps(cr_fdata))
-                except FileNotFoundError:
-                    with open('../data/user_data/'+flask.session['username']+'/created_tests/'+code+'.json', 'w') as f:
-                        f.write(json.dumps({"last_time": c_time, "last_date": c_date, "name": "Undefined", "subject": "Undefined", "responses_count": 0}))
+                        fdata = {}
+                    with open('../data/global_test_records/'+tag, 'w') as f:
+                        f.write(json.dumps(fdata))
+                for tag in tags:
+                    try:
+                        with open('../data/global_test_records/'+tag) as f:
+                            fdata = parse_dict(f.read())
+                    except FileNotFoundError:
+                        fdata = {}
+                    fdata[code] = ''
+                    with open('../data/global_test_records/'+tag, 'w') as f:
+                        f.write(json.dumps(fdata))
+        with open('../data/test_metadata/'+code+'.json') as f:
+            metadata = parse_dict(f.read())
+        with open('../data/test_metadata/'+code+'.json', 'w') as f:
+            dt = curr_dt()
+            c_time = str(dt.hour)+':'+str(dt.minute)+':'+str(dt.second)
+            c_date = str(dt.year)+'-'+str(dt.month)+'-'+str(dt.day)
+            metadata['last_time'] = c_time
+            metadata['last_date'] = c_date
+            f.write(json.dumps(metadata))
+        try:
+            with open('../data/user_data/'+flask.session['username']+'/created_tests/'+code+'.json') as f:
+                cr_fdata = parse_dict(f.read())
+            try:
+                with open('../data/response_data/'+code+'.json') as g:
+                    responses_count = len(parse_dict(g.read())['responses'])
+            except FileNotFoundError:
+                responses_count = 0
+            with open('../data/user_data/'+flask.session['username']+'/created_tests/'+code+'.json', 'w') as f:
+                cr_fdata['name'] = test_data['test_name']
+                cr_fdata['subject'] = test_data['subject']
+                cr_fdata['responses_count'] = responses_count
+                cr_fdata['last_time'] = c_time
+                cr_fdata['last_date'] = c_date
+                f.write(json.dumps(cr_fdata))
+        except FileNotFoundError:
+            with open('../data/user_data/'+flask.session['username']+'/created_tests/'+code+'.json', 'w') as f:
+                f.write(json.dumps({"last_time": c_time, "last_date": c_date, "name": "Undefined", "subject": "Undefined", "responses_count": 0}))
         return 'ok'
     except FileNotFoundError:
         return "Missing questions. Add few questions and try again."
