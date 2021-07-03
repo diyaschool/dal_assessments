@@ -118,7 +118,8 @@ searchfunc()
         </button>
       </div>
       <div class="modal-body">
-        <button type="button" class="btn btn-info" style='margin-bottom: 10px' onclick='window.location.href = "/t/{{code}}/analytics_download/csv"'>Download CSV</button><br>
+        <button type="button" class="btn btn-info" style='margin-bottom: 10px' onclick='get_sheet_id();'><span class="material-icons" style='position:relative; top: 5px;'>cloud_upload</span>&nbsp;Open Google Sheet</button><br>
+        <button type="button" class="btn btn-info" style='margin-bottom: 10px' onclick='window.location.href = "/t/{{code}}/analytics_download/csv"'><span class="material-icons" style='position:relative; top: 5px;'>file_download</span>&nbsp;Download CSV</button><br>
         <script>
         function get_sheet_id(){
           var xhttp = new XMLHttpRequest();
@@ -132,7 +133,6 @@ searchfunc()
           return "test";
         }
         </script>
-        <button type="button" class="btn btn-info" style='margin-bottom: 10px' onclick='get_sheet_id();'>Open Google Sheet</button><br>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
