@@ -1505,7 +1505,7 @@ def test_analytics_download(code, mode):
             creds = gauth.load_credentials(flask.session['username'])
             if creds == None:
                 flask.session['settings_alert'] = 'Please link your Google account before creating a test'
-                return flask.redirect('/settings')
+                return flask.request.url_root+'settings'
             sheet_id = googleapis.create_data_sheet(f"{title} - Analytics", creds, csv_data)
             gdata[code] = sheet_id
             with open('../data/user_data/'+flask.session['username']+'/google_sheets_analytics_records', 'w') as f:
@@ -1514,9 +1514,10 @@ def test_analytics_download(code, mode):
         else:
             gauth = googleapis.authorize()
             creds = gauth.load_credentials(flask.session['username'])
+            print(creds)
             if creds == None:
                 flask.session['settings_alert'] = 'Please link your Google account before creating a test'
-                return flask.redirect('/settings')
+                return flask.request.url_root+'settings'
             sheet_id = googleapis.update_sheet(gdata[code], creds, csv_data)
             flask.session['analytics_alert'] = "Generated Google Sheet"
             if sheet_id == False:
