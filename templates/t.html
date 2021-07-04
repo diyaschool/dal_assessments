@@ -56,7 +56,7 @@
 </style>
 <style>
 body {
-  overflow: hidden;
+  overflow:  auto;
 }
 #preloader {
   position: fixed;
@@ -102,10 +102,11 @@ $(window).on('load', function() { // makes sure the whole site is loaded
   </head>
   <body style='background-size: cover; background-image: url("/background.png");  background-repeat: no-repeat; background-position: center; background-attachment: fixed;'>
     <center>
-    <br><br><br><br><br><div class="noselect" style='background-color: white; height: {%if image_url%}{{total_height}}{%else%}{{total_height-300}}{%endif%}px; width: 1050px; border-radius: 20px; opacity: 1'>
-      <form method='POST' action='/t/{{code}}/verify' onsubmit="warn_on_leave=false;">
+    <br><br><br><br><br><div class="noselect" style='background-color: white; height: auto; width: 1150px; border-radius: 20px; opacity: 1'>
+      <form method='POST' action='/t/{{code}}/verify' onsubmit="warn_on_leave=false;" style='padding-bottom: 80px;'>
       <div style='text-align: left; position: relative; left: 70px; top: 40px'>
-      <text style='font-size: 30px'>{{q_number}}: {%for chunk in question_data['question']%}{{chunk}}<br>{%endfor%}</text><br>
+      <div style='text-align: right; '><button class="button" type='submit' style='position: relative; width: 120px;height: 70px; right: 1px; float: right; position:relative; right: 100px;' id='next_button'><span>Next</span></button><br></div>
+      <text style='font-size: 30px;'>{{q_number}}: {%for chunk in question_data['question']%}{{chunk}}<br>{%endfor%}</text><br>
       {%set counter = 0%}
           {%for option in answers%}
           {%if counter == 0%}{%set option1_label = "a"+option['id']%}{%endif%}
@@ -118,9 +119,6 @@ $(window).on('load', function() { // makes sure the whole site is loaded
           <br><img src='{{image_url}}' height='350px'>
         {%endif%}
         <input type="hidden" name="alt" value="0" id='alt_input'>
-          <button class="button" type='submit' style='position: absolute; top: -20px; width: 120px;  left: 800px; height: 70px' id='next_button'>
-            <span>Next</span>
-          </button>
         </div>
         <style>
         .button {
