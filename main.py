@@ -18,8 +18,6 @@ import uuid
 import ipaddress
 from dateutil import tz
 import base64
-from Crypto import Random
-from Crypto.Cipher import AES
 from collections import OrderedDict
 
 #################### Initialize ####################
@@ -155,23 +153,6 @@ def parse_access_token_str(token_str):
     _vars = str(token_str).split('&')
     access_token = _vars[0].split('=')[1]
     return access_token
-
-def encrypt(text, password):
-    bs = AES.block_size
-    key = hashlib.sha256(password.encode()).digest()
-    text = text + (bs - len(text) % bs) * chr(bs - len(text) % bs)
-    iv = Random.new().read(bs)
-    cipher = AES.new(key, AES.MODE_CBC, iv)
-    return base64.b64encode(iv+cipher.encrypt(text.encode()))
-
-def decrypt(enc, password):
-    bs = AES.block_size
-    key = hashlib.sha256(password.encode()).digest()
-    enc = base64.b64decode(enc)
-    iv = enc[:bs]
-    cipher = AES.new(key, AES.MODE_CBC, iv)
-    s = cipher.decrypt(enc[bs:])
-    return s[:-ord(s[len(s)-1:])].decode('utf-8')
 
 def parse_dict(str_data):
     try:
