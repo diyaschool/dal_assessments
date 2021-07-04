@@ -1,6 +1,7 @@
 ipaddress
 datetime
 flask
+httpagentparser
 python-dateutil
 getch
 google-api-python-client
