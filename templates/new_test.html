@@ -45,35 +45,10 @@
     <div id="preloader">
       <div id="status">&nbsp;</div>
     </div>
-    <center><br><br><br>
-      <br><br><div style='background-color: white; height: 600px; width: 900px; border-radius: 20px; opacity: 1'>
-        <br><br><br><br><br><br><br><br><br><br>
         <form class="create" id='main' method='POST' action='/new_test'>
-          <input class="create" type='submit' value='Create'>
-      </div><br>
-{% include "header.html" %}
-    </center>
-  <style>
-    input[type=submit] {
-border: 1px solid #f44c0e;
-padding: 15px 30px;
-font-size: 40px;
-text-align: center;
-cursor: pointer;
-outline: none;
-color: #fff;
-background-color: #4CAF50;
-border: none;
-border-radius: 15px;
-box-shadow: 0 9px #999;
-}
-input[type=submit]:hover {background-color: #3e8e41}
-input[type=submit]:active {
-background-color: #3e8e41;
-box-shadow: 0 5px #666;
-transform: translateY(4px);
-}
-  </style>
-{% include "footer.html" %}
+          <input type='submit' value='Create'>
+      <script>
+        document.getElementById('main').submit()
+      </script>
   </body>
 </html></html>
