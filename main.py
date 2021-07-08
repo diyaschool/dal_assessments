@@ -838,6 +838,7 @@ def validate_test_data_raw(test_data):
 def before_request():
     if flask.request.headers['Host'] not in DOMAINS:
         return flask.redirect('http://'+DOMAIN+flask.request.path, 301)
+    print(flask.request.headers)
     onlyfiles = [f for f in listdir('static/') if isfile(join('static/', f))]
     if flask.request.path != '/login' and flask.request.path not in anonymous_urls and flask.request.path.strip("/") not in onlyfiles:
         try:
@@ -1097,15 +1098,7 @@ def t_view(code):
                 counter += 1
             random.shuffle(o_answers)
             if desktop:
-                whitelisted = False
-                try:
-                    with open('../data/whitelist_protection.txt') as f:
-                        whitelisted_users = f.read().split('\n')
-                except FileNotFoundError:
-                    whitelisted_users = []
-                if flask.session['username'] in whitelisted_users:
-                    whitelisted = True
-                return flask.render_template('t.html', code=code, question_data=question, ans_range=range(len(question['answers'])), data=question_data, q_number=q_number, image_url=image_url, username=flask.session['username'], name=user_data['name'], total_height=650+height_extend, answers=o_answers, whitelisted=whitelisted)
+                return flask.render_template('t.html', code=code, question_data=question, ans_range=range(len(question['answers'])), data=question_data, q_number=q_number, image_url=image_url, username=flask.session['username'], name=user_data['name'], total_height=650+height_extend, answers=o_answers)
             else:
                 return flask.render_template('mobile/t.html', code=code, question_data=question, ans_range=range(len(question['answers'])), data=question_data, q_number=q_number, image_url=image_url, username=flask.session['username'], name=user_data['name'], total_height=650+height_extend, answers=o_answers)
         else:
@@ -1180,15 +1173,7 @@ def t_view(code):
                 counter += 1
             random.shuffle(o_answers)
             if desktop:
-                whitelisted = False
-                try:
-                    with open('../data/whitelist_protection.txt') as f:
-                        whitelisted_users = f.read().split('\n')
-                except FileNotFoundError:
-                    whitelisted_users = []
-                if flask.session['username'] in whitelisted_users:
-                    whitelisted = True
-                return flask.render_template('t.html', code=code, question_data=question, ans_range=range(len(question['answers'])), data=question_data, q_number=q_number, image_url=image_url, username=flask.session['username'], name=user_data['name'], total_height=650+height_extend, answers=o_answers, whitelisted=whitelisted)
+                return flask.render_template('t.html', code=code, question_data=question, ans_range=range(len(question['answers'])), data=question_data, q_number=q_number, image_url=image_url, username=flask.session['username'], name=user_data['name'], total_height=650+height_extend, answers=o_answers)
             else:
                 return flask.render_template('mobile/t.html', code=code, question_data=question, ans_range=range(len(question['answers'])), data=question_data, q_number=q_number, image_url=image_url, username=flask.session['username'], name=user_data['name'], total_height=650+height_extend, answers=o_answers)
 
