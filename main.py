@@ -1695,6 +1695,8 @@ def upload_file(code):
             else:
                 break
         file_id = r_id.lower()
+        if f.filename.strip() == "":
+            return "file name not ok", 401
         os.mkdir('../data/test_data/'+code+'/files/'+file_id)
         f.save('../data/test_data/'+code+'/files/'+file_id+'/'+f.filename)
         return 'test'
