@@ -1260,7 +1260,7 @@ def test_edit_delete(code):
     delete_test(code)
     return flask.redirect('/')
 
-@app.route('/t/<code>/edit/', methods=['GET', 'POST', 'PUT'])
+@app.route('/t/<code>/edit/', methods=['GET'])
 def test_edit(code):
     if '\\' in code or '.' in code:
         return flask.render_template('500.html'), 500
@@ -1362,19 +1362,6 @@ def test_edit(code):
                 return flask.render_template('t_edit.html', test_data=test_data, sheet_id=sheet_id, title=title, username=flask.session['username'], name=user_data['name'], code=code, alert="Error: "+test_validation, base_uri=flask.request.url_root)
         else:
             return flask.render_template('t_edit.html', test_data=test_data, sheet_id=sheet_id, title=title, username=flask.session['username'], name=user_data['name'], code=code, alert=None, base_uri=flask.request.url_root)
-    elif flask.request.method == 'POST':
-        data = flask.request.form
-        v_output = validate_test_data(data['test_data'])
-        if v_output == True:
-            with open('../data/test_data/'+code+'/config.json', 'w') as f:
-                f.write(data['test_data'])
-            return 'validated, modified config file'
-        else:
-            return v_output, 400
-    elif flask.request.method == 'PUT':
-        with open('../data/test_data/'+code+'/config.json') as f:
-            fdata = f.read()
-        return fdata
 
 @app.route('/t/<code>/analytics/')
 def test_analytics(code):
@@ -1697,6 +1684,8 @@ def upload_file(code):
             all_files[file] = [f for f in os.listdir('../data/test_data/'+code+'/files/'+file) if os.path.isfile(os.path.join('../data/test_data/'+code+'/files/'+file, f))][0]
         return flask.render_template('upload.html', files=all_files, base_uri=flask.request.url_root, code=code)
     elif flask.request.method == 'POST':
+        print(flask.request.form)
+        print(flask.request.files)
         f = flask.request.files['file']
         test_list = [f for f in os.listdir('../data/test_data/'+code+'/files/') if os.path.isdir(os.path.join('../data/test_data/'+code+'/files/', f))]
         while 1:
@@ -1708,7 +1697,7 @@ def upload_file(code):
         file_id = r_id.lower()
         os.mkdir('../data/test_data/'+code+'/files/'+file_id)
         f.save('../data/test_data/'+code+'/files/'+file_id+'/'+f.filename)
-        return flask.redirect(flask.request.path)
+        return 'test'
 
 @app.route('/t/<code>/upload/delete/<file_id>/')
 def upload_delete(code, file_id):
