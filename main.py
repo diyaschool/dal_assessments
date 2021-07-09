@@ -1667,39 +1667,42 @@ def sheets_api_authorize_delete():
 def u_r(code):
     return flask.render_template('u_r.html', code=code)
 
-@app.route('/t/<code>/upload/', methods=['GET', 'POST'])
+@app.route('/t/<code>/upload/', methods=['POST'])
 def upload_file(code):
-    if flask.request.method == 'GET':
-        user_data = get_user_data(flask.session['username'])
+    user_data = get_user_data(flask.session['username'])
+    try:
         with open('../data/test_metadata/'+code+'.json') as f:
-            test_metadata = parse_dict(f.read())
-        if flask.session['username'] != test_metadata['owner']:
-            if 'admin' in user_data['tags'] or 'team' in user_data['tags'] or check_sharing_perms(test_metadata, flask.session['username'])['files'] == True:
-                pass
-            else:
-                return '<br><br><center>YOU ARE NOT AUTHORIZED TO VIEW/MODIFY FILES</center>'
-        files = [f for f in os.listdir('../data/test_data/'+code+'/files') if os.path.isdir(os.path.join('../data/test_data/'+code+'/files', f))]
-        all_files = {}
-        for file in files:
-            all_files[file] = [f for f in os.listdir('../data/test_data/'+code+'/files/'+file) if os.path.isfile(os.path.join('../data/test_data/'+code+'/files/'+file, f))][0]
-        return flask.render_template('upload.html', files=all_files, base_uri=flask.request.url_root, code=code)
-    elif flask.request.method == 'POST':
-        print(flask.request.form)
-        print(flask.request.files)
-        f = flask.request.files['file']
-        test_list = [f for f in os.listdir('../data/test_data/'+code+'/files/') if os.path.isdir(os.path.join('../data/test_data/'+code+'/files/', f))]
-        while 1:
-            r_id = id_generator()
-            if r_id in test_list:
-                pass
-            else:
-                break
-        file_id = r_id.lower()
-        if f.filename.strip() == "":
-            return "file name not ok", 401
-        os.mkdir('../data/test_data/'+code+'/files/'+file_id)
-        f.save('../data/test_data/'+code+'/files/'+file_id+'/'+f.filename)
-        return 'test'
+            data = parse_dict(f.read())
+    except FileNotFoundError:
+        return flask.render_template('404.html'), 404
+    if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags'] or check_sharing_perms(data, flask.session['username'])['edit'] == True:
+        pass
+    else:
+        return flask.redirect('/t/'+code)
+    print(flask.request.form)
+    print(flask.request.files)
+    f = flask.request.files['file']
+    test_list = [f for f in os.listdir('../data/test_data/'+code+'/files/') if os.path.isdir(os.path.join('../data/test_data/'+code+'/files/', f))]
+    while 1:
+        r_id = id_generator()
+        if r_id in test_list:
+            pass
+        else:
+            break
+    file_id = r_id.lower()
+    if f.filename.strip() == "":
+        return "file name not ok", 401
+    os.mkdir('../data/test_data/'+code+'/files/'+file_id)
+    f.save('../data/test_data/'+code+'/files/'+file_id+'/'+f.filename)
+    try:
+        with open('../data/t_editor_data/'+code+'.json') as f:
+            fdata = parse_dict(f.read())
+    except FileNotFoundError:
+        fdata = {}
+    fdata[flask.request.form['div_id']]['image'] = file_id
+    with open('../data/t_editor_data/'+code+'.json', 'w') as f:
+        f.write(json.dumps(fdata))
+    return file_id
 
 @app.route('/t/<code>/upload/delete/<file_id>/')
 def upload_delete(code, file_id):
@@ -1985,7 +1988,7 @@ def t_edit_api_apply_changes(code):
                 question['difficulty'] = 'medium'
             for i, option in enumerate(question['options']):
                 question['options'][i] = option.strip()
-            editor_data[question['difficulty']].append({'question': question['question'].strip(), 'answers': question['options'], 'correct_answer_index': question['c_a_i']})
+            editor_data[question['difficulty']].append({'question': question['question'].strip(), 'answers': question['options'], 'correct_answer_index': question['c_a_i'], 'image': question.get('image')})
         if len(editor_data['easy']) == 0:
             return 'Missing 1 mark questions'
         if len(editor_data['medium']) == 0:
@@ -2192,7 +2195,7 @@ def test_editor_load_data(code):
         fdata = {}
     output = {"easy": [], "mid": [], "hard": []}
     for div in fdata:
-        output[fdata[div]['difficulty']].append({'q': fdata[div]['question'], 'options': fdata[div]['options'], 'c_a_i': fdata[div]['c_a_i'], 'div_id': div})
+        output[fdata[div]['difficulty']].append({'q': fdata[div]['question'], 'options': fdata[div]['options'], 'c_a_i': fdata[div]['c_a_i'], 'div_id': div, "image": fdata[div].get("image")})
     return output
 
 #################### Error Handlers ####################
