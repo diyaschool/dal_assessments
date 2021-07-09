@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <title>Test Editor | DAL Assessments</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous"> -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
@@ -131,6 +131,8 @@ html, body {
 <div id="options_example" hidden=true style='margin-left: 10px;'>
   <input required type="radio" name="c_a_i" value="1"  tabindex="-1" style='width: 25px'>&nbsp;<input type="text" value="" placeholder="Option" style="border-radius: 5px; width: 70%;" onchange="update_question(this.parentNode.parentNode.parentNode.id, true)" required>&nbsp;<span class="material-icons" style='cursor:pointer; font-size: 20px;' onclick="delete_option(this.parentNode.parentNode, this.parentNode.children[0].value)">delete_outline</span><br>
 </div>
+<button id="example_que_div_image_button" hidden type="button" onclick="document.getElementById('upload_form').div_id.value=this.parentNode.id; $('#image_add_modal').modal('show')" class='button' style='font-size: 15px; box-shadow: 0 6px #999; padding: 5px 10px 5px; height: 30px;margin: 15px;'><span class="material-icons" style='position:relative; top: 3px; font-size: 20px;'>image</span> Image</button>
+<div id="example_que_div_image" onclick="document.getElementById('upload_form').div_id.value=this.parentNode.id;" hidden style='margin-left: 10px; margin-bottom: 10px; cursor:pointer; margin-top: -20px;' data-toggle="modal" data-target="#image_add_modal"><br><img src="/loading2.gif" style="height:100px;" alt=""></div>
 <div id="example_que_div" class="noselect" hidden=true style='border: 5px black solid; border-radius: 10px; margin-bottom: 10px; background-color: #DEEFCC'>
   <input required type="text" name="question" value="" onchange="update_question(this.parentNode.id, true)" style='margin: 10px; width: 85%; border-radius: 3px;' placeholder="Question?"/>
   <span class="material-icons" style='cursor:pointer; position: relative; right: 10px; top: 5px;' onclick="delete_question(this.parentNode.id)">delete_outline</span>
@@ -150,15 +152,15 @@ function load_data(){
   $.ajax({url: "/t/{{code}}/edit/editor/load_data", type: "GET", success: function(data){
     for (let i = 0; i < data['easy'].length; i++) {
       q = data['easy'][i]
-      render_new_div(q['div_id'], "easy", q['q'], q['options'], q['c_a_i'])
+      render_new_div(q['div_id'], "easy", q['q'], q['options'], q['c_a_i'], false, data['easy'][i]['image'])
     }
     for (let i = 0; i < data['mid'].length; i++) {
       q = data['mid'][i]
-      render_new_div(q['div_id'], "mid", q['q'], q['options'], q['c_a_i'])
+      render_new_div(q['div_id'], "mid", q['q'], q['options'], q['c_a_i'], false, data['mid'][i]['image'])
     }
     for (let i = 0; i < data['hard'].length; i++) {
       q = data['hard'][i]
-      render_new_div(q['div_id'], "hard", q['q'], q['options'], q['c_a_i'])
+      render_new_div(q['div_id'], "hard", q['q'], q['options'], q['c_a_i'], false, data['hard'][i]['image'])
     }
   }, error: function(error){console.log("Error:");console.log(error);}});
 }
@@ -193,13 +195,23 @@ function update_question(div_id, notify=false){
   }, error: function(error){alert("Error, please check console!");console.log("Error:");console.log(error);}});
 }
 
-function render_new_div(div_id, difficulty, question, options, c_a_i, ignore_options=false){
+function render_new_div(div_id, difficulty, question, options, c_a_i, ignore_options=false, image=null){
+  console.log(image);
   var div = document.getElementById('example_que_div').cloneNode(true);
   div = document.getElementById(difficulty+"_div").appendChild(div);
   div.hidden = false;
   div.id = div_id
   var q_box = div.children[0]
   q_box.value = question
+  if (image==null){
+    var example_que_div_image_button = document.getElementById('example_que_div_image_button').cloneNode(true);
+    div = document.getElementById(div_id).appendChild(example_que_div_image_button);
+  } else {
+    var example_que_div_image = document.getElementById('example_que_div_image').cloneNode(true);
+    example_que_div_image.children[1].src = '/t/'+code+'/static/'+image
+    div = document.getElementById(div_id).appendChild(example_que_div_image);
+  }
+  div.hidden = false;
   if (ignore_options==false){
     for (let i = 0; i < options.length; i++) {
       add_option(document.getElementById(div_id).children[2], options[i])
@@ -207,13 +219,11 @@ function render_new_div(div_id, difficulty, question, options, c_a_i, ignore_opt
     document.getElementById(div_id).children[2].c_a_i.value = c_a_i
   }
 }
-
 function delete_question(div_id){
   $.ajax({url: "/t/{{code}}/edit/editor/delete_que", type: "POST", data: JSON.stringify({"div_id": div_id}), dataType: "json", processData: false, 'contentType': 'application/json', success: function(data){
     document.getElementById(div_id).remove()
   }, error: function(error){alert("Error, please check console!");console.log("Error:");console.log(error);}});
 }
-
 function add_easy_temp(){
   $.ajax({url: "/t/{{code}}/edit/editor/add_que", type: "POST", data: JSON.stringify({"difficulty": "easy", "question": "", "options": ['', ''], "c_a_i": 0}), dataType: "json", processData: false, 'contentType': 'application/json', success: function(data){
     render_new_div(data['div_id'], data['difficulty'], data['question'], data['options'], data['c_a_i'], true)
@@ -367,8 +377,40 @@ function load_metadata(){
     document.getElementById("visibility_checkbox").checked = data['visibility']
   }, error: function(error){alert("Error, please check console!");console.log("Error:");console.log(error);}});
 }
+code = "{{code}}"
+function send_file(){
+  // var formData = new FormData(this);
+  // form_data = document.getElementById('upload_form').form
+  document.getElementById('onscreen_loader').hidden=false
+  var form_data = new FormData(document.getElementById('upload_form'));
+  $.ajax({url: "/t/{{code}}/upload/", type: "POST", data: form_data, cache: false, contentType: false, processData: false, success: function(data){
+    document.getElementById('onscreen_loader').hidden=true;
+    document.getElementById(document.getElementById('upload_form').div_id.value).children[4].remove()
+    var div = document.getElementById('example_que_div_image').cloneNode(true);
+    div.children[1].src = '/t/'+code+'/static/'+data
+    div = document.getElementById(document.getElementById('upload_form').div_id.value).appendChild(div);
+    div.hidden = false;
+    $("#image_add_modal").modal("hide")
+  }, error: function(error){document.getElementById('onscreen_loader').hidden=true;alert("Error, please check console!");console.log("Error:");console.log(error);}});
+}
+// $(document).ready(function(){
+//   $("#image_add_modal").modal("show")
+// })
 load_metadata()
 </script>
+<style>
+.loading {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-color: rgba(0,0,0,.5);
+}
+</style>
+<div class='noselect' style='background-color: black; height: 100%; width: 100%; z-index: 5000; position: fixed; opacity: 0.8' hidden id="onscreen_loader"><center><img src="/loading2.gif" alt=""></center></div>
 <center>
   <div style='width: 100%; position: fixed; background-color: black; padding: 10px; top: 0px; left:0px; opacity: 1; height: 80px;'>
     <!-- <span class="material-icons noselect" style='color: white; position:absolute; left: 15px; top: 23px; font-size: 30px; cursor: pointer' onclick='window.location.href = "/t/{{code}}/edit"'>arrow_back</span> -->
@@ -405,6 +447,10 @@ setInputFilter(document.getElementById("total_questions_input"), function(value)
 });
 setInputFilter(document.getElementById("student_tags_input"), function(value) {
   return /^[a-zA-Z0-9,]*$/.test(value);
+});
+$(document).ready(function(){
+  document.getElementById("upload_form").children[0].value = ""
+  document.getElementById('upload_form').div_id.value=""
 });
 </script>
 <button type="button" data-toggle="modal" data-target="#publish_modal" class='button' style='position:relative; top:-10px; margin-left: 30px; height: 40px;'><span class="material-icons" style='position: relative; top: 3px; margin-right: 10px;'>publish</span>Publish</button>
@@ -549,5 +595,27 @@ x.innerHTML = text
 setTimeout(function(){ x.className = x.className.replace("show", ""); }, 1500);
 }
 </script>
+<div class="modal fade" id="image_add_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLongTitle">Upload Image</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"  onclick="$('#image_add_modal').modal('hide');">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form action='/t/{{code}}/upload/' id="upload_form" method="POST" enctype = "multipart/form-data">
+          <input type="file" id="document_attachment_doc" name='file' required accept="image/*"><br>&nbsp;
+          <input type="hidden" name="div_id" value="">
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="$('#image_add_modal').modal('hide');">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick='send_file()'>Confirm upload</button>
+      </div>
+    </div>
+  </div>
+</div>
   </body>
 </html>
