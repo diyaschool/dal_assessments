@@ -82,7 +82,7 @@ body {
 <script>
 $(window).on('load', function() { // makes sure the whole site is loaded
   $('#status').fadeOut(); // will first fade out the loading animation
-  {%if image_url%}
+  {%if image_url!=None%}
     $('#preloader').delay(100).fadeOut('slow'); // will fade out the white DIV that covers the website.
     $('body').delay(1000).css({'overflow':'visible'});
   {%else%}
@@ -115,8 +115,8 @@ $(window).on('load', function() { // makes sure the whole site is loaded
             </div>
             {%set counter = counter+1%}
           {%endfor%}
-        {%if image_url%}
-          <br><img src='{{image_url}}' height='350px'>
+        {%if image_url!=None%}
+          <br><img src='/t/{{code}}/static/{{image_url}}' height='350px'>
         {%endif%}
         <input type="hidden" name="alt" value="0" id='alt_input'>
         </div>

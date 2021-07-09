@@ -838,6 +838,7 @@ def validate_test_data_raw(test_data):
 def before_request():
     if flask.request.headers['Host'] not in DOMAINS:
         return flask.redirect('http://'+DOMAIN+flask.request.path, 301)
+    print(flask.request.headers)
     onlyfiles = [f for f in listdir('static/') if isfile(join('static/', f))]
     if flask.request.path != '/login' and flask.request.path not in anonymous_urls and flask.request.path.strip("/") not in onlyfiles:
         try:
@@ -1097,15 +1098,7 @@ def t_view(code):
                 counter += 1
             random.shuffle(o_answers)
             if desktop:
-                whitelisted = False
-                try:
-                    with open('../data/whitelist_protection.txt') as f:
-                        whitelisted_users = f.read().split('\n')
-                except FileNotFoundError:
-                    whitelisted_users = []
-                if flask.session['username'] in whitelisted_users:
-                    whitelisted = True
-                return flask.render_template('t.html', code=code, question_data=question, ans_range=range(len(question['answers'])), data=question_data, q_number=q_number, image_url=image_url, username=flask.session['username'], name=user_data['name'], total_height=650+height_extend, answers=o_answers, whitelisted=whitelisted)
+                return flask.render_template('t.html', code=code, question_data=question, ans_range=range(len(question['answers'])), data=question_data, q_number=q_number, image_url=image_url, username=flask.session['username'], name=user_data['name'], total_height=650+height_extend, answers=o_answers)
             else:
                 return flask.render_template('mobile/t.html', code=code, question_data=question, ans_range=range(len(question['answers'])), data=question_data, q_number=q_number, image_url=image_url, username=flask.session['username'], name=user_data['name'], total_height=650+height_extend, answers=o_answers)
         else:
@@ -1180,15 +1173,7 @@ def t_view(code):
                 counter += 1
             random.shuffle(o_answers)
             if desktop:
-                whitelisted = False
-                try:
-                    with open('../data/whitelist_protection.txt') as f:
-                        whitelisted_users = f.read().split('\n')
-                except FileNotFoundError:
-                    whitelisted_users = []
-                if flask.session['username'] in whitelisted_users:
-                    whitelisted = True
-                return flask.render_template('t.html', code=code, question_data=question, ans_range=range(len(question['answers'])), data=question_data, q_number=q_number, image_url=image_url, username=flask.session['username'], name=user_data['name'], total_height=650+height_extend, answers=o_answers, whitelisted=whitelisted)
+                return flask.render_template('t.html', code=code, question_data=question, ans_range=range(len(question['answers'])), data=question_data, q_number=q_number, image_url=image_url, username=flask.session['username'], name=user_data['name'], total_height=650+height_extend, answers=o_answers)
             else:
                 return flask.render_template('mobile/t.html', code=code, question_data=question, ans_range=range(len(question['answers'])), data=question_data, q_number=q_number, image_url=image_url, username=flask.session['username'], name=user_data['name'], total_height=650+height_extend, answers=o_answers)
 
@@ -1275,7 +1260,7 @@ def test_edit_delete(code):
     delete_test(code)
     return flask.redirect('/')
 
-@app.route('/t/<code>/edit/', methods=['GET', 'POST', 'PUT'])
+@app.route('/t/<code>/edit/', methods=['GET'])
 def test_edit(code):
     if '\\' in code or '.' in code:
         return flask.render_template('500.html'), 500
@@ -1377,19 +1362,6 @@ def test_edit(code):
                 return flask.render_template('t_edit.html', test_data=test_data, sheet_id=sheet_id, title=title, username=flask.session['username'], name=user_data['name'], code=code, alert="Error: "+test_validation, base_uri=flask.request.url_root)
         else:
             return flask.render_template('t_edit.html', test_data=test_data, sheet_id=sheet_id, title=title, username=flask.session['username'], name=user_data['name'], code=code, alert=None, base_uri=flask.request.url_root)
-    elif flask.request.method == 'POST':
-        data = flask.request.form
-        v_output = validate_test_data(data['test_data'])
-        if v_output == True:
-            with open('../data/test_data/'+code+'/config.json', 'w') as f:
-                f.write(data['test_data'])
-            return 'validated, modified config file'
-        else:
-            return v_output, 400
-    elif flask.request.method == 'PUT':
-        with open('../data/test_data/'+code+'/config.json') as f:
-            fdata = f.read()
-        return fdata
 
 @app.route('/t/<code>/analytics/')
 def test_analytics(code):
@@ -1695,35 +1667,42 @@ def sheets_api_authorize_delete():
 def u_r(code):
     return flask.render_template('u_r.html', code=code)
 
-@app.route('/t/<code>/upload/', methods=['GET', 'POST'])
+@app.route('/t/<code>/upload/', methods=['POST'])
 def upload_file(code):
-    if flask.request.method == 'GET':
-        user_data = get_user_data(flask.session['username'])
+    user_data = get_user_data(flask.session['username'])
+    try:
         with open('../data/test_metadata/'+code+'.json') as f:
-            test_metadata = parse_dict(f.read())
-        if flask.session['username'] != test_metadata['owner']:
-            if 'admin' in user_data['tags'] or 'team' in user_data['tags'] or check_sharing_perms(test_metadata, flask.session['username'])['files'] == True:
-                pass
-            else:
-                return '<br><br><center>YOU ARE NOT AUTHORIZED TO VIEW/MODIFY FILES</center>'
-        files = [f for f in os.listdir('../data/test_data/'+code+'/files') if os.path.isdir(os.path.join('../data/test_data/'+code+'/files', f))]
-        all_files = {}
-        for file in files:
-            all_files[file] = [f for f in os.listdir('../data/test_data/'+code+'/files/'+file) if os.path.isfile(os.path.join('../data/test_data/'+code+'/files/'+file, f))][0]
-        return flask.render_template('upload.html', files=all_files, base_uri=flask.request.url_root, code=code)
-    elif flask.request.method == 'POST':
-        f = flask.request.files['file']
-        test_list = [f for f in os.listdir('../data/test_data/'+code+'/files/') if os.path.isdir(os.path.join('../data/test_data/'+code+'/files/', f))]
-        while 1:
-            r_id = id_generator()
-            if r_id in test_list:
-                pass
-            else:
-                break
-        file_id = r_id.lower()
-        os.mkdir('../data/test_data/'+code+'/files/'+file_id)
-        f.save('../data/test_data/'+code+'/files/'+file_id+'/'+f.filename)
-        return flask.redirect(flask.request.path)
+            data = parse_dict(f.read())
+    except FileNotFoundError:
+        return flask.render_template('404.html'), 404
+    if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags'] or check_sharing_perms(data, flask.session['username'])['edit'] == True:
+        pass
+    else:
+        return flask.redirect('/t/'+code)
+    print(flask.request.form)
+    print(flask.request.files)
+    f = flask.request.files['file']
+    test_list = [f for f in os.listdir('../data/test_data/'+code+'/files/') if os.path.isdir(os.path.join('../data/test_data/'+code+'/files/', f))]
+    while 1:
+        r_id = id_generator()
+        if r_id in test_list:
+            pass
+        else:
+            break
+    file_id = r_id.lower()
+    if f.filename.strip() == "":
+        return "file name not ok", 401
+    os.mkdir('../data/test_data/'+code+'/files/'+file_id)
+    f.save('../data/test_data/'+code+'/files/'+file_id+'/'+f.filename)
+    try:
+        with open('../data/t_editor_data/'+code+'.json') as f:
+            fdata = parse_dict(f.read())
+    except FileNotFoundError:
+        fdata = {}
+    fdata[flask.request.form['div_id']]['image'] = file_id
+    with open('../data/t_editor_data/'+code+'.json', 'w') as f:
+        f.write(json.dumps(fdata))
+    return file_id
 
 @app.route('/t/<code>/upload/delete/<file_id>/')
 def upload_delete(code, file_id):
@@ -2009,7 +1988,7 @@ def t_edit_api_apply_changes(code):
                 question['difficulty'] = 'medium'
             for i, option in enumerate(question['options']):
                 question['options'][i] = option.strip()
-            editor_data[question['difficulty']].append({'question': question['question'].strip(), 'answers': question['options'], 'correct_answer_index': question['c_a_i']})
+            editor_data[question['difficulty']].append({'question': question['question'].strip(), 'answers': question['options'], 'correct_answer_index': question['c_a_i'], 'image': question.get('image')})
         if len(editor_data['easy']) == 0:
             return 'Missing 1 mark questions'
         if len(editor_data['medium']) == 0:
@@ -2216,7 +2195,7 @@ def test_editor_load_data(code):
         fdata = {}
     output = {"easy": [], "mid": [], "hard": []}
     for div in fdata:
-        output[fdata[div]['difficulty']].append({'q': fdata[div]['question'], 'options': fdata[div]['options'], 'c_a_i': fdata[div]['c_a_i'], 'div_id': div})
+        output[fdata[div]['difficulty']].append({'q': fdata[div]['question'], 'options': fdata[div]['options'], 'c_a_i': fdata[div]['c_a_i'], 'div_id': div, "image": fdata[div].get("image")})
     return output
 
 #################### Error Handlers ####################
