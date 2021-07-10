@@ -837,7 +837,7 @@ def validate_test_data_raw(test_data):
 @app.before_request
 def before_request():
     if flask.request.headers['Host'] not in DOMAINS:
-        return flask.redirect('http://'+DOMAIN+flask.request.path, 301)
+        return flask.redirect('https://google.com/', 301)
     print(flask.request.headers)
     onlyfiles = [f for f in listdir('static/') if isfile(join('static/', f))]
     if flask.request.path != '/login' and flask.request.path not in anonymous_urls and flask.request.path.strip("/") not in onlyfiles:
@@ -862,8 +862,6 @@ def before_request():
 @app.after_request
 def after_request(response):
     response.headers["Server"] = "DAL-Server/0.9"
-    response.headers["Developers"] = "Chaitanya, Harsha, Kushal, Piyush"
-    response.headers["Origin-School"] = "Diya Academy of Learning"
     response.headers["X-Frame-Options"] = "SAMEORIGIN"
     response.headers["X-Content-Type-Options"] = "nosniff"
     return response
@@ -1719,7 +1717,9 @@ def upload_delete(code, file_id):
 
 @app.route('/t/<code>/static/<file_code>/')
 def t_static(code, file_code):
-    return flask.send_file('../data/test_data/'+code+'/files/'+file_code+'/'+[f for f in os.listdir('../data/test_data/'+code+'/files/'+file_code) if os.path.isfile(os.path.join('../data/test_data/'+code+'/files/'+file_code, f))][0])
+    if os.path.isdir('../data/test_data/'+code+'/files/'+file_code)==True:
+        return flask.send_file('../data/test_data/'+code+'/files/'+file_code+'/'+[f for f in os.listdir('../data/test_data/'+code+'/files/'+file_code) if os.path.isfile(os.path.join('../data/test_data/'+code+'/files/'+file_code, f))][0])
+    return "File not found"
 
 @app.route('/t/<code>/edit/editor/', methods=['GET', 'POST'])
 def test_edit_editor(code):
