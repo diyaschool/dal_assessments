@@ -837,8 +837,7 @@ def validate_test_data_raw(test_data):
 @app.before_request
 def before_request():
     if flask.request.headers['Host'] not in DOMAINS:
-        return flask.redirect('http://'+DOMAIN+flask.request.path, 301)
-    print(flask.request.headers)
+        return flask.redirect('https://google.com/', 301)
     onlyfiles = [f for f in listdir('static/') if isfile(join('static/', f))]
     if flask.request.path != '/login' and flask.request.path not in anonymous_urls and flask.request.path.strip("/") not in onlyfiles:
         try:
@@ -862,8 +861,6 @@ def before_request():
 @app.after_request
 def after_request(response):
     response.headers["Server"] = "DAL-Server/0.9"
-    response.headers["Developers"] = "Chaitanya, Harsha, Kushal, Piyush"
-    response.headers["Origin-School"] = "Diya Academy of Learning"
     response.headers["X-Frame-Options"] = "SAMEORIGIN"
     response.headers["X-Content-Type-Options"] = "nosniff"
     return response
@@ -976,6 +973,14 @@ def t_view(code):
         authorized = True
     if authorized == False:
         return flask.render_template('401.html'), 401
+    if test_metadata.get('enable') == True or test_metadata.get('enable') == None:
+        pass
+    else:
+        if desktop:
+            return flask.render_template('t_disabled.html')
+        else:
+            # return flask.render_template('mobile/t_disabled.html')
+            return flask.render_template('t_disabled.html')
     try:
         if flask.session['t']['code'] != code:
             flask.session.pop('t')
@@ -1719,7 +1724,9 @@ def upload_delete(code, file_id):
 
 @app.route('/t/<code>/static/<file_code>/')
 def t_static(code, file_code):
-    return flask.send_file('../data/test_data/'+code+'/files/'+file_code+'/'+[f for f in os.listdir('../data/test_data/'+code+'/files/'+file_code) if os.path.isfile(os.path.join('../data/test_data/'+code+'/files/'+file_code, f))][0])
+    if os.path.isdir('../data/test_data/'+code+'/files/'+file_code)==True:
+        return flask.send_file('../data/test_data/'+code+'/files/'+file_code+'/'+[f for f in os.listdir('../data/test_data/'+code+'/files/'+file_code) if os.path.isfile(os.path.join('../data/test_data/'+code+'/files/'+file_code, f))][0])
+    return "File not found"
 
 @app.route('/t/<code>/edit/editor/', methods=['GET', 'POST'])
 def test_edit_editor(code):
@@ -1746,12 +1753,11 @@ def test_edit_editor(code):
             test_data = {}
             test_data['tags'] = []
             title = 'Untitled'
-    sheet_id = data.get('sheet_id')
     if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags'] or check_sharing_perms(data, flask.session['username'])['edit'] == True:
         pass
     else:
         return flask.redirect('/t/'+code)
-    return flask.render_template('editor.html', code=code, data=data, test_data=test_data, sheet_id=sheet_id, title=title, username=flask.session['username'], name=user_data['name'])
+    return flask.render_template('editor.html', code=code, data=data, test_data=test_data, title=title, username=flask.session['username'], name=user_data['name'])
 
 #################### API Endpoints ####################
 
@@ -1773,6 +1779,32 @@ def t_edit_api_load_metadata(code):
     if visibility == None:
         visibility = True
     return {"title": test_data['test_name'], "tags": ",".join(test_data['tags']), "subject": test_data['subject'], 'total_questions': test_data['question_count'], 'visibility': visibility}
+
+@app.route('/t/<code>/edit/api/enable', methods=['GET', 'POST'])
+def t_edit_api_enable(code):
+    user_data = get_user_data(flask.session['username'])
+    try:
+        with open('../data/test_metadata/'+code+'.json') as f:
+            data = parse_dict(f.read())
+    except FileNotFoundError:
+        return flask.render_template('404.html'), 404
+    if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags'] or check_sharing_perms(data, flask.session['username'])['edit'] == True:
+        pass
+    else:
+        return flask.redirect('/t/'+code)
+    with open('../data/test_metadata/'+code+'.json') as f:
+        test_data = parse_dict(f.read())
+    if flask.request.method == 'GET':
+        enable = test_data.get('enable')
+        if enable == None:
+            enable = True
+        return enable
+    elif flask.request.method == 'POST':
+        req_data = flask.request.json
+        test_data['enable'] = req_data['enable']
+        with open('../data/test_metadata/'+code+'.json', 'w') as f:
+            f.write(json.dumps(test_data))
+        return {'success': True}
 
 @app.route('/t/<code>/edit/api/visibility', methods=['GET', 'POST'])
 def t_edit_api_visibility(code):
