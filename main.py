@@ -838,7 +838,6 @@ def validate_test_data_raw(test_data):
 def before_request():
     if flask.request.headers['Host'] not in DOMAINS:
         return flask.redirect('https://google.com/', 301)
-    print(flask.request.headers)
     onlyfiles = [f for f in listdir('static/') if isfile(join('static/', f))]
     if flask.request.path != '/login' and flask.request.path not in anonymous_urls and flask.request.path.strip("/") not in onlyfiles:
         try:
@@ -1754,12 +1753,11 @@ def test_edit_editor(code):
             test_data = {}
             test_data['tags'] = []
             title = 'Untitled'
-    sheet_id = data.get('sheet_id')
     if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags'] or check_sharing_perms(data, flask.session['username'])['edit'] == True:
         pass
     else:
         return flask.redirect('/t/'+code)
-    return flask.render_template('editor.html', code=code, data=data, test_data=test_data, sheet_id=sheet_id, title=title, username=flask.session['username'], name=user_data['name'])
+    return flask.render_template('editor.html', code=code, data=data, test_data=test_data, title=title, username=flask.session['username'], name=user_data['name'])
 
 #################### API Endpoints ####################
 
