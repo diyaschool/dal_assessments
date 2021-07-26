@@ -896,21 +896,6 @@ def home():
     else:
         return flask.render_template('mobile/home.html', username=flask.session['username'], name=user_data['name'], created_tests=created_tests, created_tests_len=len(created_tests), current_tests=current_tests, current_tests_len=len(current_tests), completed_tests=completed_tests, completed_tests_len=len(completed_tests))
 
-@app.route('/home_beta')
-def home_beta():
-    desktop = True
-    for agent in mobile_agents:
-        if agent in flask.request.headers['User-Agent']:
-            desktop = False
-    user_data = get_user_data(flask.session['username'])
-    current_tests = get_current_tests_list(flask.session['username'])
-    completed_tests = get_completed_tests_list(flask.session['username'])
-    created_tests = get_created_tests_list(flask.session['username'])
-    if desktop:
-        return flask.render_template('home_beta.html', username=flask.session['username'], name=user_data['name'], created_tests=created_tests, created_tests_len=len(created_tests), current_tests=current_tests, current_tests_len=len(current_tests), completed_tests=completed_tests, completed_tests_len=len(completed_tests))
-    else:
-        return flask.render_template('mobile/home_beta.html', username=flask.session['username'], name=user_data['name'], created_tests=created_tests, created_tests_len=len(created_tests), current_tests=current_tests, current_tests_len=len(current_tests), completed_tests=completed_tests, completed_tests_len=len(completed_tests))
-
 @app.route('/logout')
 def logout():
     flask.session.pop('username')
@@ -932,6 +917,7 @@ def clear_test_cookies():
 
 @app.route('/t/<code>/verify', methods=['POST'])
 def t_verify(code):
+    code = sanitize_input(code)
     data = flask.request.form
     if str(data['answer']) == str(flask.session['t']['c_a_i']):
         flask.session['t']['prev_q_res'] = True
@@ -956,6 +942,7 @@ def t_verify(code):
 
 @app.route('/t/<code>/')
 def t_view(code):
+    code = sanitize_input(code)
     desktop = True
     for agent in mobile_agents:
         if agent in flask.request.headers['User-Agent']:
@@ -1248,16 +1235,12 @@ def new_test():
     if flask.request.method == 'GET':
         return flask.render_template('new_test.html', username=flask.session['username'], name=user_data['name'])
     else:
-        # gauth = googleapis.authorize()
-        # creds = gauth.load_credentials(flask.session['username'])
-        # if creds == None:
-        #     flask.session['settings_alert'] = 'Please link your Google account before creating a test'
-        #     return flask.redirect('/settings')
         test_id = create_new_test_sheet(flask.session['username'])
         return flask.redirect('/t/'+test_id+'/edit/editor/')
 
 @app.route('/t/<code>/edit/delete/', methods=['GET'])
 def test_edit_delete(code):
+    code = sanitize_input(code)
     try:
         with open('../data/test_metadata/'+code+'.json') as f:
             data = parse_dict(f.read())
@@ -1273,10 +1256,12 @@ def test_edit_delete(code):
 
 @app.route('/t/<code>/edit/', methods=['GET'])
 def test_edit(code):
+    code = sanitize_input(code)
     return flask.redirect("/t/"+code+"/edit/editor/", 301)
 
 @app.route('/t/<code>/analytics/')
 def test_analytics(code):
+    code = sanitize_input(code)
     user_data = get_user_data(flask.session['username'])
     try:
         with open('../data/test_metadata/'+code+'.json') as f:
@@ -1324,6 +1309,8 @@ def test_analytics(code):
 
 @app.route('/t/<code>/analytics_download/<mode>')
 def test_analytics_download(code, mode):
+    code = sanitize_input(code)
+    mode = sanitize_input(mode)
     user_data = get_user_data(flask.session['username'])
     try:
         with open('../data/test_metadata/'+code+'.json') as f:
@@ -1397,6 +1384,8 @@ def test_analytics_download(code, mode):
 
 @app.route('/t/<code>/analytics/<username>/')
 def test_analytics_user(code, username):
+    code = sanitize_input(code)
+    username = sanitize_input(username)
     auserdata = get_user_data(username)
     user_data = get_user_data(flask.session['username'])
     try:
@@ -1640,6 +1629,7 @@ def t_static(code, file_code):
 
 @app.route('/t/<code>/edit/editor/', methods=['GET', 'POST'])
 def test_edit_editor(code):
+    code = sanitize_input(code)
     user_data = get_user_data(flask.session['username'])
     try:
         with open('../data/test_metadata/'+code+'.json') as f:
@@ -1673,6 +1663,7 @@ def test_edit_editor(code):
 
 @app.route('/t/<code>/edit/api/load_metadata')
 def t_edit_api_load_metadata(code):
+    code = sanitize_input(code)
     user_data = get_user_data(flask.session['username'])
     try:
         with open('../data/test_metadata/'+code+'.json') as f:
@@ -1719,6 +1710,7 @@ def t_edit_api_enable(code):
 
 @app.route('/t/<code>/edit/api/visibility', methods=['GET', 'POST'])
 def t_edit_api_visibility(code):
+    code = sanitize_input(code)
     user_data = get_user_data(flask.session['username'])
     try:
         with open('../data/test_metadata/'+code+'.json') as f:
@@ -1742,6 +1734,7 @@ def t_edit_api_visibility(code):
 
 @app.route('/t/<code>/edit/api/title', methods=['GET', 'POST'])
 def t_edit_api_title(code):
+    code = sanitize_input(code)
     user_data = get_user_data(flask.session['username'])
     try:
         with open('../data/test_metadata/'+code+'.json') as f:
@@ -1793,6 +1786,7 @@ def t_edit_api_title(code):
 
 @app.route('/t/<code>/edit/api/subject', methods=['GET', 'POST'])
 def t_edit_api_subject(code):
+    code = sanitize_input(code)
     user_data = get_user_data(flask.session['username'])
     try:
         with open('../data/test_metadata/'+code+'.json') as f:
@@ -1816,6 +1810,7 @@ def t_edit_api_subject(code):
 
 @app.route('/t/<code>/edit/api/tags', methods=['GET', 'POST'])
 def t_edit_api_tags(code):
+    code = sanitize_input(code)
     user_data = get_user_data(flask.session['username'])
     try:
         with open('../data/test_metadata/'+code+'.json') as f:
@@ -1876,6 +1871,7 @@ def t_edit_api_tags(code):
 
 @app.route('/t/<code>/edit/api/total_questions', methods=['GET', 'POST'])
 def t_edit_api_total_questions(code):
+    code = sanitize_input(code)
     user_data = get_user_data(flask.session['username'])
     try:
         with open('../data/test_metadata/'+code+'.json') as f:
@@ -2033,6 +2029,7 @@ def t_edit_api_apply_changes(code):
 
 @app.route('/t/<code>/edit/editor/add_que', methods=['POST'])
 def test_editor_add_que(code):
+    code = sanitize_input(code)
     user_data = get_user_data(flask.session['username'])
     try:
         with open('../data/test_metadata/'+code+'.json') as f:
@@ -2064,6 +2061,7 @@ def test_editor_add_que(code):
 
 @app.route('/t/<code>/edit/editor/update_que', methods=['POST'])
 def test_editor_update_que(code):
+    code = sanitize_input(code)
     user_data = get_user_data(flask.session['username'])
     try:
         with open('../data/test_metadata/'+code+'.json') as f:
