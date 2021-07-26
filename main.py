@@ -865,6 +865,12 @@ def after_request(response):
     response.headers["X-Content-Type-Options"] = "nosniff"
     return response
 
+def sanitize_input(in_data):
+    in_data.replace('.', '')
+    in_data.replace('/', '')
+    in_data.replace('\\', '')
+    return in_data
+
 #################### Context Processors ####################
 
 @app.context_processor
@@ -1575,6 +1581,7 @@ def u_r(code):
 
 @app.route('/t/<code>/upload/', methods=['POST'])
 def upload_file(code):
+    code = sanitize_input(code)
     user_data = get_user_data(flask.session['username'])
     try:
         with open('../data/test_metadata/'+code+'.json') as f:
@@ -1612,6 +1619,8 @@ def upload_file(code):
 
 @app.route('/t/<code>/upload/delete/<file_id>/')
 def upload_delete(code, file_id):
+    code = sanitize_input(code)
+    file_id = sanitize_input(file_id)
     user_data = get_user_data(flask.session['username'])
     with open('../data/test_metadata/'+code+'.json') as f:
         test_metadata = parse_dict(f.read())
@@ -1683,6 +1692,7 @@ def t_edit_api_load_metadata(code):
 
 @app.route('/t/<code>/edit/api/enable', methods=['GET', 'POST'])
 def t_edit_api_enable(code):
+    code = sanitize_input(code)
     user_data = get_user_data(flask.session['username'])
     try:
         with open('../data/test_metadata/'+code+'.json') as f:
@@ -1822,7 +1832,7 @@ def t_edit_api_tags(code):
         return test_data['test_name']
     elif flask.request.method == 'POST':
         req_data = flask.request.json
-        tags_raw = req_data['tags'].split(',')
+        tags_raw = sanitize_input(req_data['tags']).split(',')
         tags = []
         for tag in tags_raw:
             tag = tag.strip()
@@ -1896,6 +1906,7 @@ def t_edit_api_total_questions(code):
 
 @app.route('/t/<code>/edit/api/apply_changes', methods=['POST'])
 def t_edit_api_apply_changes(code):
+    code = sanitize_input(code)
     user_data = get_user_data(flask.session['username'])
     try:
         with open('../data/test_metadata/'+code+'.json') as f:
@@ -2086,6 +2097,7 @@ def test_editor_update_que(code):
 
 @app.route('/t/<code>/edit/editor/delete_que', methods=['POST'])
 def test_editor_delete_que(code):
+    code = sanitize_input(code)
     user_data = get_user_data(flask.session['username'])
     try:
         with open('../data/test_metadata/'+code+'.json') as f:
@@ -2110,6 +2122,7 @@ def test_editor_delete_que(code):
 
 @app.route('/t/<code>/edit/editor/load_data')
 def test_editor_load_data(code):
+    code = sanitize_input(code)
     user_data = get_user_data(flask.session['username'])
     try:
         with open('../data/test_metadata/'+code+'.json') as f:
