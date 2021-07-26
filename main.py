@@ -1948,7 +1948,9 @@ def t_edit_api_apply_changes(code):
                     return 'Missing option text in a 5 mark question'
         with open('../data/test_data/'+code+'/config.json') as f:
             test_data = parse_dict(f.read())
-        test_data['question_count'] = len(editor_data.keys())
+        if len(editor_data['easy'])+len(editor_data['medium'])+len(editor_data['hard']) < test_data['question_count']:
+            print('testssssssss')
+            test_data['question_count'] = len(editor_data['easy'])+len(editor_data['medium'])+len(editor_data['hard'])
         if test_data['test_name'].strip() == "":
             return "Title empty. Please enter the title."
         if test_data['subject'].strip() == "":
