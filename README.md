@@ -1,6 +1,6 @@
 # DAL Assessments
 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/1011a8694a714340a62f24ccde43e5aa)](https://app.codacy.com/gh/ChaitanyaPy/dal_assessments?utm_source=github.com&utm_medium=referral&utm_content=ChaitanyaPy/dal_assessments&utm_campaign=Badge_Grade)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/9e4d4633522c46f3aa06bedb019c7ef0)](https://www.codacy.com/gh/diyaschool/dal_assessments/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=diyaschool/dal_assessments&amp;utm_campaign=Badge_Grade)
 [![GitHub license](https://img.shields.io/github/license/Naereen/StrapDown.js.svg)](https://github.com/ChaitanyaPy/dal_assessments/blob/master/LICENSE)
 [![Website shields.io](https://img.shields.io/website-up-down-green-red/http/shields.io.svg)](https://diyaassessments.pythonanywhere.com)
 [![GitHub issues](https://img.shields.io/github/issues/ChaitanyaPy/dal_assessments.svg)](https://github.com/ChaitanyaPy/dal_assessments/issues/)
