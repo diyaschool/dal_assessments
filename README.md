@@ -30,7 +30,7 @@ The project is pretty new and we did it mostly just for fun, but it works surpri
 This website was particularly built for Diya Academy of Learning. If you want an exclusive copy for yourself, you will have to run your own web server.
 Almost everything is working fine execpt the occasional bugs.
 
-Please report bugs [here]https://github.com/diyaschool/dal_assessments/issues/new?assignees=&labels=&template=bug_report.md) and suggest ideas [here](https://github.com/diyaschool/dal_assessments/issues/new?assignees=&labels=&template=feature_request.md), it really helps.
+Please report bugs [here](https://github.com/diyaschool/dal_assessments/issues/new?assignees=&labels=&template=bug_report.md) and suggest ideas [here](https://github.com/diyaschool/dal_assessments/issues/new?assignees=&labels=&template=feature_request.md), it really helps.
 
 
 [![forthebadge](https://forthebadge.com/images/badges/check-it-out.svg)](https://diyaassessments.pythonanywhere.com/)
