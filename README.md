@@ -1,6 +1,6 @@
 # DAL Assessments
 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/1011a8694a714340a62f24ccde43e5aa)](https://app.codacy.com/gh/ChaitanyaPy/dal_assessments?utm_source=github.com&utm_medium=referral&utm_content=ChaitanyaPy/dal_assessments&utm_campaign=Badge_Grade)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/9e4d4633522c46f3aa06bedb019c7ef0)](https://www.codacy.com/gh/diyaschool/dal_assessments/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=diyaschool/dal_assessments&amp;utm_campaign=Badge_Grade)
 [![GitHub license](https://img.shields.io/github/license/Naereen/StrapDown.js.svg)](https://github.com/ChaitanyaPy/dal_assessments/blob/master/LICENSE)
 [![Website shields.io](https://img.shields.io/website-up-down-green-red/http/shields.io.svg)](https://diyaassessments.pythonanywhere.com)
 [![GitHub issues](https://img.shields.io/github/issues/ChaitanyaPy/dal_assessments.svg)](https://github.com/ChaitanyaPy/dal_assessments/issues/)
@@ -30,7 +30,7 @@ The project is pretty new and we did it mostly just for fun, but it works surpri
 This website was particularly built for Diya Academy of Learning. If you want an exclusive copy for yourself, you will have to run your own web server.
 Almost everything is working fine execpt the occasional bugs.
 
-Please report bugs [here](https://github.com/ChaitanyaPy/dal_assessments/issues/new?assignees=&labels=&template=bug_report.md) and suggest ideas [here](https://github.com/ChaitanyaPy/dal_assessments/issues/new?assignees=&labels=&template=feature_request.md), it really helps.
+Please report bugs [here](https://github.com/diyaschool/dal_assessments/issues/new?assignees=&labels=&template=bug_report.md) and suggest ideas [here](https://github.com/diyaschool/dal_assessments/issues/new?assignees=&labels=&template=feature_request.md), it really helps.
 
 
 [![forthebadge](https://forthebadge.com/images/badges/check-it-out.svg)](https://diyaassessments.pythonanywhere.com/)
