@@ -10,6 +10,7 @@ Any URL request on this server without logging in will be returned with a redire
                                        when complete: t_completed.html
 /login                             - [HTML] login.html
 /new_test                          - [HTML] new_test.html
+/aboutus                           - [HTML] aboutus.html 
 /t/<code>/edit/                    - [HTML] t_edit.html
 /t/<code>/analytics/               - [HTML] test_analytics.html
 /t/<code>/analytics/<username>/    - [HTML] test_analytics.html
