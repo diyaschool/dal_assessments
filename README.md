@@ -23,12 +23,12 @@ Built with :heart: by the students of [Diya Academy of Learning](https://www.diy
 This is a website that allows teachers/tutors to conduct academic tests for students. Currently it supports only MCQ format of questions for auto-correction. On completing a test, it returns the final test score and saves a detailed record of the test stream which includes analytocs like question sequence, difficulty modulation, average time, total time, etc.
 
 ## Why is this special?
-This isn't a static test, it keeps changing. We have used few algorithms to make each test uniquely adapt the person attending it. It automatically adjusts the difficulty of the upcoming questions to allow the student to learn from their mistakes in a uniform fashion.
+This isn't a static test, it keeps changing. We used a few algorithms to make each test uniquely adapt to the person attending it. It automatically adjusts the difficulty of the upcoming questions to allow the student to learn from their mistakes in a uniform fashion.
 
 ## Status and usability
 The project is pretty new and we did it mostly just for fun, but it works surprisingly well though.
 This website was particularly built for Diya Academy of Learning. If you want an exclusive copy for yourself, you will have to run your own web server.
-Almost everything is working fine execpt the occasional bugs.
+Almost everything is working fine execpt the occasional bugs. Why dont u check the website out? Take a look [here](https://diyaassessments.pythonanywhere.com/)
 
 Please report bugs [here](https://github.com/diyaschool/dal_assessments/issues/new?assignees=&labels=&template=bug_report.md) and suggest ideas [here](https://github.com/diyaschool/dal_assessments/issues/new?assignees=&labels=&template=feature_request.md), it really helps.
 
