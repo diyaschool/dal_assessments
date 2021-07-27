@@ -896,10 +896,10 @@ def home():
     else:
         return flask.render_template('mobile/home.html', username=flask.session['username'], name=user_data['name'], created_tests=created_tests, created_tests_len=len(created_tests), current_tests=current_tests, current_tests_len=len(current_tests), completed_tests=completed_tests, completed_tests_len=len(completed_tests))
 
-@app.route('/aboutus')
-def aboutus():
+@app.route('/about')
+def about():
     user_data = get_user_data(flask.session['username'])
-    return flask.render_template("aboutus.html", username=flask.session['username'], name=user_data['name'])
+    return flask.render_template("about.html", username=flask.session['username'], name=user_data['name'])
 
 @app.route('/logout')
 def logout():
