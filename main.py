@@ -961,11 +961,16 @@ def home():
     else:
         return flask.render_template('mobile/home.html', username=flask.session['username'], name=user_data['name'], created_tests=created_tests, created_tests_len=len(created_tests), current_tests=current_tests, current_tests_len=len(current_tests), completed_tests=completed_tests, completed_tests_len=len(completed_tests))
 
+<<<<<<< HEAD
 
 @app.route('/aboutus')
 def aboutus():
+=======
+@app.route('/about')
+def about():
+>>>>>>> 58b4de77af0f83ce99c5935570ca9e95c1e8fe80
     user_data = get_user_data(flask.session['username'])
-    return flask.render_template("aboutus.html", username=flask.session['username'], name=user_data['name'])
+    return flask.render_template("about.html", username=flask.session['username'], name=user_data['name'])
 
 
 @app.route('/logout')
