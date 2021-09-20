@@ -38,7 +38,8 @@ with open('../data/auth_domains') as f:
     DOMAINS = f.read().split('\n')
 DOMAIN = DOMAINS[0]
 
-anonymous_urls = ['/favicon.ico', '/clear_test_cookies', '/logo.png', '/background.png', '/loading.gif', '/update_server', '/privacy-policy', '/gauthtoken']
+anonymous_urls = ['/favicon.ico', '/clear_test_cookies', '/logo.png',
+                  '/background.png', '/loading.gif', '/update_server', '/privacy-policy', '/gauthtoken']
 mobile_agents = ['Android', 'iPhone', 'iPod touch']
 
 user_credentials = {}
@@ -48,11 +49,13 @@ to_zone = tz.gettz('Asia/Kolkata')
 
 #################### Utility Functions ####################
 
+
 def curr_dt():
     dt = datetime.datetime.now()
     dt.replace(tzinfo=from_zone)
     dt = dt.astimezone(to_zone)
     return dt
+
 
 def log_data(username, data):
     if os.path.isdir(f"../data/user_data/{username}/logs") == False:
@@ -74,19 +77,22 @@ def log_data(username, data):
     log['utime'] = str(time.time())
     log.update(data)
     with open(path, 'a') as f:
-        f.write("\n"+json.dumps(log))
+        f.write("\n" + json.dumps(log))
+
 
 def list_to_csv(data):
     output_data = ""
     for row in data:
         for cell in row:
-            output_data += str(cell)+","
+            output_data += str(cell) + ","
         output_data += "\n"
     return output_data
 
+
 def convert_analytics_to_csv(data):
     output_data = []
-    output_data.append(['#', 'Username', 'Name', 'Total Score', 'Average Time', 'Total Time', 'Time Stamp', 'Score (EZ)', 'Score (MID)', 'Score (HARD)', 'Percentage (EZ)', 'Percentage (MID)', 'Percentage (HARD)', 'Attempts'])
+    output_data.append(['#', 'Username', 'Name', 'Total Score', 'Average Time', 'Total Time', 'Time Stamp', 'Score (EZ)',
+                       'Score (MID)', 'Score (HARD)', 'Percentage (EZ)', 'Percentage (MID)', 'Percentage (HARD)', 'Attempts'])
     for response in data:
         total_diff_scores_list = []
         for diff in response['difficulty_fraction']:
@@ -104,26 +110,30 @@ def convert_analytics_to_csv(data):
         else:
             attempts = f'Attempts {response.get("attempts")}'
         total_diff_scores = total_diff_scores.replace(' ', '').split('|')
-        total_diff_percentage = total_diff_percentage.replace(' ', '').split('|')
-        row_var = [response['index'], response['username'], response['name'], response['score'], response['average_time'], response['total_time'], response['long_time_stamp'], total_diff_scores[0], total_diff_scores[1], total_diff_scores[2], total_diff_percentage[0], total_diff_percentage[1], total_diff_percentage[2], attempts]
+        total_diff_percentage = total_diff_percentage.replace(
+            ' ', '').split('|')
+        row_var = [response['index'], response['username'], response['name'], response['score'], response['average_time'], response['total_time'], response['long_time_stamp'],
+                   total_diff_scores[0], total_diff_scores[1], total_diff_scores[2], total_diff_percentage[0], total_diff_percentage[1], total_diff_percentage[2], attempts]
         output_data.append(row_var)
     return output_data
+
 
 def get_difficulty_percentage(data):
     output_data = [0, 0, 0]
     try:
-        output_data[0] = int(data[0][0]/data[0][1]*100)
+        output_data[0] = int(data[0][0] / data[0][1] * 100)
     except ZeroDivisionError:
         output_data[0] = None
     try:
-        output_data[1] = int(data[1][0]/data[1][1]*100)
+        output_data[1] = int(data[1][0] / data[1][1] * 100)
     except ZeroDivisionError:
         output_data[1] = None
     try:
-        output_data[2] = int(data[2][0]/data[2][1]*100)
+        output_data[2] = int(data[2][0] / data[2][1] * 100)
     except ZeroDivisionError:
         output_data[2] = None
     return output_data
+
 
 def get_difficulty_fraction(data):
     output_data = [[0, 0], [0, 0], [0, 0]]
@@ -142,10 +152,13 @@ def get_difficulty_fraction(data):
                 output_data[2][0] += 1
     return output_data
 
+
 def get_data_check_string(data):
     data = OrderedDict(sorted(data.items()))
-    data_check_string = '\n'.join(['%s=%s' % (key, value) for (key, value) in data.items() if key != 'hash'])
+    data_check_string = '\n'.join(
+        ['%s=%s' % (key, value) for (key, value) in data.items() if key != 'hash'])
     return data_check_string
+
 
 def parse_access_token_str(token_str):
     if token_str[:5] == 'error':
@@ -153,6 +166,7 @@ def parse_access_token_str(token_str):
     _vars = str(token_str).split('&')
     access_token = _vars[0].split('=')[1]
     return access_token
+
 
 def parse_dict(str_data):
     try:
@@ -162,6 +176,7 @@ def parse_dict(str_data):
     except SyntaxError:
         return False
 
+
 def check_sharing_perms(test_metadata, username):
     if test_metadata.get('sharing') == None:
         return {"edit": False, "overview-analytics": False, "individual-analytics": False, "files": False, "attend": False}
@@ -170,15 +185,17 @@ def check_sharing_perms(test_metadata, username):
             return user['settings']
     return {"edit": False, "overview-analytics": False, "individual-analytics": False, "files": False, "attend": False}
 
+
 def check_hook_integrity(ip):
     if ipaddress.ip_address(ip) in ipaddress.ip_network('192.30.252.0/22') or ipaddress.ip_address(ip) in ipaddress.ip_network('185.199.108.0/22') or ipaddress.ip_address(ip) in ipaddress.ip_network('140.82.112.0/20'):
         return True
     else:
         return False
 
+
 def get_user_response(username, test_id):
     try:
-        with open('../data/response_data/'+test_id+'.json') as f:
+        with open('../data/response_data/' + test_id + '.json') as f:
             data = parse_dict(f.read())
     except FileNotFoundError:
         return False
@@ -187,12 +204,13 @@ def get_user_response(username, test_id):
             return str(i)
     return False
 
+
 def save_test_response(username, test_id):
     user_data = get_user_data(username)
-    with open('../data/user_data/'+username+'/test_data/'+test_id+'.json') as f:
+    with open('../data/user_data/' + username + '/test_data/' + test_id + '.json') as f:
         tdata = parse_dict(f.read())
     tdata['completed'] = True
-    with open('../data/user_data/'+username+'/test_data/'+test_id+'.json', 'w') as f:
+    with open('../data/user_data/' + username + '/test_data/' + test_id + '.json', 'w') as f:
         f.write(json.dumps(tdata))
     total_time = 0
     times = []
@@ -205,13 +223,13 @@ def save_test_response(username, test_id):
     data['username'] = username
     user_data = get_user_data(username)
     data['name'] = user_data['name']
-    data['average_time'] = round(sum(times)/len(times), 2)
-    with open('../data/user_data/'+username+'/test_data/'+test_id+'.json') as f:
+    data['average_time'] = round(sum(times) / len(times), 2)
+    with open('../data/user_data/' + username + '/test_data/' + test_id + '.json') as f:
         data['question_stream'] = parse_dict(f.read())['question_stream']
     now = curr_dt()
     if now.hour > 12:
         c_m = 'PM'
-        hour = now.hour-12
+        hour = now.hour - 12
     else:
         c_m = 'AM'
         hour = now.hour
@@ -219,70 +237,77 @@ def save_test_response(username, test_id):
         c_m = 'PM'
         hour = hour
     if len(str(now.minute)) == 1:
-        minute = '0'+str(now.minute)
+        minute = '0' + str(now.minute)
     else:
         minute = now.minute
-    with open('../data/test_metadata/'+test_id+'.json') as f:
+    with open('../data/test_metadata/' + test_id + '.json') as f:
         test_metadata = parse_dict(f.read())
-    data["time_stamp"] = str(hour)+":"+str(minute)+":"+str(now.second)+' '+c_m
-    data["long_time_stamp"] = str(now.day)+"-"+str(now.month)+"-"+str(now.year)+" "+str(hour)+":"+str(minute)+":"+str(now.second)+' '+c_m
-    if os.path.isdir('../data/user_data/'+username+'/response_data/') == False:
-        os.makedirs('../data/user_data/'+username+'/response_data/')
-    with open('../data/user_data/'+username+'/response_data/'+test_id+'.json', 'w') as f:
-        with open('../data/test_data/'+test_id+'/config.json') as g:
+    data["time_stamp"] = str(hour) + ":" + str(minute) + \
+        ":" + str(now.second) + ' ' + c_m
+    data["long_time_stamp"] = str(now.day) + "-" + str(now.month) + "-" + str(
+        now.year) + " " + str(hour) + ":" + str(minute) + ":" + str(now.second) + ' ' + c_m
+    if os.path.isdir('../data/user_data/' + username + '/response_data/') == False:
+        os.makedirs('../data/user_data/' + username + '/response_data/')
+    with open('../data/user_data/' + username + '/response_data/' + test_id + '.json', 'w') as f:
+        with open('../data/test_data/' + test_id + '/config.json') as g:
             _ = parse_dict(g.read())
-        f.write(json.dumps({"time_stamp": data['time_stamp'], "long_time_stamp": data['long_time_stamp'], 'score': data['score'], "id": test_id}))
+        f.write(json.dumps(
+            {"time_stamp": data['time_stamp'], "long_time_stamp": data['long_time_stamp'], 'score': data['score'], "id": test_id}))
     response_id = get_user_response(username, test_id)
     if response_id != False:
-        with open('../data/response_data/'+test_id+'.json') as f:
+        with open('../data/response_data/' + test_id + '.json') as f:
             cdata = parse_dict(f.read())
         cresponse_count = len(cdata['responses'])
-        data['index'] = int(response_id)+1
+        data['index'] = int(response_id) + 1
         try:
-            data['attempts'] = cdata['responses'][int(response_id)]['attempts'] + 1
+            data['attempts'] = cdata['responses'][int(
+                response_id)]['attempts'] + 1
         except KeyError:
             data['attempts'] = 2
         cdata['responses'][int(response_id)] = data
-        with open('../data/response_data/'+test_id+'.json', 'w') as f:
+        with open('../data/response_data/' + test_id + '.json', 'w') as f:
             f.write(json.dumps(cdata))
     else:
         try:
-            with open('../data/response_data/'+test_id+'.json') as f:
+            with open('../data/response_data/' + test_id + '.json') as f:
                 cdata = parse_dict(f.read())
             cresponse_count = len(cdata['responses'])
-            with open('../data/user_data/'+test_metadata['owner']+'/created_tests/'+test_id+'.json') as f:
+            with open('../data/user_data/' + test_metadata['owner'] + '/created_tests/' + test_id + '.json') as f:
                 cr_fdata = parse_dict(f.read())
-            cr_fdata['responses_count'] = len(cdata['responses'])+1
-            with open('../data/user_data/'+test_metadata['owner']+'/created_tests/'+test_id+'.json', 'w') as f:
+            cr_fdata['responses_count'] = len(cdata['responses']) + 1
+            with open('../data/user_data/' + test_metadata['owner'] + '/created_tests/' + test_id + '.json', 'w') as f:
                 f.write(json.dumps(cr_fdata))
-            data['index'] = cresponse_count+1
+            data['index'] = cresponse_count + 1
             data['attempts'] = 1
             cdata['responses'].append(data)
-            with open('../data/response_data/'+test_id+'.json', 'w') as f:
+            with open('../data/response_data/' + test_id + '.json', 'w') as f:
                 f.write(json.dumps(cdata))
         except FileNotFoundError:
-            with open('../data/user_data/'+test_metadata['owner']+'/created_tests/'+test_id+'.json') as f:
+            with open('../data/user_data/' + test_metadata['owner'] + '/created_tests/' + test_id + '.json') as f:
                 cr_fdata = parse_dict(f.read())
             cr_fdata['responses_count'] = 1
-            with open('../data/user_data/'+test_metadata['owner']+'/created_tests/'+test_id+'.json', 'w') as f:
+            with open('../data/user_data/' + test_metadata['owner'] + '/created_tests/' + test_id + '.json', 'w') as f:
                 f.write(json.dumps(cr_fdata))
             cdata = {}
             cdata['responses'] = []
             data['index'] = 1
             data['attempts'] = 1
             cdata['responses'].append(data)
-            with open('../data/response_data/'+test_id+'.json', 'w') as f:
+            with open('../data/response_data/' + test_id + '.json', 'w') as f:
                 f.write(json.dumps(cdata))
+
 
 def delete_score(username, test_id):
     try:
-        os.remove('../data/user_data/'+username+'/test_data/'+test_id+'.json')
+        os.remove('../data/user_data/' + username +
+                  '/test_data/' + test_id + '.json')
     except FileNotFoundError:
         pass
 
+
 def update_score(username, test_id, ans_res, difficulty, question_id, answer_index, score, ans_score, time_taken):
     try:
-        with open('../data/user_data/'+username+'/test_data/'+test_id+'.json') as f:
+        with open('../data/user_data/' + username + '/test_data/' + test_id + '.json') as f:
             fdata = f.read()
         data = parse_dict(fdata)
         try:
@@ -309,32 +334,36 @@ def update_score(username, test_id, ans_res, difficulty, question_id, answer_ind
     now = curr_dt()
     if now.hour >= 12:
         c_m = 'PM'
-        hour = now.hour-12
+        hour = now.hour - 12
     else:
         c_m = 'AM'
         hour = now.hour
     if len(str(now.minute)) == 1:
-        minute = '0'+str(now.minute)
+        minute = '0' + str(now.minute)
     else:
         minute = now.minute
     try:
-        data['question_stream'].append({"difficulty": difficulty, "question_id": question_id, "question": test_data['questions'][difficulty][question_id]['question'], "given_answer": ans_given_text, "given_answer_index": answer_index, 'ans_res': ans_res, 'ans_score': ans_score, "time_taken": time_taken, "time_stamp": str(hour)+":"+str(minute)+":"+str(now.second)+' '+c_m, "long_time_stamp": str(now.day)+"-"+str(now.month)+"-"+str(now.year)+" "+str(hour)+":"+str(minute)+":"+str(now.second)+' '+c_m, "index": len(data['question_stream'])+1})
+        data['question_stream'].append({"difficulty": difficulty, "question_id": question_id, "question": test_data['questions'][difficulty][question_id]['question'], "given_answer": ans_given_text, "given_answer_index": answer_index, 'ans_res': ans_res, 'ans_score': ans_score, "time_taken": time_taken, "time_stamp": str(
+            hour) + ":" + str(minute) + ":" + str(now.second) + ' ' + c_m, "long_time_stamp": str(now.day) + "-" + str(now.month) + "-" + str(now.year) + " " + str(hour) + ":" + str(minute) + ":" + str(now.second) + ' ' + c_m, "index": len(data['question_stream']) + 1})
     except KeyError:
         data['question_stream'] = []
-        data['question_stream'].append({"difficulty": difficulty, "question_id": question_id, "question": test_data['questions'][difficulty][question_id]['question'], "given_answer": ans_given_text, "given_answer_index": answer_index, 'ans_res': ans_res, 'ans_score': ans_score, "time_taken": time_taken, "time_stamp": str(hour)+":"+str(minute)+":"+str(now.second)+' '+c_m, "long_time_stamp": str(now.day)+"-"+str(now.month)+"-"+str(now.year)+" "+str(hour)+":"+str(minute)+":"+str(now.second)+' '+c_m, "index": 1})
+        data['question_stream'].append({"difficulty": difficulty, "question_id": question_id, "question": test_data['questions'][difficulty][question_id]['question'], "given_answer": ans_given_text, "given_answer_index": answer_index, 'ans_res': ans_res, 'ans_score': ans_score,
+                                       "time_taken": time_taken, "time_stamp": str(hour) + ":" + str(minute) + ":" + str(now.second) + ' ' + c_m, "long_time_stamp": str(now.day) + "-" + str(now.month) + "-" + str(now.year) + " " + str(hour) + ":" + str(minute) + ":" + str(now.second) + ' ' + c_m, "index": 1})
     data['score'] = score
-    with open('../data/user_data/'+username+'/test_data/'+test_id+'.json', 'w') as f:
+    with open('../data/user_data/' + username + '/test_data/' + test_id + '.json', 'w') as f:
         f.write(json.dumps(data))
     return True
 
+
 def get_user_data(user_id):
     try:
-        with open('../data/user_metadata/'+user_id) as f:
+        with open('../data/user_metadata/' + user_id) as f:
             fdata = f.read()
         data = parse_dict(fdata)
         return data
     except FileNotFoundError:
         return False
+
 
 def row_to_column(sheet):
     output = []
@@ -349,6 +378,7 @@ def row_to_column(sheet):
                 c_cell = ''
             output[i].append(c_cell)
     return output
+
 
 def convert(sheet, teacher=False):
     try:
@@ -368,30 +398,37 @@ def convert(sheet, teacher=False):
         for i in range(len(sheet[2])):
             if sheet[2][i] == '':
                 continue
-            c_a_i = parse_dict(sheet[4][i])-1
+            c_a_i = parse_dict(sheet[4][i]) - 1
             if sheet[5][i] == '':
-                output['questions']['easy'].append({"question": sheet[2][i], "answers": sheet[3][i].split('\n'), "correct_answer_index": c_a_i})
+                output['questions']['easy'].append(
+                    {"question": sheet[2][i], "answers": sheet[3][i].split('\n'), "correct_answer_index": c_a_i})
             else:
-                output['questions']['easy'].append({"question": sheet[2][i], "answers": sheet[3][i].split('\n'), "correct_answer_index": c_a_i, "image": sheet[5][i]})
+                output['questions']['easy'].append({"question": sheet[2][i], "answers": sheet[3][i].split(
+                    '\n'), "correct_answer_index": c_a_i, "image": sheet[5][i]})
         for i in range(len(sheet[6])):
             if sheet[6][i] == '':
                 continue
-            c_a_i = parse_dict(sheet[8][i])-1
+            c_a_i = parse_dict(sheet[8][i]) - 1
             if sheet[9][i] == '':
-                output['questions']['medium'].append({"question": sheet[6][i], "answers": sheet[7][i].split('\n'), "correct_answer_index": c_a_i})
+                output['questions']['medium'].append(
+                    {"question": sheet[6][i], "answers": sheet[7][i].split('\n'), "correct_answer_index": c_a_i})
             else:
-                output['questions']['medium'].append({"question": sheet[6][i], "answers": sheet[7][i].split('\n'), "correct_answer_index": c_a_i, "image": sheet[9][i]})
+                output['questions']['medium'].append({"question": sheet[6][i], "answers": sheet[7][i].split(
+                    '\n'), "correct_answer_index": c_a_i, "image": sheet[9][i]})
         for i in range(len(sheet[10])):
             if sheet[10][i] == '':
                 continue
-            c_a_i = parse_dict(sheet[12][i])-1
+            c_a_i = parse_dict(sheet[12][i]) - 1
             try:
                 if sheet[13][i] == '':
-                    output['questions']['hard'].append({"question": sheet[10][i], "answers": sheet[11][i].split('\n'), "correct_answer_index": c_a_i})
+                    output['questions']['hard'].append(
+                        {"question": sheet[10][i], "answers": sheet[11][i].split('\n'), "correct_answer_index": c_a_i})
                 else:
-                    output['questions']['hard'].append({"question": sheet[10][i], "answers": sheet[11][i].split('\n'), "correct_answer_index": c_a_i, "image": sheet[13][i]})
+                    output['questions']['hard'].append({"question": sheet[10][i], "answers": sheet[11][i].split(
+                        '\n'), "correct_answer_index": c_a_i, "image": sheet[13][i]})
             except IndexError:
-                output['questions']['hard'].append({"question": sheet[10][i], "answers": sheet[11][i].split('\n'), "correct_answer_index": c_a_i})
+                output['questions']['hard'].append(
+                    {"question": sheet[10][i], "answers": sheet[11][i].split('\n'), "correct_answer_index": c_a_i})
         try:
             if sheet[0][2] == '':
                 q_n = 0
@@ -411,11 +448,13 @@ def convert(sheet, teacher=False):
     except Exception as e:
         return "ERROR"
 
+
 def create_new_test_sheet(owner):
     dt = curr_dt()
-    c_time = str(dt.hour)+':'+str(dt.minute)+':'+str(dt.second)
-    c_date = str(dt.year)+'-'+str(dt.month)+'-'+str(dt.day)
-    test_list = [f for f in os.listdir('../data/test_data') if os.path.isdir(os.path.join('../data/test_data', f))]
+    c_time = str(dt.hour) + ':' + str(dt.minute) + ':' + str(dt.second)
+    c_date = str(dt.year) + '-' + str(dt.month) + '-' + str(dt.day)
+    test_list = [f for f in os.listdir(
+        '../data/test_data') if os.path.isdir(os.path.join('../data/test_data', f))]
     while 1:
         r_id = id_generator()
         if r_id in test_list:
@@ -424,15 +463,19 @@ def create_new_test_sheet(owner):
             break
     test_id = r_id
     # sheet_id = googleapis.create_sheet(test_id, creds)
-    os.mkdir('../data/test_data/'+test_id)
-    os.mkdir('../data/test_data/'+test_id+'/files')
-    with open('../data/test_data/'+test_id+'/config.json', 'w') as f:
-        f.write(json.dumps({"test_name": "", "subject": "", "tags": [], "question_count": 0, "visibility": True}))
-    with open('../data/test_metadata/'+test_id+'.json', 'w') as f:
-        f.write(json.dumps({"owner": owner, "time": c_time, "date": c_date, "last_time": c_time, "last_date": c_date}))
-    with open('../data/user_data/'+owner+'/created_tests/'+test_id+'.json', 'w') as f:
-        f.write(json.dumps({"last_time": c_time, "last_date": c_date, "name": "Undefined", "subject": "Undefined", "responses_count": 0}))
+    os.mkdir('../data/test_data/' + test_id)
+    os.mkdir('../data/test_data/' + test_id + '/files')
+    with open('../data/test_data/' + test_id + '/config.json', 'w') as f:
+        f.write(json.dumps({"test_name": "", "subject": "",
+                "tags": [], "question_count": 0, "visibility": True}))
+    with open('../data/test_metadata/' + test_id + '.json', 'w') as f:
+        f.write(json.dumps({"owner": owner, "time": c_time,
+                "date": c_date, "last_time": c_time, "last_date": c_date}))
+    with open('../data/user_data/' + owner + '/created_tests/' + test_id + '.json', 'w') as f:
+        f.write(json.dumps({"last_time": c_time, "last_date": c_date,
+                "name": "Undefined", "subject": "Undefined", "responses_count": 0}))
     return test_id
+
 
 def validate_test_data(data_string):
     try:
@@ -532,12 +575,14 @@ def validate_test_data(data_string):
             pass
     return True
 
+
 def id_generator(size=10, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
 
+
 def load_questions(test_id):
     try:
-        with open('../data/test_data/'+test_id+'/config.json') as f:
+        with open('../data/test_data/' + test_id + '/config.json') as f:
             fdata = f.read()
     except FileNotFoundError:
         return False
@@ -593,6 +638,7 @@ def load_questions(test_id):
                 q_n += 1
         data['question_count'] = q_n
     return data
+
 
 def get_difficulty(difficulty, completed_questions, questions, prev_q_res):
     if prev_q_res == True:
@@ -653,6 +699,7 @@ def get_difficulty(difficulty, completed_questions, questions, prev_q_res):
                 return 'TEST_COMPLETE'
     return difficulty
 
+
 def get_question(completed_questions, questions):
     if len(completed_questions) == len(questions):
         return 'QUESTIONS_COMPLETED'
@@ -664,31 +711,34 @@ def get_question(completed_questions, questions):
             break
     return q
 
+
 def delete_test(test_id):
-    with open('../data/test_metadata/'+test_id+'.json') as f:
+    with open('../data/test_metadata/' + test_id + '.json') as f:
         metadata = parse_dict(f.read())
     owner = metadata['owner']
     try:
-        os.remove('../data/user_data/'+owner+'/created_tests/'+test_id+'.json')
+        os.remove('../data/user_data/' + owner +
+                  '/created_tests/' + test_id + '.json')
     except FileNotFoundError:
         pass
     try:
-        os.remove('../data/user_data/'+owner+'/response_data/'+test_id+'.json')
+        os.remove('../data/user_data/' + owner +
+                  '/response_data/' + test_id + '.json')
     except FileNotFoundError:
         pass
     try:
-        with open('../data/user_data/'+owner+'/google_sheets_analytics_records') as f:
+        with open('../data/user_data/' + owner + '/google_sheets_analytics_records') as f:
             g_sheets_records = parse_dict(f.read())
         try:
             g_sheets_records.pop(test_id)
         except KeyError:
             pass
-        with open('../data/user_data/'+owner+'/google_sheets_analytics_records', 'w') as f:
+        with open('../data/user_data/' + owner + '/google_sheets_analytics_records', 'w') as f:
             f.write(json.dumps(g_sheets_records))
     except FileNotFoundError:
         pass
-    os.remove('../data/test_metadata/'+test_id+'.json')
-    with open('../data/test_data/'+test_id+'/config.json') as f:
+    os.remove('../data/test_metadata/' + test_id + '.json')
+    with open('../data/test_data/' + test_id + '/config.json') as f:
         try:
             test_data = parse_dict(f.read())
         except SyntaxError:
@@ -699,33 +749,36 @@ def delete_test(test_id):
             if tag == '':
                 continue
             try:
-                with open('../data/global_test_records/'+tag) as f:
+                with open('../data/global_test_records/' + tag) as f:
                     test_record = parse_dict(f.read())
                 try:
                     test_record.pop(test_id)
-                    with open('../data/global_test_records/'+tag, 'w') as f:
+                    with open('../data/global_test_records/' + tag, 'w') as f:
                         f.write(json.dumps(test_record))
                 except KeyError:
                     pass
             except FileNotFoundError:
                 pass
     try:
-        os.remove('../data/response_data/'+test_id+'.json')
+        os.remove('../data/response_data/' + test_id + '.json')
     except FileNotFoundError:
         pass
-    shutil.rmtree('../data/test_data/'+test_id)
+    shutil.rmtree('../data/test_data/' + test_id)
+
 
 def get_created_tests_list(username):
-    created_test_list = [f for f in os.listdir('../data/user_data/'+username+'/created_tests') if os.path.isfile(os.path.join('../data/user_data/'+username+'/created_tests', f))]
+    created_test_list = [f for f in os.listdir('../data/user_data/' + username + '/created_tests') if os.path.isfile(
+        os.path.join('../data/user_data/' + username + '/created_tests', f))]
     created_tests = []
     for test in created_test_list:
-        with open('../data/user_data/'+username+'/created_tests/'+test) as f:
+        with open('../data/user_data/' + username + '/created_tests/' + test) as f:
             created_tests.append(parse_dict(f.read()))
     sort_prep_list = []
     for i, test in enumerate(created_tests):
         test['id'] = created_test_list[i][:-5]
         temp_id = id_generator(5)
-        sort_prep_list.append(test['last_date']+' '+test['last_time']+' '+temp_id)
+        sort_prep_list.append(test['last_date'] +
+                              ' ' + test['last_time'] + ' ' + temp_id)
         test['temp_id'] = temp_id
     sorted_prep_list = sorted(sort_prep_list)
     final_sorted_list = []
@@ -740,12 +793,13 @@ def get_created_tests_list(username):
     final_sorted_list.reverse()
     return final_sorted_list
 
+
 def get_current_tests_list(username):
     user_data = get_user_data(username)
     test_id_list = []
     for tag in user_data['tags']:
         try:
-            with open('../data/global_test_records/'+tag) as f:
+            with open('../data/global_test_records/' + tag) as f:
                 fdata = parse_dict(f.read())
             test_id_list.extend(list(fdata.keys()))
         except FileNotFoundError:
@@ -763,7 +817,7 @@ def get_current_tests_list(username):
     test_data = []
     for test in test_id_list:
         temp = {}
-        with open('../data/test_data/'+test+'/config.json') as f:
+        with open('../data/test_data/' + test + '/config.json') as f:
             fdata = parse_dict(f.read())
         temp['id'] = test
         temp['name'] = fdata['test_name']
@@ -772,18 +826,20 @@ def get_current_tests_list(username):
         test_data.append(temp)
     return test_data
 
+
 def get_completed_tests_list(username):
     try:
-        tests = [f for f in listdir('../data/user_data/'+username+'/response_data/') if isfile(join('../data/user_data/'+username+'/response_data/', f))]
+        tests = [f for f in listdir('../data/user_data/' + username + '/response_data/')
+                 if isfile(join('../data/user_data/' + username + '/response_data/', f))]
     except FileNotFoundError:
         return []
     output = []
     for test in tests:
         try:
-            with open('../data/user_data/'+username+'/response_data/'+test) as f:
+            with open('../data/user_data/' + username + '/response_data/' + test) as f:
                 fdata = parse_dict(f.read())
                 temp = fdata.copy()
-            with open('../data/test_data/'+os.path.splitext(test)[0]+'/config.json') as f:
+            with open('../data/test_data/' + os.path.splitext(test)[0] + '/config.json') as f:
                 fdata = parse_dict(f.read())
             temp['name'] = fdata['test_name']
             temp['subject'] = fdata['subject']
@@ -792,6 +848,7 @@ def get_completed_tests_list(username):
             continue
     return output
 
+
 def editor_data_to_test_data(editor_data):
     for div in editor_data_raw:
         question = editor_data_raw[div]
@@ -799,7 +856,9 @@ def editor_data_to_test_data(editor_data):
             question['difficulty'] = 'medium'
         for i, option in enumerate(question['options']):
             question['options'][i] = option.strip()
-        editor_data[question['difficulty']].append({'question': question['question'].strip(), 'answers': question['options'], 'correct_answer_index': question['c_a_i']})
+        editor_data[question['difficulty']].append({'question': question['question'].strip(
+        ), 'answers': question['options'], 'correct_answer_index': question['c_a_i']})
+
 
 def validate_test_data_raw(test_data):
     try:
@@ -834,15 +893,17 @@ def validate_test_data_raw(test_data):
 
 #################### Reqeust Handlers ####################
 
+
 @app.before_request
 def before_request():
+    print(flask.request.headers)
     if flask.request.headers['Host'] not in DOMAINS:
         return flask.redirect('https://google.com/', 301)
     onlyfiles = [f for f in listdir('static/') if isfile(join('static/', f))]
     if flask.request.path != '/login' and flask.request.path not in anonymous_urls and flask.request.path.strip("/") not in onlyfiles:
         try:
             username = flask.session['username']
-            f = open('../data/user_metadata/'+username)
+            f = open('../data/user_metadata/' + username)
             f.close()
             if flask.session['perm_auth_key'] != hashlib.sha256(get_user_data(username)['password'].encode()).hexdigest():
                 flask.session['login_ref'] = flask.request.path
@@ -858,12 +919,14 @@ def before_request():
             if flask.request.path != '/change_password' and flask.request.path != '/logout':
                 return flask.redirect('/change_password')
 
+
 @app.after_request
 def after_request(response):
     response.headers["Server"] = "DAL-Server/0.9"
     response.headers["X-Frame-Options"] = "SAMEORIGIN"
     response.headers["X-Content-Type-Options"] = "nosniff"
     return response
+
 
 def sanitize_input(in_data):
     in_data.replace('.', '')
@@ -873,6 +936,7 @@ def sanitize_input(in_data):
 
 #################### Context Processors ####################
 
+
 @app.context_processor
 def context_processor():
     def url_root():
@@ -880,6 +944,7 @@ def context_processor():
     return dict(url_root=url_root)
 
 #################### Content Endpoints ####################
+
 
 @app.route('/')
 def home():
@@ -901,12 +966,14 @@ def about():
     user_data = get_user_data(flask.session['username'])
     return flask.render_template("about.html", username=flask.session['username'], name=user_data['name'])
 
+
 @app.route('/logout')
 def logout():
     flask.session.pop('username')
     flask.session.pop('perm_auth_key')
     flask.session.modified = True
     return flask.redirect('/login')
+
 
 @app.route('/clear_test_cookies')
 def clear_test_cookies():
@@ -919,6 +986,7 @@ def clear_test_cookies():
     except KeyError:
         pass
     return flask.render_template('cookie_cleared.html', href=href)
+
 
 @app.route('/t/<code>/verify', methods=['POST'])
 def t_verify(code):
@@ -935,15 +1003,18 @@ def t_verify(code):
             ans_score = 3
         elif flask.session['t']['difficulty'] == 2:
             ans_score = 5
-        flask.session['t']['score'] = str(parse_dict(flask.session['t']['score'])+ans_score)
+        flask.session['t']['score'] = str(parse_dict(
+            flask.session['t']['score']) + ans_score)
     else:
         ans_score = 0
     flask.session['t']['verified'] = True
-    time_taken = time.time()-flask.session['t']['time']
-    update_score(flask.session['username'], code, flask.session['t']['prev_q_res'], flask.session['t']['difficulty'], flask.session['t']['q_id'], parse_dict(data['answer']), flask.session['t']['score'], ans_score, time_taken)
-    flask.session['t']['q'] = str(parse_dict(flask.session['t']['q'])+1)
+    time_taken = time.time() - flask.session['t']['time']
+    update_score(flask.session['username'], code, flask.session['t']['prev_q_res'], flask.session['t']['difficulty'],
+                 flask.session['t']['q_id'], parse_dict(data['answer']), flask.session['t']['score'], ans_score, time_taken)
+    flask.session['t']['q'] = str(parse_dict(flask.session['t']['q']) + 1)
     flask.session.modified = True
-    return flask.redirect('/t/'+code)
+    return flask.redirect('/t/' + code)
+
 
 @app.route('/t/<code>/')
 def t_view(code):
@@ -965,7 +1036,7 @@ def t_view(code):
         if tag in question_data['tags'] or tag == 'admin' or tag == 'teacher' or tag == 'team':
             authorized = True
             break
-    with open('../data/test_metadata/'+code+'.json') as f:
+    with open('../data/test_metadata/' + code + '.json') as f:
         test_metadata = parse_dict(f.read())
     if check_sharing_perms(test_metadata, flask.session['username'])['attend'] == True:
         authorized = True
@@ -997,19 +1068,19 @@ def t_view(code):
         flask.session['t']['difficulty'] = 1
         flask.session['t']['score'] = '0'
         flask.session.modified = True
-        return flask.redirect('/t/'+code)
+        return flask.redirect('/t/' + code)
     if flask.request.args.get('start') == '':
         try:
             flask.session['t']['q'] = '1'
             flask.session.modified = True
         except KeyError:
-            return flask.redirect('/t/'+code)
-        return flask.redirect('/t/'+code)
+            return flask.redirect('/t/' + code)
+        return flask.redirect('/t/' + code)
     elif flask.request.args.get('exit') == '':
         flask.session.pop('t')
         flask.session.modified = True
         delete_score(flask.session['username'], code)
-        return flask.redirect('/t/'+code)
+        return flask.redirect('/t/' + code)
     if len(flask.session['t']['c_q'][0]) == len(question_data['questions']['easy']) and len(flask.session['t']['c_q'][1]) == len(question_data['questions']['medium']) and len(flask.session['t']['c_q'][2]) == len(question_data['questions']['hard']):
         score = flask.session['t']['score']
         flask.session.pop('t')
@@ -1021,7 +1092,7 @@ def t_view(code):
         else:
             return flask.render_template('mobile/t_completed.html', test_name=question_data['test_name'], score=score, name=user_data['name'], username=flask.session['username'], code=code)
     else:
-        if question_data['question_count'] == parse_dict(flask.session['t']['q'])-1:
+        if question_data['question_count'] == parse_dict(flask.session['t']['q']) - 1:
             score = flask.session['t']['score']
             flask.session.pop('t')
             flask.session.modified = True
@@ -1033,7 +1104,7 @@ def t_view(code):
             if 'teacher' in user_data['tags'] or 'admin' in user_data['tags'] or 'team' in user_data['tags']:
                 pass
             else:
-                with open('../data/user_metadata/'+flask.session['username'], 'w') as f:
+                with open('../data/user_metadata/' + flask.session['username'], 'w') as f:
                     f.write(json.dumps(user_data))
             save_test_response(flask.session['username'], code)
             delete_score(flask.session['username'], code)
@@ -1053,11 +1124,14 @@ def t_view(code):
         if flask.session['t']['q'] == '1':
             if flask.session['t'].get('verified') == True:
                 flask.session['t']['time'] = time.time()
-                question = get_question(flask.session['t']['c_q'][1], question_data['questions']['medium'])
+                question = get_question(
+                    flask.session['t']['c_q'][1], question_data['questions']['medium'])
                 if question == "QUESTIONS_COMPLETED":
-                    question = get_question(flask.session['t']['c_q'][0], question_data['questions']['easy'])
+                    question = get_question(
+                        flask.session['t']['c_q'][0], question_data['questions']['easy'])
                     if question == "QUESTIONS_COMPLETED":
-                        question = get_question(flask.session['t']['c_q'][2], question_data['questions']['hard'])
+                        question = get_question(
+                            flask.session['t']['c_q'][2], question_data['questions']['hard'])
                         flask.session['t']['difficulty'] = 2
                     else:
                         flask.session['t']['difficulty'] = 0
@@ -1101,27 +1175,32 @@ def t_view(code):
                 counter += 1
             random.shuffle(o_answers)
             if desktop:
-                return flask.render_template('t.html', code=code, question_data=question, ans_range=range(len(question['answers'])), data=question_data, q_number=q_number, image_url=image_url, username=flask.session['username'], name=user_data['name'], total_height=650+height_extend, answers=o_answers)
+                return flask.render_template('t.html', code=code, question_data=question, ans_range=range(len(question['answers'])), data=question_data, q_number=q_number, image_url=image_url, username=flask.session['username'], name=user_data['name'], total_height=650 + height_extend, answers=o_answers)
             else:
-                return flask.render_template('mobile/t.html', code=code, question_data=question, ans_range=range(len(question['answers'])), data=question_data, q_number=q_number, image_url=image_url, username=flask.session['username'], name=user_data['name'], total_height=650+height_extend, answers=o_answers)
+                return flask.render_template('mobile/t.html', code=code, question_data=question, ans_range=range(len(question['answers'])), data=question_data, q_number=q_number, image_url=image_url, username=flask.session['username'], name=user_data['name'], total_height=650 + height_extend, answers=o_answers)
         else:
             try:
                 if flask.session['t'].get('verified') == True:
                     prev_q_res = flask.session['t']['prev_q_res']
                     flask.session['t'].pop('prev_q_res')
                     flask.session['t']['time'] = time.time()
-                    c_difficulty = get_difficulty(flask.session['t']['difficulty'], flask.session['t']['c_q'], question_data['questions'], prev_q_res)
+                    c_difficulty = get_difficulty(
+                        flask.session['t']['difficulty'], flask.session['t']['c_q'], question_data['questions'], prev_q_res)
                     flask.session['t']['difficulty'] = c_difficulty
                     if c_difficulty == 0:
-                        question = get_question(flask.session['t']['c_q'][0], question_data['questions']['easy'])
+                        question = get_question(
+                            flask.session['t']['c_q'][0], question_data['questions']['easy'])
                     elif c_difficulty == 1:
-                        question = get_question(flask.session['t']['c_q'][1], question_data['questions']['medium'])
+                        question = get_question(
+                            flask.session['t']['c_q'][1], question_data['questions']['medium'])
                     elif c_difficulty == 2:
-                        question = get_question(flask.session['t']['c_q'][2], question_data['questions']['hard'])
+                        question = get_question(
+                            flask.session['t']['c_q'][2], question_data['questions']['hard'])
                     flask.session['t']['q_id'] = question['id']
                     if question == 'QUESTIONS_COMPLETED':
                         return flask.render_template('500.html'), 500
-                    flask.session['t']['c_q'][c_difficulty].append(question['id'])
+                    flask.session['t']['c_q'][c_difficulty].append(
+                        question['id'])
                     q_number = flask.session['t']['q']
                     flask.session['t'].pop('verified')
                     flask.session['t']['c_a_i'] = question['correct_answer_index']
@@ -1176,9 +1255,10 @@ def t_view(code):
                 counter += 1
             random.shuffle(o_answers)
             if desktop:
-                return flask.render_template('t.html', code=code, question_data=question, ans_range=range(len(question['answers'])), data=question_data, q_number=q_number, image_url=image_url, username=flask.session['username'], name=user_data['name'], total_height=650+height_extend, answers=o_answers)
+                return flask.render_template('t.html', code=code, question_data=question, ans_range=range(len(question['answers'])), data=question_data, q_number=q_number, image_url=image_url, username=flask.session['username'], name=user_data['name'], total_height=650 + height_extend, answers=o_answers)
             else:
-                return flask.render_template('mobile/t.html', code=code, question_data=question, ans_range=range(len(question['answers'])), data=question_data, q_number=q_number, image_url=image_url, username=flask.session['username'], name=user_data['name'], total_height=650+height_extend, answers=o_answers)
+                return flask.render_template('mobile/t.html', code=code, question_data=question, ans_range=range(len(question['answers'])), data=question_data, q_number=q_number, image_url=image_url, username=flask.session['username'], name=user_data['name'], total_height=650 + height_extend, answers=o_answers)
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -1201,10 +1281,11 @@ def login():
         form_data = flask.request.form.copy()
         form_data['username'] = form_data['username'].lower()
         try:
-            with open('../data/user_metadata/'+form_data['username'].lower()) as f:
+            with open('../data/user_metadata/' + form_data['username'].lower()) as f:
                 fdata = f.read()
             data = parse_dict(fdata)
-            password = hashlib.sha224(form_data['password'].encode()).hexdigest()
+            password = hashlib.sha224(
+                form_data['password'].encode()).hexdigest()
             if data['password'] != password:
                 if desktop:
                     return flask.render_template('login.html', error='Invalid Credentials', username=form_data['username'])
@@ -1213,7 +1294,8 @@ def login():
             else:
                 flask.session['username'] = form_data['username'].lower()
                 user_data = get_user_data(flask.session['username'])
-                flask.session['perm_auth_key'] = hashlib.sha256(user_data['password'].encode()).hexdigest()
+                flask.session['perm_auth_key'] = hashlib.sha256(
+                    user_data['password'].encode()).hexdigest()
                 user_data = get_user_data(flask.session['username'])
                 ip = flask.request.headers.get('X-Real-IP')
                 if ip == None:
@@ -1234,6 +1316,7 @@ def login():
             else:
                 return flask.render_template('mobile/login.html', error='Invalid Credentials', username=form_data['username'])
 
+
 @app.route('/new_test', methods=['GET', 'POST'])
 def new_test():
     user_data = get_user_data(flask.session['username'])
@@ -1241,13 +1324,14 @@ def new_test():
         return flask.render_template('new_test.html', username=flask.session['username'], name=user_data['name'])
     else:
         test_id = create_new_test_sheet(flask.session['username'])
-        return flask.redirect('/t/'+test_id+'/edit/editor/')
+        return flask.redirect('/t/' + test_id + '/edit/editor/')
+
 
 @app.route('/t/<code>/edit/delete/', methods=['GET'])
 def test_edit_delete(code):
     code = sanitize_input(code)
     try:
-        with open('../data/test_metadata/'+code+'.json') as f:
+        with open('../data/test_metadata/' + code + '.json') as f:
             data = parse_dict(f.read())
     except:
         return flask.render_template('404.html'), 404
@@ -1255,21 +1339,23 @@ def test_edit_delete(code):
     if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags'] or check_sharing_perms(data, flask.session['username'])['edit'] == True:
         pass
     else:
-        return flask.redirect('/t/'+code)
+        return flask.redirect('/t/' + code)
     delete_test(code)
     return flask.redirect('/')
+
 
 @app.route('/t/<code>/edit/', methods=['GET'])
 def test_edit(code):
     code = sanitize_input(code)
-    return flask.redirect("/t/"+code+"/edit/editor/", 301)
+    return flask.redirect("/t/" + code + "/edit/editor/", 301)
+
 
 @app.route('/t/<code>/analytics/')
 def test_analytics(code):
     code = sanitize_input(code)
     user_data = get_user_data(flask.session['username'])
     try:
-        with open('../data/test_metadata/'+code+'.json') as f:
+        with open('../data/test_metadata/' + code + '.json') as f:
             data = parse_dict(f.read())
     except:
         return flask.render_template('404.html'), 404
@@ -1279,8 +1365,8 @@ def test_analytics(code):
         if 'teacher' in user_data['tags']:
             return flask.render_template('401.html'), 401
         else:
-            return flask.redirect('/t/'+code)
-    with open('../data/test_data/'+code+'/config.json') as f:
+            return flask.redirect('/t/' + code)
+    with open('../data/test_data/' + code + '/config.json') as f:
         test_data = f.read()
     try:
         title = parse_dict(test_data)['test_name']
@@ -1289,13 +1375,15 @@ def test_analytics(code):
     except SyntaxError:
         return "The test was not properly created. Please contact the owner of this test."
     try:
-        with open('../data/response_data/'+code+'.json') as f:
+        with open('../data/response_data/' + code + '.json') as f:
             response_data = parse_dict(f.read())
     except FileNotFoundError:
         response_data = {'responses': []}
     for user in response_data['responses']:
-        user['difficulty_fraction'] = get_difficulty_fraction(user['question_stream'])
-        user['difficulty_percentage'] = get_difficulty_percentage(user['difficulty_fraction'])
+        user['difficulty_fraction'] = get_difficulty_fraction(
+            user['question_stream'])
+        user['difficulty_percentage'] = get_difficulty_percentage(
+            user['difficulty_fraction'])
     alert = flask.session.get('analytics_alert')
     if alert == None:
         alert = 'none'
@@ -1312,13 +1400,14 @@ def test_analytics(code):
         pass
     return flask.render_template('test_analytics.html', test_name=title, username=flask.session['username'], name=user_data['name'], responses=response_data['responses'], response_count=len(response_data['responses']), code=code, alert=alert, open_redirect=open_redirect)
 
+
 @app.route('/t/<code>/analytics_download/<mode>')
 def test_analytics_download(code, mode):
     code = sanitize_input(code)
     mode = sanitize_input(mode)
     user_data = get_user_data(flask.session['username'])
     try:
-        with open('../data/test_metadata/'+code+'.json') as f:
+        with open('../data/test_metadata/' + code + '.json') as f:
             data = parse_dict(f.read())
     except:
         return flask.render_template('404.html'), 404
@@ -1328,8 +1417,8 @@ def test_analytics_download(code, mode):
         if 'teacher' in user_data['tags']:
             return flask.render_template('401.html'), 401
         else:
-            return flask.redirect('/t/'+code)
-    with open('../data/test_data/'+code+'/config.json') as f:
+            return flask.redirect('/t/' + code)
+    with open('../data/test_data/' + code + '/config.json') as f:
         test_data = f.read()
     try:
         title = parse_dict(test_data)['test_name']
@@ -1338,20 +1427,22 @@ def test_analytics_download(code, mode):
     except SyntaxError:
         return "The test was not properly created. Please contact the owner of this test."
     try:
-        with open('../data/response_data/'+code+'.json') as f:
+        with open('../data/response_data/' + code + '.json') as f:
             response_data = parse_dict(f.read())
     except FileNotFoundError:
         response_data = {'responses': []}
     for user in response_data['responses']:
-        user['difficulty_fraction'] = get_difficulty_fraction(user['question_stream'])
-        user['difficulty_percentage'] = get_difficulty_percentage(user['difficulty_fraction'])
+        user['difficulty_fraction'] = get_difficulty_fraction(
+            user['question_stream'])
+        user['difficulty_percentage'] = get_difficulty_percentage(
+            user['difficulty_fraction'])
     csv_data = convert_analytics_to_csv(response_data['responses'])
     if mode == 'csv':
         csv_data_str = list_to_csv(csv_data)
         return flask.Response(csv_data_str, mimetype="text/csv", headers={"Content-disposition": f"attachment; filename={title} - Analytics.csv"})
     elif mode == 'google_sheets':
         try:
-            with open('../data/user_data/'+flask.session['username']+'/google_sheets_analytics_records') as f:
+            with open('../data/user_data/' + flask.session['username'] + '/google_sheets_analytics_records') as f:
                 gdata = parse_dict(f.read())
             if gdata == False:
                 gdata = {}
@@ -1362,10 +1453,11 @@ def test_analytics_download(code, mode):
             creds = gauth.load_credentials(flask.session['username'])
             if creds == None:
                 flask.session['settings_alert'] = 'Please link your Google account before creating a test'
-                return flask.request.url_root+'settings'
-            sheet_id = googleapis.create_data_sheet(f"{title} - Analytics", creds, csv_data)
+                return flask.request.url_root + 'settings'
+            sheet_id = googleapis.create_data_sheet(
+                f"{title} - Analytics", creds, csv_data)
             gdata[code] = sheet_id
-            with open('../data/user_data/'+flask.session['username']+'/google_sheets_analytics_records', 'w') as f:
+            with open('../data/user_data/' + flask.session['username'] + '/google_sheets_analytics_records', 'w') as f:
                 f.write(json.dumps(gdata))
             flask.session['analytics_alert'] = "Generated Google Sheet"
         else:
@@ -1374,18 +1466,20 @@ def test_analytics_download(code, mode):
             print(creds)
             if creds == None:
                 flask.session['settings_alert'] = 'Please link your Google account before creating a test'
-                return flask.request.url_root+'settings'
+                return flask.request.url_root + 'settings'
             sheet_id = googleapis.update_sheet(gdata[code], creds, csv_data)
             flask.session['analytics_alert'] = "Generated Google Sheet"
             if sheet_id == False:
-                sheet_id = googleapis.create_data_sheet(f"{title} - Analytics", creds, csv_data)
+                sheet_id = googleapis.create_data_sheet(
+                    f"{title} - Analytics", creds, csv_data)
                 gdata[code] = sheet_id
-                with open('../data/user_data/'+flask.session['username']+'/google_sheets_analytics_records', 'w') as f:
+                with open('../data/user_data/' + flask.session['username'] + '/google_sheets_analytics_records', 'w') as f:
                     f.write(json.dumps(gdata))
                 flask.session['analytics_alert'] = "Re-generated Google Sheet"
         # flask.session['analytics_redirect'] = 'https://docs.google.com/spreadsheets/d/'+sheet_id
         # return flask.redirect('/t/'+code+'/analytics/')
-        return 'https://docs.google.com/spreadsheets/d/'+sheet_id
+        return 'https://docs.google.com/spreadsheets/d/' + sheet_id
+
 
 @app.route('/t/<code>/analytics/<username>/')
 def test_analytics_user(code, username):
@@ -1394,7 +1488,7 @@ def test_analytics_user(code, username):
     auserdata = get_user_data(username)
     user_data = get_user_data(flask.session['username'])
     try:
-        with open('../data/test_metadata/'+code+'.json') as f:
+        with open('../data/test_metadata/' + code + '.json') as f:
             data = parse_dict(f.read())
     except:
         return flask.render_template('404.html'), 404
@@ -1405,8 +1499,8 @@ def test_analytics_user(code, username):
         if 'teacher' in user_data['tags']:
             return flask.render_template('401.html'), 401
         else:
-            return flask.redirect('/t/'+code)
-    with open('../data/test_data/'+code+'/config.json') as f:
+            return flask.redirect('/t/' + code)
+    with open('../data/test_data/' + code + '/config.json') as f:
         test_data = f.read()
     try:
         title = parse_dict(test_data)['test_name']
@@ -1414,8 +1508,9 @@ def test_analytics_user(code, username):
         return "The test was not properly created. Please contact the owner of this test."
     except SyntaxError:
         return "The test was not properly created. Please contact the owner of this test."
-    with open('../data/response_data/'+code+'.json') as f:
-        fdata = parse_dict(f.read())['responses'][int(get_user_response(username, code))]
+    with open('../data/response_data/' + code + '.json') as f:
+        fdata = parse_dict(f.read())['responses'][int(
+            get_user_response(username, code))]
         response_data = fdata['question_stream']
         score = fdata['score']
     for response in response_data:
@@ -1427,10 +1522,10 @@ def test_analytics_user(code, username):
         response['difficulty'] = response['difficulty'].capitalize()
         response['full_question'] = response['question']
         if len(response['question']) > 20:
-            response['question'] = response['question'][:20]+'...'
+            response['question'] = response['question'][:20] + '...'
         response['full_given_answer'] = response['given_answer']
         if len(response['given_answer']) > 20:
-            response['given_answer'] = response['given_answer'][:20]+'...'
+            response['given_answer'] = response['given_answer'][:20] + '...'
     try:
         fdata['attempts']
         attempts = True
@@ -1445,6 +1540,7 @@ def test_analytics_user(code, username):
     else:
         return flask.render_template('mobile/test_analytics_username.html', test_name=title, username=flask.session['username'], name=user_data['name'], responses=response_data, response_count=len(response_data), code=code, auserdata=auserdata, score=score, fdata=fdata, attempts_bool=attempts, admin=admin)
 
+
 @app.route('/change_password', methods=['GET', 'POST'])
 def change_password():
     user_data = get_user_data(flask.session['username'])
@@ -1455,8 +1551,10 @@ def change_password():
         if hashlib.sha224(data['current_password'].encode()).hexdigest() == user_data['password']:
             if data['new_password'] == data['conf_password']:
                 if data['current_password'] != data['new_password']:
-                    user_manager.change_password(flask.session['username'], data['new_password'])
-                    flask.session['perm_auth_key'] = hashlib.sha256(hashlib.sha224(data['new_password'].encode()).hexdigest().encode()).hexdigest()
+                    user_manager.change_password(
+                        flask.session['username'], data['new_password'])
+                    flask.session['perm_auth_key'] = hashlib.sha256(hashlib.sha224(
+                        data['new_password'].encode()).hexdigest().encode()).hexdigest()
                     if user_data.get('has_changed_password') == None:
                         pass
                     try:
@@ -1471,6 +1569,7 @@ def change_password():
                 return flask.render_template('change_password.html', username=flask.session['username'], name=user_data['name'], error='Both passwords must match')
         else:
             return flask.render_template('change_password.html', username=flask.session['username'], name=user_data['name'], error='Password incorrect')
+
 
 @app.route('/settings/', methods=['GET', 'POST'])
 def settings():
@@ -1507,8 +1606,10 @@ def settings():
             if hashlib.sha224(data['current_password'].encode()).hexdigest() == user_data['password']:
                 if data['new_password'] == data['conf_password']:
                     if data['current_password'] != data['new_password']:
-                        user_manager.change_password(flask.session['username'], data['new_password'])
-                        flask.session['perm_auth_key'] = hashlib.sha256(hashlib.sha224(data['new_password'].encode()).hexdigest().encode()).hexdigest()
+                        user_manager.change_password(
+                            flask.session['username'], data['new_password'])
+                        flask.session['perm_auth_key'] = hashlib.sha256(hashlib.sha224(
+                            data['new_password'].encode()).hexdigest().encode()).hexdigest()
                         flask.session['settings_alert'] = 'Your password has been changed successfully'
                         return flask.redirect("/settings")
                     else:
@@ -1520,6 +1621,7 @@ def settings():
             else:
                 flask.session['settings_error'] = 'Password incorrect'
                 return flask.redirect('/settings/')
+
 
 @app.route('/sheets_api_authorize/', methods=['GET', 'POST'])
 def sheets_api_authorize():
@@ -1558,38 +1660,43 @@ def sheets_api_authorize():
             flask.session['settings_error'] = 'There was an error during authorization'
             return flask.redirect('/settings')
 
+
 @app.route('/sheets_api_authorize/delete/')
 def sheets_api_authorize_delete():
     try:
         _ = get_user_data(flask.session['username'])
-        os.remove('../data/credentials/'+flask.session['username']+'.pickle')
+        os.remove('../data/credentials/' +
+                  flask.session['username'] + '.pickle')
         flask.session['settings_alert'] = 'Your Google account has been successfully unlinked'
         return flask.redirect('/settings')
     except FileNotFoundError:
         flask.session['settings_error'] = 'There was a problem unlinking your Google account'
         return flask.redirect('/settings')
 
+
 @app.route('/upload_file/<code>')
 def u_r(code):
     return flask.render_template('u_r.html', code=code)
+
 
 @app.route('/t/<code>/upload/', methods=['POST'])
 def upload_file(code):
     code = sanitize_input(code)
     user_data = get_user_data(flask.session['username'])
     try:
-        with open('../data/test_metadata/'+code+'.json') as f:
+        with open('../data/test_metadata/' + code + '.json') as f:
             data = parse_dict(f.read())
     except FileNotFoundError:
         return flask.render_template('404.html'), 404
     if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags'] or check_sharing_perms(data, flask.session['username'])['edit'] == True:
         pass
     else:
-        return flask.redirect('/t/'+code)
+        return flask.redirect('/t/' + code)
     print(flask.request.form)
     print(flask.request.files)
     f = flask.request.files['file']
-    test_list = [f for f in os.listdir('../data/test_data/'+code+'/files/') if os.path.isdir(os.path.join('../data/test_data/'+code+'/files/', f))]
+    test_list = [f for f in os.listdir('../data/test_data/' + code + '/files/')
+                 if os.path.isdir(os.path.join('../data/test_data/' + code + '/files/', f))]
     while 1:
         r_id = id_generator()
         if r_id in test_list:
@@ -1599,58 +1706,62 @@ def upload_file(code):
     file_id = r_id.lower()
     if f.filename.strip() == "":
         return "file name not ok", 401
-    os.mkdir('../data/test_data/'+code+'/files/'+file_id)
-    f.save('../data/test_data/'+code+'/files/'+file_id+'/'+f.filename)
+    os.mkdir('../data/test_data/' + code + '/files/' + file_id)
+    f.save('../data/test_data/' + code +
+           '/files/' + file_id + '/' + f.filename)
     try:
-        with open('../data/t_editor_data/'+code+'.json') as f:
+        with open('../data/t_editor_data/' + code + '.json') as f:
             fdata = parse_dict(f.read())
     except FileNotFoundError:
         fdata = {}
     fdata[flask.request.form['div_id']]['image'] = file_id
-    with open('../data/t_editor_data/'+code+'.json', 'w') as f:
+    with open('../data/t_editor_data/' + code + '.json', 'w') as f:
         f.write(json.dumps(fdata))
     return file_id
+
 
 @app.route('/t/<code>/upload/delete/<file_id>/')
 def upload_delete(code, file_id):
     code = sanitize_input(code)
     file_id = sanitize_input(file_id)
     user_data = get_user_data(flask.session['username'])
-    with open('../data/test_metadata/'+code+'.json') as f:
+    with open('../data/test_metadata/' + code + '.json') as f:
         test_metadata = parse_dict(f.read())
     if flask.session['username'] != test_metadata['owner']:
         if 'admin' in user_data['tags'] or 'team' in user_data['tags'] or check_sharing_perms(test_metadata, flask.session['username'])['files'] == True:
             pass
         else:
             return flask.render_template('401.html')
-    shutil.rmtree('../data/test_data/'+code+'/files/'+file_id+'/')
-    return flask.redirect('/t/'+code+'/upload/')
+    shutil.rmtree('../data/test_data/' + code + '/files/' + file_id + '/')
+    return flask.redirect('/t/' + code + '/upload/')
+
 
 @app.route('/t/<code>/static/<file_code>/')
 def t_static(code, file_code):
-    if os.path.isdir('../data/test_data/'+code+'/files/'+file_code)==True:
-        return flask.send_file('../data/test_data/'+code+'/files/'+file_code+'/'+[f for f in os.listdir('../data/test_data/'+code+'/files/'+file_code) if os.path.isfile(os.path.join('../data/test_data/'+code+'/files/'+file_code, f))][0])
+    if os.path.isdir('../data/test_data/' + code + '/files/' + file_code) == True:
+        return flask.send_file('../data/test_data/' + code + '/files/' + file_code + '/' + [f for f in os.listdir('../data/test_data/' + code + '/files/' + file_code) if os.path.isfile(os.path.join('../data/test_data/' + code + '/files/' + file_code, f))][0])
     return "File not found"
+
 
 @app.route('/t/<code>/edit/editor/', methods=['GET', 'POST'])
 def test_edit_editor(code):
     code = sanitize_input(code)
     user_data = get_user_data(flask.session['username'])
     try:
-        with open('../data/test_metadata/'+code+'.json') as f:
+        with open('../data/test_metadata/' + code + '.json') as f:
             data = parse_dict(f.read())
     except:
         return flask.render_template('404.html'), 404
     if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags'] or check_sharing_perms(data, flask.session['username'])['edit'] == True:
         pass
     else:
-        return flask.redirect('/t/'+code)
+        return flask.redirect('/t/' + code)
     try:
-        with open('../data/test_metadata/'+code+'.json') as f:
+        with open('../data/test_metadata/' + code + '.json') as f:
             data = parse_dict(f.read())
     except:
         return flask.render_template('404.html'), 404
-    with open('../data/test_data/'+code+'/config.json') as f:
+    with open('../data/test_data/' + code + '/config.json') as f:
         try:
             test_data = parse_dict(f.read())
             title = test_data['test_name']
@@ -1661,45 +1772,47 @@ def test_edit_editor(code):
     if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags'] or check_sharing_perms(data, flask.session['username'])['edit'] == True:
         pass
     else:
-        return flask.redirect('/t/'+code)
+        return flask.redirect('/t/' + code)
     return flask.render_template('editor.html', code=code, data=data, test_data=test_data, title=title, username=flask.session['username'], name=user_data['name'])
 
 #################### API Endpoints ####################
+
 
 @app.route('/t/<code>/edit/api/load_metadata')
 def t_edit_api_load_metadata(code):
     code = sanitize_input(code)
     user_data = get_user_data(flask.session['username'])
     try:
-        with open('../data/test_metadata/'+code+'.json') as f:
+        with open('../data/test_metadata/' + code + '.json') as f:
             data = parse_dict(f.read())
     except FileNotFoundError:
         return flask.render_template('404.html'), 404
     if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags'] or check_sharing_perms(data, flask.session['username'])['edit'] == True:
         pass
     else:
-        return flask.redirect('/t/'+code)
-    with open('../data/test_data/'+code+'/config.json') as f:
+        return flask.redirect('/t/' + code)
+    with open('../data/test_data/' + code + '/config.json') as f:
         test_data = parse_dict(f.read())
     visibility = test_data.get('visibility')
     if visibility == None:
         visibility = True
     return {"title": test_data['test_name'], "tags": ",".join(test_data['tags']), "subject": test_data['subject'], 'total_questions': test_data['question_count'], 'visibility': visibility}
 
+
 @app.route('/t/<code>/edit/api/enable', methods=['GET', 'POST'])
 def t_edit_api_enable(code):
     code = sanitize_input(code)
     user_data = get_user_data(flask.session['username'])
     try:
-        with open('../data/test_metadata/'+code+'.json') as f:
+        with open('../data/test_metadata/' + code + '.json') as f:
             data = parse_dict(f.read())
     except FileNotFoundError:
         return flask.render_template('404.html'), 404
     if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags'] or check_sharing_perms(data, flask.session['username'])['edit'] == True:
         pass
     else:
-        return flask.redirect('/t/'+code)
-    with open('../data/test_metadata/'+code+'.json') as f:
+        return flask.redirect('/t/' + code)
+    with open('../data/test_metadata/' + code + '.json') as f:
         test_data = parse_dict(f.read())
     if flask.request.method == 'GET':
         enable = test_data.get('enable')
@@ -1709,48 +1822,50 @@ def t_edit_api_enable(code):
     elif flask.request.method == 'POST':
         req_data = flask.request.json
         test_data['enable'] = req_data['enable']
-        with open('../data/test_metadata/'+code+'.json', 'w') as f:
+        with open('../data/test_metadata/' + code + '.json', 'w') as f:
             f.write(json.dumps(test_data))
         return {'success': True}
+
 
 @app.route('/t/<code>/edit/api/visibility', methods=['GET', 'POST'])
 def t_edit_api_visibility(code):
     code = sanitize_input(code)
     user_data = get_user_data(flask.session['username'])
     try:
-        with open('../data/test_metadata/'+code+'.json') as f:
+        with open('../data/test_metadata/' + code + '.json') as f:
             data = parse_dict(f.read())
     except FileNotFoundError:
         return flask.render_template('404.html'), 404
     if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags'] or check_sharing_perms(data, flask.session['username'])['edit'] == True:
         pass
     else:
-        return flask.redirect('/t/'+code)
-    with open('../data/test_data/'+code+'/config.json') as f:
+        return flask.redirect('/t/' + code)
+    with open('../data/test_data/' + code + '/config.json') as f:
         test_data = parse_dict(f.read())
     if flask.request.method == 'GET':
         return test_data['visibility']
     elif flask.request.method == 'POST':
         req_data = flask.request.json
         test_data['visibility'] = req_data['visibility']
-        with open('../data/test_data/'+code+'/config.json', 'w') as f:
+        with open('../data/test_data/' + code + '/config.json', 'w') as f:
             f.write(json.dumps(test_data))
         return {'success': True}
+
 
 @app.route('/t/<code>/edit/api/title', methods=['GET', 'POST'])
 def t_edit_api_title(code):
     code = sanitize_input(code)
     user_data = get_user_data(flask.session['username'])
     try:
-        with open('../data/test_metadata/'+code+'.json') as f:
+        with open('../data/test_metadata/' + code + '.json') as f:
             data = parse_dict(f.read())
     except FileNotFoundError:
         return flask.render_template('404.html'), 404
     if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags'] or check_sharing_perms(data, flask.session['username'])['edit'] == True:
         pass
     else:
-        return flask.redirect('/t/'+code)
-    with open('../data/test_data/'+code+'/config.json') as f:
+        return flask.redirect('/t/' + code)
+    with open('../data/test_data/' + code + '/config.json') as f:
         test_data = parse_dict(f.read())
     if flask.request.method == 'GET':
         return test_data['test_name']
@@ -1765,7 +1880,7 @@ def t_edit_api_title(code):
             if tag.strip() == '':
                 continue
             try:
-                with open('../data/global_test_records/'+tag) as f:
+                with open('../data/global_test_records/' + tag) as f:
                     fdata = parse_dict(f.read())
                 try:
                     fdata.pop(code)
@@ -1773,60 +1888,62 @@ def t_edit_api_title(code):
                     pass
             except FileNotFoundError:
                 fdata = {}
-            with open('../data/global_test_records/'+tag, 'w') as f:
+            with open('../data/global_test_records/' + tag, 'w') as f:
                 f.write(json.dumps(fdata))
         for tag in tags:
             try:
-                with open('../data/global_test_records/'+tag) as f:
+                with open('../data/global_test_records/' + tag) as f:
                     fdata = parse_dict(f.read())
             except FileNotFoundError:
                 fdata = {}
             fdata[code] = ''
-            with open('../data/global_test_records/'+tag, 'w') as f:
+            with open('../data/global_test_records/' + tag, 'w') as f:
                 f.write(json.dumps(fdata))
         test_data['test_name'] = req_data['title'].strip()
-        with open('../data/test_data/'+code+'/config.json', 'w') as f:
+        with open('../data/test_data/' + code + '/config.json', 'w') as f:
             f.write(json.dumps(test_data))
         return {'success': True}
+
 
 @app.route('/t/<code>/edit/api/subject', methods=['GET', 'POST'])
 def t_edit_api_subject(code):
     code = sanitize_input(code)
     user_data = get_user_data(flask.session['username'])
     try:
-        with open('../data/test_metadata/'+code+'.json') as f:
+        with open('../data/test_metadata/' + code + '.json') as f:
             data = parse_dict(f.read())
     except FileNotFoundError:
         return flask.render_template('404.html'), 404
     if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags'] or check_sharing_perms(data, flask.session['username'])['edit'] == True:
         pass
     else:
-        return flask.redirect('/t/'+code)
-    with open('../data/test_data/'+code+'/config.json') as f:
+        return flask.redirect('/t/' + code)
+    with open('../data/test_data/' + code + '/config.json') as f:
         test_data = parse_dict(f.read())
     if flask.request.method == 'GET':
         return test_data['test_name']
     elif flask.request.method == 'POST':
         req_data = flask.request.json
         test_data['subject'] = req_data['subject']
-        with open('../data/test_data/'+code+'/config.json', 'w') as f:
+        with open('../data/test_data/' + code + '/config.json', 'w') as f:
             f.write(json.dumps(test_data))
         return {'success': True}
+
 
 @app.route('/t/<code>/edit/api/tags', methods=['GET', 'POST'])
 def t_edit_api_tags(code):
     code = sanitize_input(code)
     user_data = get_user_data(flask.session['username'])
     try:
-        with open('../data/test_metadata/'+code+'.json') as f:
+        with open('../data/test_metadata/' + code + '.json') as f:
             data = parse_dict(f.read())
     except FileNotFoundError:
         return flask.render_template('404.html'), 404
     if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags'] or check_sharing_perms(data, flask.session['username'])['edit'] == True:
         pass
     else:
-        return flask.redirect('/t/'+code)
-    with open('../data/test_data/'+code+'/config.json') as f:
+        return flask.redirect('/t/' + code)
+    with open('../data/test_data/' + code + '/config.json') as f:
         test_data = parse_dict(f.read())
     if flask.request.method == 'GET':
         return test_data['test_name']
@@ -1850,7 +1967,7 @@ def t_edit_api_tags(code):
                         if tag.strip() == '':
                             continue
                         try:
-                            with open('../data/global_test_records/'+tag) as f:
+                            with open('../data/global_test_records/' + tag) as f:
                                 fdata = parse_dict(f.read())
                             try:
                                 fdata.pop(code)
@@ -1858,36 +1975,37 @@ def t_edit_api_tags(code):
                                 pass
                         except FileNotFoundError:
                             fdata = {}
-                        with open('../data/global_test_records/'+tag, 'w') as f:
+                        with open('../data/global_test_records/' + tag, 'w') as f:
                             f.write(json.dumps(fdata))
                     for tag in tags:
                         try:
-                            with open('../data/global_test_records/'+tag) as f:
+                            with open('../data/global_test_records/' + tag) as f:
                                 fdata = parse_dict(f.read())
                         except FileNotFoundError:
                             fdata = {}
                         fdata[code] = ''
-                        with open('../data/global_test_records/'+tag, 'w') as f:
+                        with open('../data/global_test_records/' + tag, 'w') as f:
                             f.write(json.dumps(fdata))
         test_data['tags'] = tags
-        with open('../data/test_data/'+code+'/config.json', 'w') as f:
+        with open('../data/test_data/' + code + '/config.json', 'w') as f:
             f.write(json.dumps(test_data))
         return {'success': True}
+
 
 @app.route('/t/<code>/edit/api/total_questions', methods=['GET', 'POST'])
 def t_edit_api_total_questions(code):
     code = sanitize_input(code)
     user_data = get_user_data(flask.session['username'])
     try:
-        with open('../data/test_metadata/'+code+'.json') as f:
+        with open('../data/test_metadata/' + code + '.json') as f:
             data = parse_dict(f.read())
     except FileNotFoundError:
         return flask.render_template('404.html'), 404
     if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags'] or check_sharing_perms(data, flask.session['username'])['edit'] == True:
         pass
     else:
-        return flask.redirect('/t/'+code)
-    with open('../data/test_data/'+code+'/config.json') as f:
+        return flask.redirect('/t/' + code)
+    with open('../data/test_data/' + code + '/config.json') as f:
         test_data = parse_dict(f.read())
     if flask.request.method == 'GET':
         return test_data['test_name']
@@ -1895,36 +2013,38 @@ def t_edit_api_total_questions(code):
         req_data = flask.request.json
         question_count = int(req_data['total_questions'])
         test_data['question_count'] = question_count
-        with open('../data/t_editor_data/'+code+'.json') as f:
+        with open('../data/t_editor_data/' + code + '.json') as f:
             editor_data = parse_dict(f.read())
         if question_count > len(editor_data.keys()):
             return {'success': False, "message": "Total question limit exceeding the number of available questions"}
         if question_count < 3:
             return {'success': False, "message": "Question limit should be a minimum of 3"}
-        with open('../data/test_data/'+code+'/config.json', 'w') as f:
+        with open('../data/test_data/' + code + '/config.json', 'w') as f:
             f.write(json.dumps(test_data))
         return {'success': True}
+
 
 @app.route('/t/<code>/edit/api/apply_changes', methods=['POST'])
 def t_edit_api_apply_changes(code):
     code = sanitize_input(code)
     user_data = get_user_data(flask.session['username'])
     try:
-        with open('../data/test_metadata/'+code+'.json') as f:
+        with open('../data/test_metadata/' + code + '.json') as f:
             data = parse_dict(f.read())
     except FileNotFoundError:
         return flask.render_template('404.html'), 404
     if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags'] or check_sharing_perms(data, flask.session['username'])['edit'] == True:
         pass
     else:
-        return flask.redirect('/t/'+code)
+        return flask.redirect('/t/' + code)
     try:
-        with open('../data/test_data/'+code+'/config.json') as f:
+        with open('../data/test_data/' + code + '/config.json') as f:
             test_data = parse_dict(f.read())
     except SyntaxError:
-        test_data = {"test_name": "", "subject": "", "tags": [], "question_count": 0, "visibility": True}
+        test_data = {"test_name": "", "subject": "",
+                     "tags": [], "question_count": 0, "visibility": True}
     try:
-        with open('../data/t_editor_data/'+code+'.json') as f:
+        with open('../data/t_editor_data/' + code + '.json') as f:
             editor_data_raw = parse_dict(f.read())
         editor_data = {"easy": [], "medium": [], "hard": []}
         for div in editor_data_raw:
@@ -1933,7 +2053,8 @@ def t_edit_api_apply_changes(code):
                 question['difficulty'] = 'medium'
             for i, option in enumerate(question['options']):
                 question['options'][i] = option.strip()
-            editor_data[question['difficulty']].append({'question': question['question'].strip(), 'answers': question['options'], 'correct_answer_index': question['c_a_i'], 'image': question.get('image')})
+            editor_data[question['difficulty']].append({'question': question['question'].strip(
+            ), 'answers': question['options'], 'correct_answer_index': question['c_a_i'], 'image': question.get('image')})
         if len(editor_data['easy']) == 0:
             return 'Missing 1 mark questions'
         if len(editor_data['medium']) == 0:
@@ -1958,10 +2079,11 @@ def t_edit_api_apply_changes(code):
             for o in q['answers']:
                 if o == '':
                     return 'Missing option text in a 5 mark question'
-        with open('../data/test_data/'+code+'/config.json') as f:
+        with open('../data/test_data/' + code + '/config.json') as f:
             test_data = parse_dict(f.read())
-        if len(editor_data['easy'])+len(editor_data['medium'])+len(editor_data['hard']) < test_data['question_count']:
-            test_data['question_count'] = len(editor_data['easy'])+len(editor_data['medium'])+len(editor_data['hard'])
+        if len(editor_data['easy']) + len(editor_data['medium']) + len(editor_data['hard']) < test_data['question_count']:
+            test_data['question_count'] = len(
+                editor_data['easy']) + len(editor_data['medium']) + len(editor_data['hard'])
         if test_data['test_name'].strip() == "":
             return "Title empty. Please enter the title."
         if test_data['subject'].strip() == "":
@@ -1969,7 +2091,7 @@ def t_edit_api_apply_changes(code):
         if test_data['tags'] == []:
             return "Student tags empty. Please enter the tags in comma-separated format."
         test_data['questions'] = editor_data
-        with open('../data/test_data/'+code+'/config.json', 'w') as f:
+        with open('../data/test_data/' + code + '/config.json', 'w') as f:
             f.write(json.dumps(test_data))
         if test_data.get('visibility') == False:
             if 'teacher' in user_data['tags'] or 'team' in user_data['tags'] or 'admin' in user_data['tags']:
@@ -1982,7 +2104,7 @@ def t_edit_api_apply_changes(code):
                     if tag.strip() == '':
                         continue
                     try:
-                        with open('../data/global_test_records/'+tag) as f:
+                        with open('../data/global_test_records/' + tag) as f:
                             fdata = parse_dict(f.read())
                         try:
                             fdata.pop(code)
@@ -1990,35 +2112,35 @@ def t_edit_api_apply_changes(code):
                             pass
                     except FileNotFoundError:
                         fdata = {}
-                    with open('../data/global_test_records/'+tag, 'w') as f:
+                    with open('../data/global_test_records/' + tag, 'w') as f:
                         f.write(json.dumps(fdata))
                 for tag in tags:
                     try:
-                        with open('../data/global_test_records/'+tag) as f:
+                        with open('../data/global_test_records/' + tag) as f:
                             fdata = parse_dict(f.read())
                     except FileNotFoundError:
                         fdata = {}
                     fdata[code] = ''
-                    with open('../data/global_test_records/'+tag, 'w') as f:
+                    with open('../data/global_test_records/' + tag, 'w') as f:
                         f.write(json.dumps(fdata))
-        with open('../data/test_metadata/'+code+'.json') as f:
+        with open('../data/test_metadata/' + code + '.json') as f:
             metadata = parse_dict(f.read())
-        with open('../data/test_metadata/'+code+'.json', 'w') as f:
+        with open('../data/test_metadata/' + code + '.json', 'w') as f:
             dt = curr_dt()
-            c_time = str(dt.hour)+':'+str(dt.minute)+':'+str(dt.second)
-            c_date = str(dt.year)+'-'+str(dt.month)+'-'+str(dt.day)
+            c_time = str(dt.hour) + ':' + str(dt.minute) + ':' + str(dt.second)
+            c_date = str(dt.year) + '-' + str(dt.month) + '-' + str(dt.day)
             metadata['last_time'] = c_time
             metadata['last_date'] = c_date
             f.write(json.dumps(metadata))
         try:
-            with open('../data/user_data/'+flask.session['username']+'/created_tests/'+code+'.json') as f:
+            with open('../data/user_data/' + flask.session['username'] + '/created_tests/' + code + '.json') as f:
                 cr_fdata = parse_dict(f.read())
             try:
-                with open('../data/response_data/'+code+'.json') as g:
+                with open('../data/response_data/' + code + '.json') as g:
                     responses_count = len(parse_dict(g.read())['responses'])
             except FileNotFoundError:
                 responses_count = 0
-            with open('../data/user_data/'+flask.session['username']+'/created_tests/'+code+'.json', 'w') as f:
+            with open('../data/user_data/' + flask.session['username'] + '/created_tests/' + code + '.json', 'w') as f:
                 cr_fdata['name'] = test_data['test_name']
                 cr_fdata['subject'] = test_data['subject']
                 cr_fdata['responses_count'] = responses_count
@@ -2026,28 +2148,30 @@ def t_edit_api_apply_changes(code):
                 cr_fdata['last_date'] = c_date
                 f.write(json.dumps(cr_fdata))
         except FileNotFoundError:
-            with open('../data/user_data/'+flask.session['username']+'/created_tests/'+code+'.json', 'w') as f:
-                f.write(json.dumps({"last_time": c_time, "last_date": c_date, "name": "Undefined", "subject": "Undefined", "responses_count": 0}))
+            with open('../data/user_data/' + flask.session['username'] + '/created_tests/' + code + '.json', 'w') as f:
+                f.write(json.dumps({"last_time": c_time, "last_date": c_date,
+                        "name": "Undefined", "subject": "Undefined", "responses_count": 0}))
         return 'ok'
     except FileNotFoundError:
         return "Missing questions. Add few questions and try again."
+
 
 @app.route('/t/<code>/edit/editor/add_que', methods=['POST'])
 def test_editor_add_que(code):
     code = sanitize_input(code)
     user_data = get_user_data(flask.session['username'])
     try:
-        with open('../data/test_metadata/'+code+'.json') as f:
+        with open('../data/test_metadata/' + code + '.json') as f:
             data = parse_dict(f.read())
     except FileNotFoundError:
         return flask.render_template('404.html'), 404
     if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags'] or check_sharing_perms(data, flask.session['username'])['edit'] == True:
         pass
     else:
-        return flask.redirect('/t/'+code)
+        return flask.redirect('/t/' + code)
     data = flask.request.json
     try:
-        with open('../data/t_editor_data/'+code+'.json') as f:
+        with open('../data/t_editor_data/' + code + '.json') as f:
             fdata = parse_dict(f.read())
     except FileNotFoundError:
         fdata = {}
@@ -2059,27 +2183,29 @@ def test_editor_add_que(code):
         div_id = id_generator(5)
         if div_id not in fdata.keys():
             break
-    fdata[div_id] = {"difficulty": difficulty, "question": question, "options": options, "c_a_i": c_a_i}
-    with open('../data/t_editor_data/'+code+'.json', 'w') as f:
+    fdata[div_id] = {"difficulty": difficulty,
+                     "question": question, "options": options, "c_a_i": c_a_i}
+    with open('../data/t_editor_data/' + code + '.json', 'w') as f:
         f.write(json.dumps(fdata))
     return {"div_id": div_id, "difficulty": difficulty, "question": question, "options": options, "c_a_i": c_a_i}
+
 
 @app.route('/t/<code>/edit/editor/update_que', methods=['POST'])
 def test_editor_update_que(code):
     code = sanitize_input(code)
     user_data = get_user_data(flask.session['username'])
     try:
-        with open('../data/test_metadata/'+code+'.json') as f:
+        with open('../data/test_metadata/' + code + '.json') as f:
             data = parse_dict(f.read())
     except FileNotFoundError:
         return flask.render_template('404.html'), 404
     if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags'] or check_sharing_perms(data, flask.session['username'])['edit'] == True:
         pass
     else:
-        return flask.redirect('/t/'+code)
+        return flask.redirect('/t/' + code)
     data = flask.request.json
     try:
-        with open('../data/t_editor_data/'+code+'.json') as f:
+        with open('../data/t_editor_data/' + code + '.json') as f:
             fdata = parse_dict(f.read())
     except FileNotFoundError:
         fdata = {}
@@ -2094,41 +2220,43 @@ def test_editor_update_que(code):
     fdata[div_id]['question'] = question
     fdata[div_id]['options'] = options
     fdata[div_id]['c_a_i'] = c_a_i
-    with open('../data/t_editor_data/'+code+'.json', 'w') as f:
+    with open('../data/t_editor_data/' + code + '.json', 'w') as f:
         f.write(json.dumps(fdata))
     return {"div_id": div_id, "question": question, "options": options, "c_a_i": c_a_i}
+
 
 @app.route('/t/<code>/edit/editor/delete_que', methods=['POST'])
 def test_editor_delete_que(code):
     code = sanitize_input(code)
     user_data = get_user_data(flask.session['username'])
     try:
-        with open('../data/test_metadata/'+code+'.json') as f:
+        with open('../data/test_metadata/' + code + '.json') as f:
             data = parse_dict(f.read())
     except FileNotFoundError:
         return flask.render_template('404.html'), 404
     if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags'] or check_sharing_perms(data, flask.session['username'])['edit'] == True:
         pass
     else:
-        return flask.redirect('/t/'+code)
+        return flask.redirect('/t/' + code)
     data = flask.request.json
     try:
-        with open('../data/t_editor_data/'+code+'.json') as f:
+        with open('../data/t_editor_data/' + code + '.json') as f:
             fdata = parse_dict(f.read())
     except FileNotFoundError:
         fdata = {}
     div_id = data['div_id']
     fdata.pop(div_id)
-    with open('../data/t_editor_data/'+code+'.json', 'w') as f:
+    with open('../data/t_editor_data/' + code + '.json', 'w') as f:
         f.write(json.dumps(fdata))
     return {"div_id": div_id}
+
 
 @app.route('/t/<code>/edit/editor/load_data')
 def test_editor_load_data(code):
     code = sanitize_input(code)
     user_data = get_user_data(flask.session['username'])
     try:
-        with open('../data/test_metadata/'+code+'.json') as f:
+        with open('../data/test_metadata/' + code + '.json') as f:
             data = parse_dict(f.read())
     except FileNotFoundError:
         return flask.render_template('404.html'), 404
@@ -2137,22 +2265,25 @@ def test_editor_load_data(code):
     if data['owner'] == flask.session['username'] or 'admin' in user_data['tags'] or 'team' in user_data['tags'] or check_sharing_perms(data, flask.session['username'])['edit'] == True:
         pass
     else:
-        return flask.redirect('/t/'+code)
+        return flask.redirect('/t/' + code)
     try:
-        with open('../data/t_editor_data/'+code+'.json') as f:
+        with open('../data/t_editor_data/' + code + '.json') as f:
             fdata = parse_dict(f.read())
     except FileNotFoundError:
         fdata = {}
     output = {"easy": [], "mid": [], "hard": []}
     for div in fdata:
-        output[fdata[div]['difficulty']].append({'q': fdata[div]['question'], 'options': fdata[div]['options'], 'c_a_i': fdata[div]['c_a_i'], 'div_id': div, "image": fdata[div].get("image")})
+        output[fdata[div]['difficulty']].append({'q': fdata[div]['question'], 'options': fdata[div]
+                                                ['options'], 'c_a_i': fdata[div]['c_a_i'], 'div_id': div, "image": fdata[div].get("image")})
     return output
 
 #################### Error Handlers ####################
 
+
 @app.errorhandler(404)
 def e_404(e):
     return flask.render_template('404.html'), 404
+
 
 @app.errorhandler(500)
 def e_500(e):
@@ -2160,6 +2291,7 @@ def e_500(e):
     return flask.render_template('500.html'), 500
 
 #################### Other Endpoints ####################
+
 
 @app.route('/gauthtoken', methods=["POST"])
 def gauthtoken():
@@ -2169,7 +2301,7 @@ def gauthtoken():
     if user_data == False:
         return "UNAUTHORIZED"
     try:
-        with open("../data/google_sso/"+user_data['email']) as f:
+        with open("../data/google_sso/" + user_data['email']) as f:
             username = f.read().strip()
         username_user_data = get_user_data(username)
         if username_user_data.get('has_changed_password') == False:
@@ -2177,10 +2309,12 @@ def gauthtoken():
         if username_user_data == False:
             return "BAD_ACCOUNT"
         flask.session['username'] = username
-        flask.session['perm_auth_key'] = hashlib.sha256(username_user_data['password'].encode()).hexdigest()
+        flask.session['perm_auth_key'] = hashlib.sha256(
+            username_user_data['password'].encode()).hexdigest()
         return 'AUTHORIZED'
     except FileNotFoundError:
         return "BAD_ACCOUNT"
+
 
 @app.route('/robots.txt')
 def robots_txt():
@@ -2189,9 +2323,11 @@ def robots_txt():
     Allow: /
     '''
 
+
 @app.route('/privacy-policy')
 def privacy_policy():
     return flask.render_template('privacy-policy.html')
+
 
 @app.route('/update_server', methods=['post'])
 def update_server():
@@ -2208,5 +2344,6 @@ def update_server():
 
 #################### Main ####################
 
-if __name__=='__main__':
-    app.run(debug=True , port=80, host='0.0.0.0', threaded=True)
+
+if __name__ == '__main__':
+    app.run(debug=True, port=80, host='0.0.0.0', threaded=True)
